@@ -9,6 +9,10 @@ your reading of a drawing by reconstructing it instead of guessing.
 > Every feature is usable without Chinese if you follow this README; an English UI is not available
 > yet. Open an issue if you would find it useful.
 
+**[▶ Live demo](https://zeder11.github.io/three-view-workbench/app/three-view-workbench.html)** · no install, runs in your browser
+
+**[▶ 在线试玩](https://zeder11.github.io/three-view-workbench/app/three-view-workbench.html)** · 免安装，直接在浏览器打开
+
 ![Workspace](docs/draft-section.png)
 
 ## Why another CAD-ish toy?
