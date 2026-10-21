@@ -1,0 +1,28 @@
+{
+  "format": "orthographic-workbench",
+  "version": 3,
+  "shapes": [
+    {
+      "type": "box",
+      "op": "add",
+      "axis": "z",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "sx": 64,
+      "sy": 60,
+      "sz": 50,
+      "rot": 0
+    },
+    {
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "z",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "r": 12,
+      "h": 90
+    }
+  ]
+}

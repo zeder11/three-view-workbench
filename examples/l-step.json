@@ -1,0 +1,30 @@
+{
+  "format": "orthographic-workbench",
+  "version": 3,
+  "shapes": [
+    {
+      "type": "box",
+      "op": "add",
+      "axis": "z",
+      "cx": 50,
+      "cy": 50,
+      "cz": 32,
+      "sx": 70,
+      "sy": 60,
+      "sz": 30,
+      "rot": 0
+    },
+    {
+      "type": "box",
+      "op": "add",
+      "axis": "z",
+      "cx": 70,
+      "cy": 50,
+      "cz": 60,
+      "sx": 30,
+      "sy": 60,
+      "sz": 26,
+      "rot": 0
+    }
+  ]
+}
