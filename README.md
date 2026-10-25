@@ -10,7 +10,7 @@ the selected language is remembered locally and also applies to exported drawing
 
 ![Workspace](docs/draft-section.png)
 
-## What changed in v0.0.2
+## What changed in v0.2.0
 
 This version improves 3D outlines and adds named records, language switching and candidate comparison.
 The drafting geometry kernel, model format and examples remain compatible — all 100 projection
@@ -168,4 +168,4 @@ into a paid product, or put behind ads or paywalls.
 
 The embedded FXAA shader keeps its upstream MIT/BSD notices in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md); those third-party parts stay under their own
-licences. The earlier v0.0.1 release remains MIT.
+licences. The earlier v0.1.0 release remains MIT.
