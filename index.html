@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>三视图工作台 · 工程制图学习工具</title>
+<meta name="description" content="离线单文件工程制图学习工具：描截面、拉伸、挖槽、切割，实时生成三视图与立体预览。">
+<style>
+  :root{
+    --ink:#12293c; --muted:#5d7488; --line:#c9d8e2; --paper:#f7fafc;
+    --accent:#0a7c8f; --accent-d:#065a68; --mark:#b74924;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; color:var(--ink); background:var(--paper);
+    font:16px/1.75 "PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+    background-image:
+      linear-gradient(#dfeaf1 1px,transparent 1px),
+      linear-gradient(90deg,#dfeaf1 1px,transparent 1px);
+    background-size:26px 26px; background-position:-1px -1px;
+  }
+  .wrap{max-width:940px;margin:0 auto;padding:clamp(28px,6vw,72px) clamp(18px,4vw,32px)}
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.15;margin:0 0 10px;letter-spacing:-.5px}
+  h1 span{display:block;font-size:13px;letter-spacing:.22em;color:var(--muted);font-weight:500;margin-top:12px;text-transform:uppercase}
+  .lede{font-size:17px;color:#33505f;max-width:36em;margin:0}
+  .tag{font:12px/1 ui-monospace,Consolas,monospace;border:1px solid var(--line);border-radius:999px;padding:6px 11px;color:var(--muted);background:#fff8;white-space:nowrap}
+  .actions{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px;margin:34px 0 10px}
+  .btn{
+    display:flex;flex-direction:column;justify-content:center;gap:3px;
+    padding:16px 18px;border-radius:9px;text-decoration:none;border:1px solid var(--line);
+    background:#fff;color:var(--ink);transition:transform .14s ease,box-shadow .14s ease,border-color .14s;
+    box-shadow:0 1px 0 #fff inset,0 2px 8px #12293c0d;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px #12293c1a;border-color:#9db9c8}
+  .btn b{font-size:16px;letter-spacing:.01em}
+  .btn small{font-size:11.5px;color:var(--muted);line-height:1.5}
+  .btn.primary{background:linear-gradient(180deg,#0d8b9f,var(--accent-d));border-color:var(--accent-d);color:#fff}
+  .btn.primary small{color:#cfeaf0}
+  .btn.primary:hover{box-shadow:0 10px 26px #0a7c8f3d}
+  .hint{font-size:13px;color:var(--muted);margin:4px 0 0}
+  .shot{margin:30px 0 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;box-shadow:0 14px 40px #12293c14}
+  .shot img{display:block;width:100%;height:auto}
+  h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:44px 0 14px;font-weight:600}
+  ul.feat{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px}
+  ul.feat li{padding-left:20px;position:relative;font-size:15px;color:#25414f}
+  ul.feat li::before{content:"";position:absolute;left:0;top:.62em;width:8px;height:8px;border:1.6px solid var(--accent);border-radius:1px;transform:rotate(45deg)}
+  ul.feat b{font-weight:600}
+  .note{border-left:3px solid var(--mark);background:#fff6f3;padding:12px 15px;font-size:14px;color:#5b332a;margin:18px 0 0;border-radius:0 6px 6px 0}
+  .note b{color:var(--mark)}
+  footer{margin-top:46px;padding-top:18px;border-top:1px dashed var(--line);font-size:13px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
+  footer a{color:var(--accent-d);text-decoration:none;border-bottom:1px solid #0a7c8f55}
+  code{font:12.5px/1.5 ui-monospace,Consolas,monospace;background:#e8f1f6;padding:2px 6px;border-radius:4px;color:#2b4a5a}
+  @media(max-width:720px){
+    .actions{grid-template-columns:1fr}
+    ul.feat{grid-template-columns:1fr}
+    header{gap:14px}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div>
+      <h1>三视图工作台<span>three-view workbench · 工程制图学习工具</span></h1>
+      <p class="lede">描截面、拉伸、挖槽、切一刀，用视图把立体一步步搭出来，再回头核对三视图。<b>离线单文件，双击就能用。</b></p>
+    </div>
+    <p class="tag">PolyForm NC · v0.0.2</p>
+  </header>
+
+  <div class="actions">
+    <a class="btn primary" href="app/three-view-workbench.html">
+      <b>▶ 在线使用</b>
+      <small>不用下载，直接在浏览器打开（推荐）</small>
+    </a>
+    <a class="btn" href="https://github.com/zeder11/three-view-workbench/raw/main/app/three-view-workbench.html" download>
+      <b>⬇ 下载离线版</b>
+      <small>单个 HTML，约 342 KB，双击运行</small>
+    </a>
+    <a class="btn" href="https://github.com/zeder11/three-view-workbench/archive/refs/heads/main.zip">
+      <b>源码 ZIP</b>
+      <small>整仓打包，含示例和说明</small>
+    </a>
+  </div>
+  <p class="hint">下载后若浏览器提示“文件可能有害”，选保留即可——它只是普通的本地网页，不联网、不上传数据。</p>
+
+  <figure class="shot">
+    <img src="docs/draft-section.png" alt="三视图工作台界面截图：左侧建模操作，中间三视图，右侧立体预览">
+  </figure>
+
+  <h2>能做什么</h2>
+  <ul class="feat">
+    <li><b>描截面拉伸</b>：三角形、梯形、L 形，直线与圆弧可逐段组合；圆弧接缝不会画成一排棱线</li>
+    <li><b>画截面挖除</b>：通槽、盲槽、圆孔（真圆柱刀具）</li>
+    <li><b>视图画线切割</b>：切平面在该视图上积聚成直线</li>
+    <li><b>三点定截平面</b>：两个视图定位，自动预览切后立体</li>
+    <li><b>步骤回放</b>：逐刀查看中间结果，不占撤销记录</li>
+    <li><b>题图叠图</b>：铺在草稿纸下，两点标定后直接描</li>
+    <li><b>点位对应</b>：点一处，另两视图标出长对正／高平齐／宽相等</li>
+    <li><b>轮廓显示</b>：按原始曲面生成连续轮廓，去除网格毛边；被遮挡棱用虚线显示</li>
+    <li><b>3D 质量</b>：快速 42³／精细 84³／超精细 128³，调整实体细腻度；轮廓清晰度独立</li>
+    <li><b>中英切换</b>：右上角一键切换，导出图纸跟着换语言</li>
+      <li><b>这条线是什么</b>：描点并补充多视图约束，对比候选的三视图变化，确认后采用</li>
+      <li><b>命名记录</b>：把模型连视角、显示模式和缩略图存进浏览器本地，起名如 <code>3-53</code>，随时回看</li>
+  </ul>
+
+  <p class="note"><b>先说清楚：</b>它是采样法计算，不是精确 CAD。比一个采样格还窄的槽或薄片可能消失（可调高精度）；立体网格比三视图粗，只用来理解，想更顺可以切「超精细 · 128³」。建议当核对工具，<b>不要直接把结果当作业答案</b>。</p>
+
+  <footer>
+    <span>© 2026 zeder11 · PolyForm Noncommercial 1.0.0</span>
+    <span>
+      <a href="https://github.com/zeder11/three-view-workbench">源码仓库</a> ·
+      <a href="README.zh-CN.md">使用说明</a> ·
+      <a href="https://github.com/zeder11/three-view-workbench/issues">反馈问题</a>
+    </span>
+  </footer>
+</main>
+</body>
+</html>
