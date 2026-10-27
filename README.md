@@ -8,7 +8,75 @@ your reading of a drawing by reconstructing it instead of guessing.
 The interface supports **English and Chinese**. Use the `EN` / `中文` button in the top-right corner;
 the selected language is remembered locally and also applies to exported drawings.
 
-![Workspace](docs/draft-section.png)
+<p align="center"><img src="docs/landing-desktop.png" alt="Desktop UI" width="720"> <img src="docs/landing-mobile.png" alt="Mobile UI" width="180"></p>
+
+![Sketch dialog](docs/draft-section.png)
+
+## What changed in v0.3.0
+
+The main workflow is unchanged (build → read the three views → trace a line → compare candidates →
+preview the difference → adopt → replay steps). This release closes the gaps where students could
+only guess, plus two feel/reliability problems. Model format, kernel and examples stay compatible
+(all 100 projection fingerprints match v0.2.0).
+
+- **When several candidates tie, the panel now says which view and which region to trace next.**
+  Ties are common (the two directions of a plane cut project identically in the same view). The panel
+  scans the candidates' three views, picks the view and region where they differ most, and writes e.g.
+  "these candidates look the same in the front view; the largest difference is in the middle of the
+  left view" / "tracing one more line here separates 2 candidate pairs". That region is outlined in amber
+  on the drawing, and a **Trace here** button switches to the suggested view and starts a new annotation —
+  no manual view picking. If all three views are identical it says so instead: "the three views cannot
+  distinguish these constructions; you need dimensions, the problem text, or another condition."
+- **Large-radius shallow arcs are no longer silently shrunk into small holes.** When the fitted radius
+  exceeds what the primitives can build (> 60, or the centre falls outside the sheet), those candidates are
+  marked *outside the constructible range of the current primitives* and disabled; preview reports it
+  instead of showing a low-scoring candidate built from a clamped radius.
+- **3D drag no longer sticks at the vertical limit.** Rotation used the pointer-down height as its anchor
+  and clamped at ±86°, so overshooting and dragging back had to spend the overshoot first. The anchor is
+  now rebased every frame. Measured reversal dead zone: 30 px → 0; per-frame interval median 6.1 ms,
+  p95 11.8–12 ms.
+- **Autosave failures are reported once**: "Local autosave failed — use *Save model* to export a JSON backup."
+- **A row of standard-view buttons above the 3D preview**: front / top / left / right / bottom / back.
+  One click eases the camera (0.3 s) to that direction of the first-angle set (front looks along −Y,
+  top along +Z, left along −X, …). Zoom is kept, pan recentres, and dragging during the animation
+  interrupts it. Much faster than hunting for the angle when you want to check "is this the view in my
+  problem sheet?".
+- **Replay diff**: while replaying a step, cyan marks lines this step added, orange marks lines it removed,
+  purple marks solid/hidden changes, and the panel counts them (added / removed / visibility). Exported PNG/SVG
+  stay clean; untick `Diff vs previous step` to see the step on its own.
+- **Less clutter on screen, plainer saving and error wording.** Below 730 px the primitive palette and the
+  shape list start collapsed and the helper paragraph is hidden, so the sheet is on the first screen of a
+  390×844 phone (sidebar 450 px → 352 px); the desktop layout is unchanged. The toolbar now reads
+  **Export model file / Import model file / Local records**, and a quiet “Autosaved locally · 20:31” line
+  reports success without a dialog. Import failures and bad half-space input stay in a red bar that states the
+  reason and “the current model is unchanged” until you close it or fix the input; success toasts still fade.
+  Polyhedron and cutting-plane parameters moved under “Advanced primitives”, the face-count note is collapsed,
+  parameters read “X position (left–right) / Y position (front–back) / Z position (up–down)”, and “add / sub”
+  became “Add material / Remove material”. No geometry, file-format or palette changes in this pass.
+- **Vertical rotation now reaches ±90° instead of ±86°**: elevation used to be clamped at ±1.5 rad
+  (85.94°), 4° short of straight up/down. It is clamped at ±π/2 now, so dragging up stops exactly on the
+  top view with no degenerate basis vectors or flicker. Flipping past the pole is still not allowed —
+  it only shows the same view upside down; use **Back** to look at the other side.
+- **Sketching is undoable now: `Ctrl+Z` only touches sketch points, and Clear/presets can be undone.** The sketch pad keeps its own
+  undo stack (Undo/Redo buttons plus `Ctrl+Z` / `Ctrl+Shift+Z`), and while a dialog is open the shortcut no longer rewrites the
+  model history behind it. Clearing the sketch or applying a preset offers an "applied L-shape · Undo" note.
+  Points look the same but their hit area is about 24×24 px, the dragged point and its coordinate row light up, and pressing
+  near a point starts a drag instead of adding a new point. Marker points can be dragged on the sheet (snapping still applies
+  on release) or deleted one at a time from the panel. On narrow screens the next-step hint sits right under the drawing with
+  a sticky "Back one point | Add to workbench" bar, and the static how-to text folds into "How to draw".
+- **`Delete` removes the step, not a fragment**: an L-shaped sketch is split into several convex blocks behind one card; `Delete` now removes the whole step ("Deleted this step") while a plain box/cylinder still deletes only itself. Sketch-group and three-point cutting-plane cards also get the selection outline now.
+- **Clear asks first, loading an example is undoable**: clearing a non-empty model asks once, and replacing the current model with an example shows "Replaced the current model" with an *Undo* button.
+- **View this step**: every solid card, sketch card and cutting-plane card has a small *View this step* button. It jumps the three views to that step and turns on *Diff vs previous step* automatically (new lines cyan, vanished lines red-orange, visibility flips purple), with a *Back to final model* button in the banner; on narrow screens the sheet scrolls back into view. Clicking the card itself never triggers it, so dragging sliders cannot fire it by accident.
+- **Closing an unsaved sketch asks first**: if you have drawn points but not applied them yet, the close button or `Esc` shows *This sketch has not been added yet; closing will discard it* with *Keep editing* / *Discard and close*. Empty sketches close silently.
+- **English UI completed**: after switching to EN, the invisible strings (`title`, `aria-label`, `placeholder`, `alt`) are translated too — about 70 more entries. Slider labels keep the `slider` wording for screen readers, live snap hints and the 3D note read as whole sentences, and there is no more mixed Chinese/English or glued text such as `supersamplingon`.
+- **Errors no longer cost work, and narrow screens show you the next step.** Failures that could lose work (failed
+  autosave, failed export, an unreadable local record) now stay in a red bar under the toolbar with an "Export backup"
+  button instead of vanishing after a few seconds; an export failure says the model is still there and can be retried.
+  After adding a shape on a narrow screen, the success toast offers "Edit size", which expands the shape list and
+  focuses that card. The sketch pad shows one line telling you what to do next ("2 more points", "step 2: click the
+  circle direction", "closed, ready to add") and explains why the main button is disabled. The narrow toolbar groups
+  export/import actions under "File" and "Sheet & export", keeping Undo/Redo and "Explain this line" always visible.
+  Copy and punctuation are tidied up as well.
 
 ## What changed in v0.2.0
 
@@ -35,7 +103,7 @@ fingerprints match the existing baseline.
   the current quality level.
 - **New "records" panel**: saves the current model, 3D camera, display mode and a thumbnail under a
   name you type (e.g. `3-53`), in this browser's localStorage only — nothing is uploaded. Click a card
-  to restore that state later. Portable copies still come from 保存模型 → JSON export.
+  to restore that state later. Portable copies still come from 「保存模型」 → JSON export (renamed **Export model file** in v0.3.0).
 - **Interface language switch (English / Chinese)**: the `EN` button in the top-right corner switches
   the whole interface at runtime and remembers the choice in localStorage. The exported SVG/PNG drawing
   follows the selected language; model files and its JSON format are untouched.
@@ -88,12 +156,14 @@ This app is deliberately small and use-case driven:
 - **Solid / visible-outline / hidden-as-dashed** rendering, FXAA and optional high-resolution mesh
   (fast 42³, fine 84³, ultra 128³).
 
+![Three points define a cutting plane](docs/three-point-plane.png)
+
 ## Quick start
 
 1. Download this repository (Code → Download ZIP) and unzip it.
 2. Double-click `app/three-view-workbench.html`. That is the whole installation.
 3. The sample model appears immediately. Drag on the 3D view to rotate; scroll to zoom.
-4. Open **File → 打开模型** (open model) to load one of the `examples/*.json` files.
+4. Use **Import model file** in the toolbar to load one of the `examples/*.json` files.
 
 The interface ships in Chinese and English: the `EN` / `中文` button in the top-right corner switches
 it at runtime and remembers the choice; exported drawings follow the selected language.
