@@ -1,3 +1,135 @@
+# v0.4.0: finish the editing workflow (2026-10-31)
+
+The toolbar now has Model files, Export drawing and Tools menus, with outside-click/Escape dismissal and viewport-aware placement. Legacy arc upgrades appear under Model files → Legacy files only when verified groups exist; upgrades remain explicit and undoable.
+
+Steps show compact dimension summaries. Edit one step to expand its parameters; other steps close, and new primitives open for editing. Reorder/delete actions live under each step's More control. Sketch adjustments use “Use in outline”, followed by “Finish & update model”, with a clear pending-update message. Undoing back to the original outline clears that message. A persistent mobile Sketch button returns to the drawing without losing edits or previews. Geometry, formats and full-precision saving are unchanged. HTML: 523598 bytes, SHA256 prefix 64A60351. Current acceptance is tracked in the root progress file; physical-device follow-up remains deferred. No online publication was performed.
+
+Local acceptance passed: all 32 browser suites, 8 unwrapped workflow checks on both development/release files, 19 existing-function release checks and 25 desktop checks of the refreshed device entry; no page errors. Geometry code is byte-identical to the pre-change backup, so unrelated unit/fingerprint calculations were not repeated. Comments and documentation are updated.
+
+---
+
+# 历史：v0.4.0: a simpler workspace (2026-10-31)
+
+Compact modeling actions and a shorter mobile toolbar bring the drawing into view sooner. Long drawing instructions, step-order notes and rendering explanations now expand on demand. Coordinates, depth, display modes and mesh quality remain directly editable. The previous outline-retention action is now labeled “Keep a section”.
+
+Arc joins show one compact row per arc, with “Keep endpoints” and “Keep radius…” as the main actions. Single-end controls and external tangency diagnostics expand when needed. A pending preview focuses the panel on its result; dimensions, contact coordinates, movement amounts and dependent steps remain visible before applying to the draft. Geometry, full-precision persistence, undo and file formats are unchanged. HTML: 512815 bytes, SHA256 prefix 8152575B. Current acceptance is recorded below.
+
+Local acceptance: all 31 browser suites ultimately passed, including two reruns after adapting obsolete UI expectations; initial logs and rerun evidence are preserved. Both development and release files passed 10 new UI checks; the release also passed 19 existing-function checks, and the refreshed device entry passed 25 desktop checks. No page errors. Geometry code is unchanged, so unrelated unit/fingerprint calculations were not repeated. Comments and documentation are updated. Only the deferred physical-device follow-up remains.
+
+---
+
+# 历史：v0.4.0: solve both ends of an arc together (2026-10-31)
+
+Single-end adjustments can no longer break existing tangency at the other end. For an arc between two lines, first check whether both joins can be satisfied with fixed endpoints. If not, preview moving both contacts along their original lines while keeping the current radius. Other points, line directions and depth stay fixed. The preview lists coordinates, movement distances, line lengths and both angles before anything changes. Confirm to the draft, then commit; cancel, two-level undo/redo and persistence are supported.
+
+Try the [two-end exercise](examples/adjust-both-joins.json), editing arc 2 in step 1. Fixed endpoints conflict; moving the contacts preserves R20 and satisfies both joins. Review homework dimensions before moving points. Insufficient line space, reversed bulge, unsupported semicircles/major arcs and invalid profiles are rejected. Profiles with their own persistent constraints must remove them before moving contacts; downstream steps still preview and update atomically. This remains a one-time adjustment with no file-format change. HTML: 510739 bytes, SHA256 prefix 789D9133. Current acceptance is tracked in the root progress file. Physical-device follow-up remains deferred; no online publication was performed.
+
+Local acceptance passed: 25 unit scripts, 30 browser suites, 100 unchanged fingerprints, 17 targeted geometry checks, 13 feature checks on each development/release file, 19 existing-function release checks and 25 desktop checks of the refreshed device entry; no page errors. Comments and documentation are updated.
+
+---
+
+# 历史：v0.4.0: adjust adjacent line/arc joins (2026-10-31)
+
+The sketch now identifies tangent joins and real corners within the same closed profile. Keep the current shape by default, or preview a smooth adjustment before applying it to the draft and committing to the workbench. Orange dashes show the candidate without changing the draft or model. Editing invalidates a pending preview; commit is disabled until the preview is applied or cancelled.
+
+Endpoints, straight segments and depth stay fixed; only the selected arc's sagitta/radius changes. The other endpoint's angle change is shown. This is a one-time adjustment, not a persistent constraint. Impossible fixed-endpoint solutions, bulge reversals, semicircles/major arcs and invalid profiles are rejected without changing geometry. Legacy chords need an explicit upgrade first. Draft undo/redo, atomic dependent-step updates and full-precision persistence are supported without a new file format.
+
+Try the [corner adjustment exercise](examples/adjust-smooth-join.json): edit step 1, preview point 2 or 3, apply and compare the views. The [exact tangent example](examples/smooth-arc-transition.json) remains available. HTML: 501042 bytes, SHA256 prefix 46CA3C14. Current acceptance is recorded below.
+
+Local acceptance passed: 25 unit scripts, 30 browser suites, 100 unchanged fingerprints, 8 new-feature checks on both development/release files, 19 final existing-function release checks and 23 desktop checks of the device entry, with no page errors. Comments and usage/acceptance documentation are updated. Only the deferred physical-device follow-up remains.
+
+---
+
+# 历史：v0.4.0: smooth seams and release-triggered outlines (2026-10-31)
+
+Exactly tangent line/arc joins no longer create internal sheet lines; real corners, cuts and outer boundaries remain. Try the [smooth transition example](examples/smooth-arc-transition.json). While a mouse or touch pointer remains down, the preview stays shaded even if movement pauses. Outlines resume after the last pointer ends, including cancellation or focus loss. Orbiting does not rebuild geometry.
+
+Also fixes valid 0.1 depth/radius values rejected by floating-point rounding, out-of-domain retention hatching, and a tangent dialog incorrectly calling retained models v5. Format selection is unchanged: retained models remain v6. HTML: 488837 bytes, SHA256 prefix 38EC7F65. Current evidence is recorded below.
+
+Local acceptance passed: 24 unit scripts, 29 browser suites, 100 unchanged fingerprints, 12 targeted checks on both development/release files and 19 existing-function checks on the actual release, with no page errors. Only physical-device follow-up remains.
+
+Local profile retention instructions and historical acceptance notes follow.
+
+# v0.4.0: local profile retention (2026-10-31)
+
+New in v0.4.0. Choose “Keep outline → cut outside”, draw a circle or a closed polygon (including concave and arc profiles), and set the depth interval. The operation removes existing material outside the outline only in that interval, preserving prior holes and slots. It applies to all earlier material; later additions follow normal step order. Editing, undo, replay and persistence are supported.
+
+Try [cylinder reduction](examples/local-retain-cylinder.json) or [box reduction](examples/local-retain-box.json). Models containing this operation export as v6 and require this updated build. Other models retain their existing v3/v4/v5 formats. Acceptance status is tracked at the top of the root progress README. Historical device reports below apply to the earlier HTML only.
+
+Local acceptance passed: 23 unit scripts, 28 browser suites, 100 unchanged fingerprints and 26 new geometry checks. Development and release HTML each passed 10 feature checks; the actual release also passed 19 existing-function checks, with no page errors. HTML: 483133 bytes, SHA256 prefix 66E31930.
+
+# Historical: v0.4.0 locally finalized (2026-10-31)
+
+Both closing tasks are complete: final acceptance of existing functionality, and testing on desktop browsers (Edge) and two mobile devices. The local release file is `app/three-view-workbench.html`; no online publication was performed. Spatial ellipse contact and general surface constraints move to future exploration and are not release blockers. The 128-shape capacity and sampling limits remain.
+
+Existing functionality passed 19 final release checks on 2026-10-31, including 12 standard-view line comparisons across both example models and their legacy/native forms. Offline modeling and trace scoring also passed with no page errors. Both mobile devices passed 13 automatic checks: touch gestures, orientation/layout, actual download/reimport and sustained-use stability were all confirmed. Mobile automatic checks used 320 projection / 42³ fast mesh. Product HTML is unchanged.
+
+Historical batch notes follow. Their older pending-feature lists have been superseded by this frozen scope. Current evidence is recorded below.
+
+# Historical: v0.4.0 development batch 10: projected ellipses and sphere contact
+
+Tilted cylinder end rims now have analytic ellipse projection checks for tangency, crossings and gaps, with a sketch reference overlay. They are explicitly 2D projection checks and offer no solid tangent construction or persistent binding. Degenerate or nearly edge-on projections are excluded. Try the [ellipse projection example](examples/projected-ellipse-check.json), then edit step 2.
+
+Sphere references support tangent construction and persistent constraints only when the sketch depth contains the sphere-center plane. Radius/center changes update contacts; depth changes are validated, with invalid updates rolled back. v5 export/import, reloads and saved records preserve stable references. Try the [sphere contact example](examples/sphere-tangent-contact.json), changing radius 20 to 22. Use this batch or later to edit sphere constraints.
+
+Validation: 22 unit scripts, 27 browser suites and 100 unchanged fingerprints, including 13 new analytic and 9 browser checks. GeometryKernel, legacy geometry and both drawing baselines are unchanged. Spatial ellipse contact, general surface constraints, other near intersections, real phones and other browsers remain pending. Checklist item 4 stays open; this is still a development build. Historical notes follow.
+
+# v0.4.0 development batch 9: connected arc endpoint updates
+
+A tangent line contact can now drive an adjacent arc sharing the same sketch vertex, with an explicit fixed-sagitta policy. The other endpoint, signed height and bulge direction remain; the center and radius are recalculated. Confirmation and constraint text explain this. Adding an arc to an existing constraint requires “Enable connected arc updates…”. A reference circle → connected arc → downstream tangent chain supports preview, atomic commit and undo. Invalid changes roll back; legacy chords require an explicit upgrade. Smooth tangency between adjacent curves and fixed-radius updates are not added.
+
+Try the [linked arc example](examples/connected-arc-tangent.json): import it and change the first circle radius from 20 to 22. Policy survives v5 export/import, saved records and reloads; use this batch or later. Validation: 21 unit scripts, 26 browser suites and 100 unchanged fingerprints, including 13 numerical and 10 browser checks for this feature. GeometryKernel and both drawing baselines are unchanged.
+
+Ellipse/general-surface tangency, other near intersections, real phones and other browsers remain pending. Checklist item 4 stays open; this is still a development build. Historical notes follow.
+
+# v0.4.0 development batch 8: native arc endpoint parity
+
+Fixes exterior points near native arc endpoints being classified as material. Arcs and lines now share half-open crossing rules; conservative tight bounds are restored for native extrusions. Points, arc heights, depths and file formats are unchanged: unconstrained native models remain v4, constrained models v5. Legacy chord models retain their original geometry unless explicitly upgraded.
+
+Validation: 20 unit scripts, 25 browser suites and 100 unchanged v0.4.0 fingerprints; 10 independent analytic checks and 6 browser checks. Across legacy/native versions of the two example models, 12,000 broad field samples and all three 320-resolution sheet paths are unchanged. Targeted native endpoint predicates are corrected; changed 4-24 3D visibility segmentation is checked against the existing coverage budget. No baseline update. Try the [native endpoint example](examples/native-endpoint-profile.json).
+
+Checklist item 4 remains open: connected arc endpoint updates, ellipse/general-surface tangency and other near intersections are pending, as are real phones and other browsers. This is still a development build. Historical notes follow.
+
+# v0.4.0 development batch 7: persistent tangency
+
+Use “Keep tangent” in sketch tangency checks to save a driving point, contact point, branch and stable circle/arc reference. Moving the driver or changing the reference center, radius or arc height updates dependent steps. Orange dashed outlines preview linked changes; one workspace undo restores the transaction. Invalid updates are blocked or rolled back. Removing a constraint preserves coordinates. Supported: straight segments against circles/native arcs in the same view with overlapping depth. Connected arc endpoints and general surface tangency remain pending.
+
+Models with constraints export as **v5**; saved records and reloads preserve them. Older apps may ignore constraints: continue in this batch or later. Unconstrained native profiles remain v4 and ordinary models v3. Try the [persistent tangent example](examples/persistent-tangent.json), then change the circle radius from 20 to 22. Validation: 19 unit scripts, 24 browser suites and 100 unchanged batch-5 fingerprints. Remaining: complex curves/numerical boundaries, real phones and other browsers. This is still a development build. Historical notes follow.
+
+# v0.4.0 development batch 6
+
+Conservative spatial bounds, ordered material-state short circuits, occlusion ray filtering and exact-position caching reduce work while preserving line arrays and source results. Native arcs retain full-domain fallback for endpoint numerical compatibility.
+
+Existing-line explanations now run in a persistent worker, with cancellation, model/trace invalidation, bounded query caching and retryable failures. Median of five alternating local samples: legacy 4-24 feature construction plus one view 1090→284ms, 4-25 297→153ms. These are stage timings, not whole-page or phone guarantees. Validation: 18 unit scripts, 23 browser suites, 100 unchanged batch-5 fingerprints. Persistent constraints, complex curves and real-device testing remain pending. Historical notes follow.
+
+# v0.4.0 development batch 5
+
+Front/top/left sheet paths were checked against the corresponding standard 3D directions. Fixes cover smooth cylinder/sphere seams, legacy sketch partition edges, missing hidden intersections, silhouette visibility and camera-angle rounding. Material, dimensions and physical rays stay unchanged.
+
+Try `examples/smooth-cylinder-sphere.json` and `examples/intersecting-cylinders.json` in 3D X-ray outline mode and a standard view. Agreement is checked within the declared projection sampling budget; tiny features still need higher precision. Validation: 17 unit scripts, 22 browser suites, 100 cases against a separately reviewed v0.4.0 baseline; the historical baseline is retained. Performance, persistent constraints, complex curves and real-device testing remain pending. Historical notes follow.
+
+# v0.4.0 development batch 4
+
+The sketch editor now checks nearby line/circle or line/arc tangency, distinguishing crossings, gaps and extension-only contacts. **Construct tangent…** shows coordinates and movement before applying a reversible draft edit. The reference circle and one endpoint stay fixed. Upgrade legacy chord arcs first. Shallow real cuts no longer lose their edges, and exact tangent contacts no longer gain rounding-induced seams. Try `examples/near-tangent-demo.json` and edit its second step.
+
+This is a one-time construction: recheck after later edits. Persistent constraints, spatial pruning, complete 2D/3D line agreement and real-device testing remain pending. Native profiles still export as v4, which older apps cannot read. Validation: 16 unit scripts, 21 browser suites, 100 unchanged existing projection fingerprints. Historical notes follow.
+
+# v0.4.0 development batch 3
+
+New sketches with arcs use one native line/arc extrusion, including concave profiles with multiple material intervals. Orthographic views and 3D outlines share the analytic boundary. Old files retain their geometry. Use **Upgrade legacy arcs** to check and convert complete, matching sketch groups; confirmation and undo are supported. Example: `examples/native-rounded-profile.json`.
+
+**Models containing native profiles export as v4 and cannot be read by older apps. Keep the original files.** Other models still export as v3. Background outlines, capacity 128 and caching are implemented. Tangent constraints, spatial pruning and line-by-line view validation remain pending. Meshes and drawn lines still use sampling; performance did not improve across all stages for 4-25.
+
+Validation: 15 unit scripts, 20 browser suites and 100 unchanged existing projection fingerprints. Historical batch and v0.3.0 notes follow.
+
+Batch 2 added background outline calculation with an interactive shaded preview. Native arcs were still pending at that stage.
+
+# v0.4.0 development batch 1
+
+Cross-step arc seams fixed; internal capacity 128; mesh evaluation cached. Native arc extrusion and tangent construction remain pending. Background feature lines are implemented in batch 2. Earlier feature notes follow.
+
+---
+
 # Three-View Workbench — an engineering-drawing learning tool
 
 A single-file, offline, zero-install web app for **descriptive geometry**. You build a part from
@@ -8,7 +140,7 @@ your reading of a drawing by reconstructing it instead of guessing.
 The interface supports **English and Chinese**. Use the `EN` / `中文` button in the top-right corner;
 the selected language is remembered locally and also applies to exported drawings.
 
-<p align="center"><img src="docs/landing-desktop.png" alt="Desktop UI" width="720"> <img src="docs/landing-mobile.png" alt="Mobile UI" width="180"></p>
+<p align="center"><img src="docs/app-desktop.png" alt="Desktop UI" width="720"> <img src="docs/app-mobile.png" alt="Mobile UI" width="180"></p>
 
 ![Sketch dialog](docs/draft-section.png)
 

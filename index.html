@@ -65,7 +65,7 @@
       <h1>三视图工作台<span>three-view workbench · 工程制图学习工具</span></h1>
       <p class="lede">描截面、拉伸、挖槽、切一刀，用视图把立体一步步搭出来，再回头核对三视图。<b>离线单文件，双击就能用。</b></p>
     </div>
-    <p class="tag">PolyForm NC · v0.3.0</p>
+    <p class="tag">PolyForm NC · v0.4.0</p>
   </header>
 
   <div class="actions">
@@ -73,9 +73,9 @@
       <b>▶ 在线使用</b>
       <small>不用下载，直接在浏览器打开（推荐）</small>
     </a>
-    <a class="btn" href="https://github.com/zeder11/three-view-workbench/releases/latest/download/three-view-workbench.html">
+    <a class="btn" href="app/three-view-workbench.html" download="three-view-workbench-v0.4.0.html">
       <b>⬇ 下载离线版</b>
-      <small>单个 HTML，约 395 KB，双击运行</small>
+      <small>单个 HTML，约 511 KB，双击运行</small>
     </a>
     <a class="btn" href="https://github.com/zeder11/three-view-workbench/archive/refs/heads/main.zip">
       <b>源码 ZIP</b>
@@ -87,6 +87,19 @@
   <figure class="shot">
     <img src="docs/draft-section.png" alt="三视图工作台界面截图：左侧建模操作，中间三视图，右侧立体预览">
   </figure>
+
+  <p class="hint">双端相切练习：<a href="examples/adjust-both-joins.json" download>两端不能分别调整的圆弧</a>，导入后编辑第1步，使用「第2段圆弧 · 双端一起相切」。可先检查固定端点，或预览保持半径、沿两侧直线移动切点，核对坐标及移动距离后再确认；可撤销。单端练习：<a href="examples/adjust-smooth-join.json" download>有折角的圆弧</a>；准确相切对照：<a href="examples/smooth-arc-transition.json" download>光滑圆弧接直线</a>。</p>
+  <p class="hint">局部保留示例：<a href="examples/local-retain-cylinder.json" download>圆柱下段缩径</a> · <a href="examples/local-retain-box.json" download>方柱下段收窄</a>，两者都保留原有中心孔。</p>
+  <p class="hint">持续相切示例：<a href="examples/persistent-tangent.json" download>下载模型 JSON</a>，在工作台导入后将圆半径20改为22查看联动。</p>
+  <p class="hint">原生圆弧端点示例：<a href="examples/native-endpoint-profile.json" download>下载模型 JSON</a>，导入后可编辑弦高核对截面与立体。</p>
+  <p class="hint">圆弧端点链式联动示例：<a href="examples/connected-arc-tangent.json" download>下载模型 JSON</a>，导入后将第1步圆半径20改为22，查看后两步联动。</p>
+  <p class="hint">新示例：<a href="examples/projected-ellipse-check.json" download>椭圆投影检查</a>（编辑第2步查看参照） · <a href="examples/sphere-tangent-contact.json" download>球面持续相切</a>（将球半径20改为22）。</p>
+  <h2>本次更新</h2>
+  <ul class="feat">
+    <li><b>操作流程收尾</b>：顶部按「模型文件」「导出图纸」「辅助工具」分组；步骤只展开当前编辑项；草绘先「采用到轮廓」再「完成并更新立体」，手机上可直接回到草绘图</li>
+    <li><b>界面精简</b>：常用建模入口更紧凑，手机图纸更早出现；圆弧连接按整段集中显示，单端调整和长说明按需展开，关键预览尺寸仍在确认前保留</li>
+    <li><b>平滑圆弧修正</b>：圆弧接直线处不再有多余分界线；拖动预览在最后一个指针松开后才恢复轮廓；新增「保留轮廓 → 切掉外侧」局部削切，原有孔槽保留（含此操作的 v6 模型请用本版应用编辑）</li>
+  </ul>
 
   <h2>能做什么</h2>
   <ul class="feat">
