@@ -1,0 +1,115 @@
+{
+  "format": "orthographic-workbench",
+  "version": 3,
+  "shapes": [
+    {
+      "type": "cylinder",
+      "op": "add",
+      "axis": "z",
+      "cx": 50,
+      "cy": 50,
+      "cz": 40,
+      "r": 20,
+      "h": 40,
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "draft": {
+        "group": "draft-tangent-demo-circle",
+        "view": "H",
+        "mode": "add",
+        "profile": "circle",
+        "points": [
+          [
+            50,
+            50
+          ],
+          [
+            70,
+            50
+          ]
+        ],
+        "arcs": {},
+        "side": null,
+        "lo": 20,
+        "hi": 60
+      }
+    },
+    {
+      "type": "poly",
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "hs": [
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          -1,
+          20
+        ],
+        [
+          0,
+          60,
+          0,
+          2400
+        ],
+        [
+          20.16,
+          0,
+          0,
+          604.8
+        ],
+        [
+          0,
+          -60,
+          0,
+          -1190.3999999999996
+        ],
+        [
+          -20.16,
+          0,
+          0,
+          604.8
+        ]
+      ],
+      "draft": {
+        "group": "draft-tangent-demo-line",
+        "view": "H",
+        "mode": "add",
+        "profile": "polygon",
+        "points": [
+          [
+            20,
+            30.16
+          ],
+          [
+            80,
+            30.16
+          ],
+          [
+            80,
+            10
+          ],
+          [
+            20,
+            10
+          ]
+        ],
+        "arcs": {},
+        "side": null,
+        "lo": 30,
+        "hi": 50
+      }
+    }
+  ]
+}

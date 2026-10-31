@@ -1,0 +1,107 @@
+{
+  "format": "orthographic-workbench",
+  "version": 5,
+  "shapes": [
+    {
+      "type": "sphere",
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "r": 20,
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "refKey": "ref-sphere-contact"
+    },
+    {
+      "type": "poly",
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "hs": [
+        [
+          0,
+          0,
+          1,
+          10
+        ],
+        [
+          0,
+          0,
+          -1,
+          20
+        ],
+        [
+          0,
+          60,
+          0,
+          2400
+        ],
+        [
+          20.000285454201183,
+          -30.106855447045042,
+          0,
+          -604.265654255766
+        ],
+        [
+          0.15971454579881694,
+          -29.893144552954958,
+          0,
+          -597.8714243045908
+        ],
+        [
+          -20.16,
+          0,
+          0,
+          604.8
+        ]
+      ],
+      "draft": {
+        "group": "draft-sphere-contact",
+        "view": "H",
+        "mode": "add",
+        "profile": "polygon",
+        "points": [
+          [
+            20,
+            30.16
+          ],
+          [
+            49.89314455295496,
+            30.000285454201183
+          ],
+          [
+            80,
+            10
+          ],
+          [
+            20,
+            10
+          ]
+        ],
+        "arcs": {},
+        "side": null,
+        "lo": 30,
+        "hi": 60,
+        "constraints": [
+          {
+            "type": "tangent",
+            "edge": 0,
+            "fixed": 0,
+            "moving": 1,
+            "branch": 1,
+            "target": {
+              "key": "ref-sphere-contact",
+              "kind": "circle"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

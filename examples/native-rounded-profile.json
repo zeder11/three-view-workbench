@@ -1,0 +1,72 @@
+{
+  "format": "orthographic-workbench",
+  "version": 4,
+  "shapes": [
+    {
+      "type": "extrude",
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "profile": {
+        "view": "H",
+        "points": [
+          [
+            25,
+            25
+          ],
+          [
+            65,
+            25
+          ],
+          [
+            65,
+            75
+          ],
+          [
+            25,
+            75
+          ]
+        ],
+        "arcs": {
+          "1": -10
+        },
+        "lo": 30,
+        "hi": 60
+      },
+      "draft": {
+        "group": "draft-example-native-rounded",
+        "view": "H",
+        "mode": "add",
+        "profile": "polygon",
+        "points": [
+          [
+            25,
+            25
+          ],
+          [
+            65,
+            25
+          ],
+          [
+            65,
+            75
+          ],
+          [
+            25,
+            75
+          ]
+        ],
+        "arcs": {
+          "1": -10
+        },
+        "side": null,
+        "lo": 30,
+        "hi": 60
+      }
+    }
+  ]
+}

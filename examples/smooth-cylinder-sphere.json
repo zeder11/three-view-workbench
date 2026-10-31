@@ -1,0 +1,30 @@
+{
+  "format": "orthographic-workbench",
+  "version": 3,
+  "shapes": [
+    {
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 35,
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "cylinder",
+      "axis": "z",
+      "r": 20,
+      "h": 30
+    },
+    {
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "sphere",
+      "r": 20
+    }
+  ]
+}

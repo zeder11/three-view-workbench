@@ -1,0 +1,73 @@
+{
+  "format": "orthographic-workbench",
+  "version": 6,
+  "shapes": [
+    {
+      "type": "cylinder",
+      "op": "add",
+      "axis": "z",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "r": 20,
+      "h": 60
+    },
+    {
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "z",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "r": 4,
+      "h": 100
+    },
+    {
+      "type": "retain",
+      "op": "sub",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "profile": {
+        "view": "H",
+        "points": [
+          [
+            50,
+            50
+          ],
+          [
+            62,
+            50
+          ]
+        ],
+        "arcs": {},
+        "lo": 20,
+        "hi": 50,
+        "kind": "circle"
+      },
+      "draft": {
+        "group": "draft-retain-circle",
+        "view": "H",
+        "mode": "keep",
+        "profile": "circle",
+        "points": [
+          [
+            50,
+            50
+          ],
+          [
+            62,
+            50
+          ]
+        ],
+        "arcs": {},
+        "side": null,
+        "lo": 20,
+        "hi": 50
+      }
+    }
+  ]
+}
