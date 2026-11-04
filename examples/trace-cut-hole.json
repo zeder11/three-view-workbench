@@ -1,0 +1,15 @@
+{
+  "format": "orthographic-workbench",
+  "version": 3,
+  "shapes": [
+    {"type":"box","op":"add","cx":50,"cy":50,"cz":50,"sx":60,"sy":50,"sz":50,"rot":0}
+  ],
+  "annotations": {
+    "traces": [
+      {"view":"V","kind":"solid","shape":"arc","complete":false,"points":[[62,50],[50,62],[38,50],[50,38],[62,50]]},
+      {"view":"H","kind":"hidden","shape":"line","complete":false,"points":[[38,25],[38,75]]},
+      {"view":"H","kind":"hidden","shape":"line","complete":false,"points":[[62,25],[62,75]]}
+    ],
+    "images": {}
+  }
+}

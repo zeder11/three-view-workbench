@@ -1,0 +1,129 @@
+{
+  "format": "orthographic-workbench",
+  "version": 4,
+  "shapes": [
+    {
+      "type": "extrude",
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "profile": {
+        "view": "V",
+        "points": [
+          [
+            2.5,
+            95.125
+          ],
+          [
+            97.5,
+            95.125
+          ],
+          [
+            97.5,
+            23.875
+          ],
+          [
+            2.5,
+            23.875
+          ]
+        ],
+        "arcs": {
+          "2": 19
+        },
+        "lo": 26.25,
+        "hi": 73.75
+      },
+      "draft": {
+        "group": "draft-ai-0",
+        "view": "V",
+        "mode": "add",
+        "profile": "polygon",
+        "points": [
+          [
+            2.5,
+            95.125
+          ],
+          [
+            97.5,
+            95.125
+          ],
+          [
+            97.5,
+            23.875
+          ],
+          [
+            2.5,
+            23.875
+          ]
+        ],
+        "arcs": {
+          "2": 19
+        },
+        "side": null,
+        "lo": 26.25,
+        "hi": 73.75
+      }
+    },
+    {
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "y",
+      "cx": 50,
+      "cy": 50,
+      "cz": 28.625,
+      "r": 9.5,
+      "h": 95
+    }
+  ],
+  "meta": {
+    "source": "固定草绘格式示例（非真实识图结果）",
+    "unit": "mm",
+    "scale": 2.375,
+    "originalShapes": [
+      {
+        "type": "sketch",
+        "op": "add",
+        "view": "V",
+        "profile": "polygon",
+        "points": [
+          [
+            -20,
+            0
+          ],
+          [
+            20,
+            0
+          ],
+          [
+            20,
+            30
+          ],
+          [
+            -20,
+            30
+          ]
+        ],
+        "arcs": {
+          "2": -8
+        },
+        "lo": -10,
+        "hi": 10
+      },
+      {
+        "type": "cylinder",
+        "op": "sub",
+        "axis": "y",
+        "cx": 0,
+        "cy": 0,
+        "cz": 10,
+        "r": 4,
+        "h": 40
+      }
+    ],
+    "notices": []
+  }
+}

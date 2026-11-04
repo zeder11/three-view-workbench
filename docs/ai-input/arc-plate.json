@@ -1,0 +1,49 @@
+{
+  "understanding": "固定草绘格式练习，不是真实AI识图结果",
+  "unit": "mm",
+  "shapes": [
+    {
+      "type": "sketch",
+      "op": "add",
+      "view": "V",
+      "profile": "polygon",
+      "points": [
+        [
+          -20,
+          0
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          20,
+          30
+        ],
+        [
+          -20,
+          30
+        ]
+      ],
+      "arcs": {
+        "2": -8
+      },
+      "lo": -10,
+      "hi": 10
+    },
+    {
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "y",
+      "cx": 0,
+      "cy": 0,
+      "cz": 10,
+      "r": 4,
+      "h": 40
+    }
+  ],
+  "assumptions": [],
+  "unsupported": [],
+  "questions": [],
+  "confidence": "high"
+}

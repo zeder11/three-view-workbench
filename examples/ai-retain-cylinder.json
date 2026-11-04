@@ -1,0 +1,121 @@
+{
+  "format": "orthographic-workbench",
+  "version": 6,
+  "shapes": [
+    {
+      "type": "cylinder",
+      "op": "add",
+      "axis": "z",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "r": 26.348,
+      "h": 79.045
+    },
+    {
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "z",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "r": 5.27,
+      "h": 100
+    },
+    {
+      "type": "retain",
+      "op": "sub",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "profile": {
+        "view": "H",
+        "points": [
+          [
+            50,
+            50
+          ],
+          [
+            65.80895559241903,
+            50
+          ]
+        ],
+        "arcs": {},
+        "lo": 10.477611018952423,
+        "hi": 50,
+        "kind": "circle"
+      },
+      "draft": {
+        "group": "draft-ai-2",
+        "view": "H",
+        "mode": "keep",
+        "profile": "circle",
+        "points": [
+          [
+            50,
+            50
+          ],
+          [
+            65.80895559241903,
+            50
+          ]
+        ],
+        "arcs": {},
+        "side": null,
+        "lo": 10.477611018952423,
+        "hi": 50
+      }
+    }
+  ],
+  "meta": {
+    "source": "固定草绘格式示例（非真实识图结果）",
+    "unit": "mm",
+    "scale": 1.3174129660349192,
+    "originalShapes": [
+      {
+        "type": "cylinder",
+        "op": "add",
+        "axis": "z",
+        "cx": 0,
+        "cy": 0,
+        "cz": 0,
+        "r": 20,
+        "h": 60
+      },
+      {
+        "type": "cylinder",
+        "op": "sub",
+        "axis": "z",
+        "cx": 0,
+        "cy": 0,
+        "cz": 0,
+        "r": 4,
+        "h": 100
+      },
+      {
+        "type": "sketch",
+        "op": "keep",
+        "view": "H",
+        "profile": "circle",
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            12,
+            0
+          ]
+        ],
+        "lo": -30,
+        "hi": 0
+      }
+    ],
+    "notices": [
+      "第 2 个形体（cylinder）的 h=131.741 比整个零件还大，已按上限 100 截短（挖除结果不受影响）"
+    ]
+  }
+}

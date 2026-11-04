@@ -1,0 +1,45 @@
+{
+  "understanding": "固定草绘格式练习，不是真实AI识图结果",
+  "unit": "mm",
+  "shapes": [
+    {
+      "type": "sketch",
+      "op": "add",
+      "view": "H",
+      "profile": "polygon",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          30,
+          10
+        ],
+        [
+          10,
+          10
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          0,
+          30
+        ]
+      ],
+      "arcs": {},
+      "lo": 0,
+      "hi": 15
+    }
+  ],
+  "assumptions": [],
+  "unsupported": [],
+  "questions": [],
+  "confidence": "high"
+}
