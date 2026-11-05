@@ -1,8 +1,12 @@
-# Three-View Workbench · v0.5.0
+# Three-View Workbench · v0.5.1
 
-[中文说明](README.zh-CN.md) · [Open the workbench](https://zeder11.github.io/three-view-workbench/app/three-view-workbench.html)
+[中文说明](README.zh-CN.md) · [Open this build](https://zeder11.github.io/three-view-workbench/app/three-view-workbench.html)
 
-An offline engineering-drawing study tool. This version adds visual source links and candidate-construction 3D previews to **Explain this line**, plus individual AI-question replies, an independent preview before applying, and editable AI sketches. It builds on the modeling, arcs, local retention, tangent constraints, replay and file features of v0.4.0.
+An offline engineering-drawing study tool. In v0.5.1 the front, top and left drawings and their standard 3D camera views share the same edge and visibility calculations. This fixes extra solid lines and missing hidden lines found while checking against the original drawings. A solid line takes precedence where the two styles overlap. The sampling setting still controls fill and overall dimensions. Existing model JSON files open without conversion.
+
+## v0.5.0 features
+
+v0.5.0 adds visual source links and candidate-construction 3D previews to **Explain this line**, plus individual AI-question replies, an independent preview before applying, and editable AI sketches. It builds on the modeling, arcs, local retention, tangent constraints, replay and file features of v0.4.0.
 
 ## Compact section controls
 
@@ -44,7 +48,7 @@ Open polylines now offer cuts on both sides of the traced boundary, preserving b
 
 Bounding-box trials remain inspectable but cannot be adopted. Open-path trials that clearly miss trace positions or visibility also disable adoption with an explanation, without an extra confirmation layer.
 
-Display meshes now intersect mesh edges with final material boundaries instead of linearly interpolating decomposed CSG fields. This fixes seam dents in block-based sketches, including material-change previews, while material, ray and projection routines remain unchanged. Sampling is not increased and genuine holes are preserved; very thin features still require sufficient sampling. The screenshot-based fixture reproduces the defect but is not the original 4-56 project or a verified answer.
+Display meshes now intersect mesh edges with final material boundaries instead of linearly interpolating decomposed CSG fields. This fixes seam dents in block-based sketches, including material-change previews, while material, ray and projection routines remain unchanged. Sampling is not increased and genuine holes are preserved; very thin features still require sufficient sampling. The screenshot-based fixture reproduces the defect but is not the original project or a verified answer.
 
 ## More precise tracing and contour cuts
 
