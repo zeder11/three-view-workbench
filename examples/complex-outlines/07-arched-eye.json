@@ -1,0 +1,124 @@
+{
+  "format": "orthographic-workbench",
+  "version": 3,
+  "shapes": [
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "box",
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 35,
+      "sx": 74,
+      "sy": 64,
+      "sz": 30,
+      "id": 1
+    },
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "box",
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 24.5,
+      "sx": 86,
+      "sy": 52,
+      "sz": 9,
+      "id": 2
+    },
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "z",
+      "cx": 24,
+      "cy": 34,
+      "cz": 45,
+      "r": 4,
+      "h": 72,
+      "id": 3
+    },
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "z",
+      "cx": 76,
+      "cy": 66,
+      "cz": 45,
+      "r": 4,
+      "h": 72,
+      "id": 4
+    },
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "extrude",
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "profile": {
+        "view": "V",
+        "points": [
+          [
+            28,
+            50
+          ],
+          [
+            72,
+            50
+          ],
+          [
+            50,
+            28
+          ]
+        ],
+        "arcs": {
+          "1": 6.443650813895953,
+          "2": 6.443650813895953
+        },
+        "lo": 57,
+        "hi": 80
+      },
+      "id": 5
+    },
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "y",
+      "cx": 50,
+      "cy": 53,
+      "cz": 50,
+      "r": 16,
+      "h": 10,
+      "id": 6
+    },
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "y",
+      "cx": 50,
+      "cy": 50,
+      "cz": 50,
+      "r": 8,
+      "h": 80,
+      "id": 7
+    }
+  ]
+}

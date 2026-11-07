@@ -1,6 +1,12 @@
-# Three-View Workbench · v0.5.1
+# Three-View Workbench · v0.5.2
 
 [中文说明](README.zh-CN.md) · [Open this build](https://zeder11.github.io/three-view-workbench/app/three-view-workbench.html)
+
+v0.5.2 fixes missing hidden bore lines where a hole crosses a coplanar joint. The top drawing, SVG export and 3D hidden-line view now show the two bore lines. Existing models open without conversion.
+
+The 3D preview also suppresses stray crease fragments at an exact, smooth cylinder-to-sphere join. Genuine shoulders and shallow intersections remain visible.
+
+[17 importable outline exercises](examples/complex-outlines/README.md) cover oblique and intersecting bores, thin webs, partially hidden rims, and smooth and stepped joins.
 
 An offline engineering-drawing study tool. In v0.5.1 the front, top and left drawings and their standard 3D camera views share the same edge and visibility calculations. This fixes extra solid lines and missing hidden lines found while checking against the original drawings. A solid line takes precedence where the two styles overlap. The sampling setting still controls fill and overall dimensions. Existing model JSON files open without conversion.
 

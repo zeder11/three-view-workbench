@@ -1,0 +1,76 @@
+{
+  "format": "orthographic-workbench",
+  "version": 3,
+  "shapes": [
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "box",
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 34,
+      "sx": 70,
+      "sy": 64,
+      "sz": 32,
+      "id": 1
+    },
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "box",
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 61,
+      "sx": 50,
+      "sy": 46,
+      "sz": 22,
+      "id": 2
+    },
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "box",
+      "op": "add",
+      "cx": 50,
+      "cy": 50,
+      "cz": 22.5,
+      "sx": 82,
+      "sy": 48,
+      "sz": 9,
+      "id": 3
+    },
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "z",
+      "cx": 42.8,
+      "cy": 50,
+      "cz": 45.5,
+      "r": 6,
+      "h": 67,
+      "id": 4
+    },
+    {
+      "rot": 0,
+      "rx": 0,
+      "ry": 0,
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "z",
+      "cx": 55.2,
+      "cy": 50,
+      "cz": 45.5,
+      "r": 6,
+      "h": 67,
+      "id": 5
+    }
+  ]
+}
