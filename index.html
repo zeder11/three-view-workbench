@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>三视图工作台 · 工程制图学习工具</title>
-<meta name="description" content="离线单文件工程制图学习工具：描截面、拉伸、挖槽、切割，实时生成三视图与立体预览；可点选已有线追溯来源、剖开立体看切前切后。">
+<meta name="description" content="离线单文件工程制图学习工具：搭建立体，生成三视图和中心线，查看并导出 A–A 全剖视图。">
 <style>
   :root{
     --ink:#12293c; --muted:#5d7488; --line:#c9d8e2; --paper:#f7fafc;
@@ -68,26 +68,26 @@
       <h1>三视图工作台<span>three-view workbench · 工程制图学习工具</span></h1>
       <p class="lede">描截面、拉伸、挖槽、切一刀，用视图把立体一步步搭出来，再回头核对三视图。<b>离线单文件，双击就能用。</b></p>
     </div>
-    <p class="tag">PolyForm NC · v0.5.2</p>
+    <p class="tag">PolyForm NC · v0.6.0</p>
   </header>
 
   <div class="actions">
     <a class="btn primary" href="app/three-view-workbench.html">
-      <b>▶ 在线使用</b>
-      <small>不用下载，直接在浏览器打开（推荐）</small>
+      <b>▶ 打开工作台</b>
+      <small>直接在浏览器中使用</small>
     </a>
-    <a class="btn" href="app/three-view-workbench.html" download="three-view-workbench-v0.5.2.html">
+    <a class="btn" href="app/three-view-workbench.html" download="three-view-workbench-v0.6.0.html">
       <b>⬇ 下载离线版</b>
-      <small>单个 HTML，约 720 KB，双击运行</small>
+      <small>单个 HTML，约 748 KB，下载后可离线打开</small>
     </a>
     <a class="btn" href="https://github.com/zeder11/three-view-workbench/archive/refs/heads/main.zip">
       <b>源码 ZIP</b>
       <small>整仓打包，含示例和说明</small>
     </a>
   </div>
-  <p class="hint">下载后若浏览器提示“文件可能有害”，选保留即可——它只是普通的本地网页，不联网、不上传数据。</p>
+  <p class="hint">普通建模、导入和图纸导出可离线完成。主动使用在线 AI 建模或复核时，输入的文字、图片或复核图会按功能发送给所选服务商。</p>
 
-  <p class="hint">v0.5.2：修复圆孔恰好跨过共面接缝时漏画的遮挡线。可直接打开旧模型 JSON。</p>
+  <p class="hint">v0.6.0：新增 A–A 全剖视图和中心线／对称线，并修复圆弧附近的轮廓漏线。可直接打开原模型 JSON。</p>
 
   <figure class="shot">
     <img src="docs/app-desktop.png" alt="三视图工作台界面截图：左侧建模步骤，中间三视图，右侧立体预览">
@@ -95,17 +95,14 @@
 
   <h2>本次更新</h2>
   <ul class="feat">
-    <li><b>这条线是什么 · 来源关联</b>：在图纸上点一条已有实线或虚线，看它在立体中的位置、其他视图的对应投影，以及是哪一步画出来的</li>
-    <li><b>剖开看看</b>：三个标准方向任选，拖动位置看剖面——斜线是材料、留白是孔槽；也可在候选对比里「同位置剖开 A/B」，共用比例左右对照</li>
-    <li><b>描线切法的立体预览</b>：比较候选时可直接旋转看切前、切后和实际切除的材料，再决定采用哪种切法</li>
-    <li><b>AI 建模逐项答复</b>：可编辑的直线／圆弧截面与局部保留；答复里会指出尺寸声明矛盾、阶梯孔被完全覆盖等问题，思考被截断时保留设置重试</li>
-    <li><b>可选 AI 复核</b>：只有主动点按钮才发送投影图片，用来生成待核对的三视图；是否相符仍要自己比对原题</li>
-    <li><b>窗口更紧凑</b>：长说明默认收起，手机端三视图更早出现在首屏</li>
+    <li><b>A–A 全剖视图</b>：在「剖开看看」里对照断面与全剖。全剖还会画出剖切面后方可见的边，可反转方向并导出带箭头的 SVG 或 PNG。</li>
+    <li><b>中心线／对称线</b>：在「图纸辅助」开启，圆孔可标十字或孔轴，对称视图可标对称轴。标记会随图纸导出。</li>
+    <li><b>圆弧轮廓修复</b>：补回圆弧端点附近漏画的斜边，去掉相邻圆弧之间的假接缝。原来的模型 JSON 可以直接打开。</li>
   </ul>
 
   <figure class="small">
-    <img src="docs/cut-preview.png" alt="剖开看看：拖动位置查看剖面材料" width="470">
-    <figcaption>「剖开看看」：斜线是材料，留白是孔槽或外部。</figcaption>
+    <img src="docs/cut-preview.png" alt="剖开看看：左边是剖切位置和方向箭头，右边是带剖面线和后方可见轮廓的 A–A 全剖视图" width="720">
+    <figcaption>左图定位 A–A，右图显示全剖。凹槽后方的台阶可见，所以画实线；剖到的材料才画斜线。</figcaption>
   </figure>
 
   <figure class="small">
@@ -122,6 +119,7 @@
     <li><b>圆弧相切</b>：双端一起相切、相邻段光滑调整、端点链式联动与持续约束，无解时会说明原因</li>
     <li><b>步骤回放</b>：逐刀查看中间结果，可显示「与上一步的差异」，不占撤销记录</li>
     <li><b>题图叠图</b>：铺在草稿纸下，两点标定后直接描；描出的线可比较候选切法</li>
+    <li><b>这条线是什么</b>：点已有实线或虚线，查看它在立体上的位置和对应的建模步骤</li>
     <li><b>点位对应</b>：点一处，另两视图标出长对正／高平齐／宽相等</li>
     <li><b>轮廓显示</b>：按原始曲面生成连续轮廓，去除网格毛边；被遮挡棱用虚线显示</li>
     <li><b>3D 质量</b>：快速 42³／精细 84³／超精细 128³，调整实体细腻度；轮廓清晰度独立</li>

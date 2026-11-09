@@ -129,7 +129,7 @@ html[lang="en"] .toolbar{row-gap:6px}
 <div id="errbar" class="errbar" role="alert" hidden><span id="errtext"></span><button id="errsave" class="errbar-act" type="button" hidden>导出备份</button><button id="errclose" type="button">关闭 ×</button></div>
 <div id="replaybanner" class="replay-banner" role="status" hidden></div><div class="workspace"><div class="sheetbox"><div class="sheetbar"><span>正投影图纸 / V 上、H 下、W 右</span><span id="resolution">等待计算</span></div><div id="sheet"><div class="empty">正在计算解析投影…</div></div><div id="status" class="status busy" role="status"><span class="lamp"></span><span id="statusText">正在准备几何内核</span><button id="cancelcalc" class="cancelcalc" type="button" hidden>取消</button></div></div>
 <div class="side"><div class="preview"><div class="preview-title"><span>立体预览 / 拖动旋转</span><div style="display:flex;gap:4px"><button id="expand3d">放大窗口</button><button id="reset3d">复位</button></div></div><div class="orbit-presets"><span class="orbit-presets-label">标准视角</span><button type="button" data-cam="front" title="从正前方看（主视图方向）">主视</button><button type="button" data-cam="top" title="从正上方看（俯视图方向）">俯视</button><button type="button" data-cam="left" title="从正左方看（左视图方向）">左视</button><button type="button" data-cam="right" title="从正右方看（右视图方向）">右视</button><button type="button" data-cam="bottom" title="从正下方看（仰视图方向）">仰视</button><button type="button" data-cam="back" title="从正后方看（后视图方向）">后视</button></div><div class="orbit-stage"><span id="point3d" hidden aria-hidden="true">P</span><canvas id="gl" width="530" height="530" aria-label="三维预览：左键旋转，右键或 Shift 拖动平移，滚轮缩放"></canvas></div><div class="orbit-controls"><button id="zoomout3d" aria-label="缩小立体">−</button><output id="zoomvalue3d">100%</output><button id="zoomin3d" aria-label="放大立体">＋</button><span>滚轮缩放 · Shift 拖动平移</span></div><div class="mesh-quality-controls"><label for="renderstyle">3D 显示</label><select id="renderstyle"><option value="solid">实体着色</option><option value="outline">仅可见轮廓</option><option value="xray">透视轮廓 · 遮挡线用虚线</option></select><label style="display:flex;gap:4px;align-items:center"><input id="renderaa" type="checkbox" checked>抗锯齿</label></div><div class="mesh-quality-controls"><label for="meshquality">3D 质量</label><select id="meshquality"><option value="auto">自动 · 快速→精细</option><option value="fast">快速预览 · 42³</option><option value="fine">精细预览 · 84³（较慢）</option><option value="ultra">超精细 · 128³（实体重建较慢）</option></select><button id="meshrefresh" title="按当前 3D 质量立即重建网格">重建 3D</button></div><details class="mesh-quality-detail"><summary>面数与精度说明</summary><p class="mesh-quality-note" id="renderhint">抗锯齿：开源 FXAA + 有界超采样；不改变模型精度。</p><p class="mesh-quality-note">只调整实体曲面细腻度，不改三视图和轮廓线。42³≈3 万面 / 84³≈12 万面 / 128³≈29 万面；实体网格仍可能漏掉极细特征。</p></details><div class="small" id="meshInfo" style="padding:7px 12px">网格只用于 3D，三视图不依赖体素。</div></div>
-<div class="settings"><details class="settings-fold" id="sheetfold"><summary>图纸辅助<span class="fold-state" id="sheetfoldstate"></span></summary><div class="section-label" hidden>图纸辅助</div><div class="sheethelpers"><label title="10 单位网格"><input type="checkbox" id="grid">10 单位网格</label><label title="长对正 / 高平齐 / 宽相等（第一角投影的三视图对应关系）"><input type="checkbox" id="guides">三视图对应</label><label title="点位对应辅助线（在图纸上点选一个表面点，三张视图同时标出对应位置）"><input type="checkbox" id="pointguides">点位对应</label></div><div id="pointguidepanel" hidden><p id="pointguideinfo" class="small">移动鼠标预览，点击锁定当前模型最近的可见表面点。</p><button id="pointguideclear">清除定位</button><p class="small">实心 P：该点可见；空心 P：该点被遮挡。只定位当前模型，不是自动识别题图的对应棱。定位线不导出。</p></div><div class="sheethelpers"><label title="投影外包尺寸（近似值，用虚线框标出三张视图的外包范围）"><input type="checkbox" id="dims">外包尺寸</label><label title="显示不可见轮廓（虚线）"><input type="checkbox" id="hidden" checked>不可见轮廓</label><label title="淡色填充实体投影"><input type="checkbox" id="fill">填充投影</label></div><p class="small note">可见轮廓画实线，被遮挡的轮廓画虚线。导出只包含图纸，不含 3D 和操作界面。<br>网格与尺寸采用模型单位，不代表实际毫米。</p><details><summary>精度、方向与使用限制</summary><div class="small">V：从 −Y 向 +Y 看，X 向右、Z 向上。H：从 +Z 向 −Z 看，X 向右、Y 向上（物体前面画在图纸下方）。W：从 −X 向 +X 看，Y 向左（物体前面画在图纸右侧）、Z 向上。<br>截平面默认减去局部 +Z 一侧，用位置和倾斜调整切口。锥体沿所选轴的负端为底、正端为顶，再施加倾斜。相贯轮廓由布尔表面的投影区域变化近似提取，复杂相切及光滑拼接并非 CAD 级保证。棱柱/棱锥的 rot 为截面正向旋转；长方体 rot 沿用原版绕 Z 顺时针约定。倾斜先绕世界 X，再绕世界 Y。<br>射线求交是解析的；轮廓拓扑仍按二维网格采样，再二分细化并转为折线。小于采样间距的特征可能漏掉，极近轮廓、相切、相贯处请核对。SVG 是真实路径，但不是精确 CAD 曲线。<br>3D 为独立表面网格：快速 42³（格距约 2.43）、精细 84³（约 1.21），自动模式先快后细。极细孔/薄片仍可能漏掉；以三视图为准。本工具辅助理解，不保证工程图规范完备。</div></details></details></div></div></div></section><aside class="ai-drawer" id="aidrawer" aria-label="AI 建模面板" hidden>
+<div class="settings"><details class="settings-fold" id="sheetfold"><summary>图纸辅助<span class="fold-state" id="sheetfoldstate"></span></summary><div class="section-label" hidden>图纸辅助</div><div class="sheethelpers"><label title="10 单位网格"><input type="checkbox" id="grid">10 单位网格</label><label title="长对正 / 高平齐 / 宽相等（第一角投影的三视图对应关系）"><input type="checkbox" id="guides">三视图对应</label><label title="点位对应辅助线（在图纸上点选一个表面点，三张视图同时标出对应位置）"><input type="checkbox" id="pointguides">点位对应</label></div><div id="pointguidepanel" hidden><p id="pointguideinfo" class="small">移动鼠标预览，点击锁定当前模型最近的可见表面点。</p><button id="pointguideclear">清除定位</button><p class="small">实心 P：该点可见；空心 P：该点被遮挡。只定位当前模型，不是自动识别题图的对应棱。定位线不导出。</p></div><div class="sheethelpers"><label title="投影外包尺寸（近似值，用虚线框标出三张视图的外包范围）"><input type="checkbox" id="dims">外包尺寸</label><label title="显示不可见轮廓（虚线）"><input type="checkbox" id="hidden" checked>不可见轮廓</label><label title="淡色填充实体投影"><input type="checkbox" id="fill">填充投影</label><label title="按当前投影显示圆孔轴线和视图对称线，导出时保留"><input type="checkbox" id="centerlines">中心线／对称线</label></div><p class="small note">可见轮廓画实线，被遮挡的轮廓画虚线。导出只包含图纸，不含 3D 和操作界面。<br>网格与尺寸采用模型单位，不代表实际毫米。</p><details><summary>精度、方向与使用限制</summary><div class="small">V：从 −Y 向 +Y 看，X 向右、Z 向上。H：从 +Z 向 −Z 看，X 向右、Y 向上（物体前面画在图纸下方）。W：从 −X 向 +X 看，Y 向左（物体前面画在图纸右侧）、Z 向上。<br>截平面默认减去局部 +Z 一侧，用位置和倾斜调整切口。锥体沿所选轴的负端为底、正端为顶，再施加倾斜。相贯轮廓由布尔表面的投影区域变化近似提取，复杂相切及光滑拼接并非 CAD 级保证。棱柱/棱锥的 rot 为截面正向旋转；长方体 rot 沿用原版绕 Z 顺时针约定。倾斜先绕世界 X，再绕世界 Y。<br>射线求交是解析的；轮廓拓扑仍按二维网格采样，再二分细化并转为折线。小于采样间距的特征可能漏掉，极近轮廓、相切、相贯处请核对。SVG 是真实路径，但不是精确 CAD 曲线。<br>3D 为独立表面网格：快速 42³（格距约 2.43）、精细 84³（约 1.21），自动模式先快后细。极细孔/薄片仍可能漏掉；以三视图为准。本工具辅助理解，不保证工程图规范完备。</div></details></details></div></div></div></section><aside class="ai-drawer" id="aidrawer" aria-label="AI 建模面板" hidden>
 <div class="ai-head"><strong>AI 建模</strong><span class="ai-sub">文字 / 图片 → 可编辑模型</span><button id="aiclose" class="ai-x" title="收起面板" aria-label="收起 AI 面板">×</button></div>
 <div class="ai-body">
 <div class="section-label" style="margin:0 0 6px">1 · 说明题目</div>
@@ -477,10 +477,19 @@ function profilePoint(sh,p,vector=false){const q=local(sh,p,vector),f=profileFra
 function profileWorld(sh,p){const f=profileFrames[sh.profileData.view],a=[0,0,0];for(let k=0;k<3;k++)a[k]=f.u[k]*(p[0]-f.off[0])+f.v[k]*(p[1]-f.off[1]);a[f.depth]=p[2];return sh.center.map((v,k)=>v+sh.basis.reduce((sum,b,j)=>sum+b[k]*(a[j]-50),0));}
 function profileVector(sh,p){const o=profileWorld(sh,[0,0,0]),q=profileWorld(sh,p);return q.map((x,k)=>x-o[k]);}
 function profileField(sh,p){const q=profilePoint(sh,p);return Math.max((sh.type==='retain'?-1:1)*profileDistance(sh.profileData,q),sh.profileData.lo-q[2],q[2]-sh.profileData.hi);}
-function profileIntervals(sh,O,D){
+function profileIntervals(sh,O,D,edgeClip=false){
  const p=sh.profileData,o=profilePoint(sh,O),d=profilePoint(sh,D,true),roots=[[-INF,0],[INF,0]];
  if(Math.abs(d[2])>1e-12){roots.push([(p.lo-o[2])/d[2],sh.surfaces[0]],[(p.hi-o[2])/d[2],sh.surfaces[1]]);}else if(o[2]<p.lo-EPS||o[2]>p.hi+EPS)return [];
- for(let i=0;i<p.edges.length;i++){const e=p.edges[i],sid=sh.surfaces[i+2];if(e.kind==='line'){const v=sub2(e.b,e.a),den=cross2(d,v);if(Math.abs(den)<1e-12)continue;const q=sub2(e.a,o),t=cross2(q,v)/den,u=cross2(q,d)/den;if(u>=-1e-9&&u<=1+1e-9)roots.push([t,sid]);}
+ for(let i=0;i<p.edges.length;i++){const e=p.edges[i],sid=sh.surfaces[i+2];if(e.kind==='line'){const v=sub2(e.b,e.a),den=cross2(d,v);const q=sub2(e.a,o);
+   if(Math.abs(den)<1e-12){
+    // For finite edge clipping, a ray can run exactly along this straight
+    // side and meet an arc tangentially at its end. The quadratic may then
+    // have no reliable root; the coincident segment supplies both endpoints.
+    const l2=d[0]*d[0]+d[1]*d[1];if(edgeClip&&l2>1e-24&&Math.abs(cross2(q,d))<=1e-10*Math.sqrt(l2)){
+     for(const p of [e.a,e.b])roots.push([((p[0]-o[0])*d[0]+(p[1]-o[1])*d[1])/l2,sid]);
+    }
+    continue;
+   }const t=cross2(q,v)/den,u=cross2(q,d)/den;if(u>=-1e-9&&u<=1+1e-9)roots.push([t,sid]);}
   else for(const t of circleRoots(o,d,e.center,e.r)){const q=[o[0]+t*d[0],o[1]+t*d[1]];if(onArc(e,q))roots.push([t,sid]);}
  }
  roots.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);const unique=[];for(const r of roots)if(!unique.length||Math.abs(r[0]-unique.at(-1)[0])>1e-8)unique.push(r);
@@ -893,7 +902,7 @@ function mesh(prep,res=42){
  }
  return {positions:new Float32Array(positions),normals:new Float32Array(normals),resolution:res};
 }
-return {prepare,intersect,intersections,ray,viewRay,sample,project,stitch,modelField,modelInside,shapeBounds,mesh,union,subtract,buildProfile,profileDistance,profileWorld,profileVector,profileField,profileFrames};
+return {prepare,intersect,intersections,clipEdge:(sh,o,d)=>sh.profileData?profileIntervals(sh,o,d,true):intersections(sh,o,d),ray,viewRay,sample,project,stitch,modelField,modelInside,shapeBounds,mesh,union,subtract,buildProfile,profileDistance,profileWorld,profileVector,profileField,profileFrames};
 }
 
 const $=id=>document.getElementById(id);
@@ -911,7 +920,7 @@ const DEFINITIONS={
  poly:{name:'多面体',def:{op:'add',cx:50,cy:50,cz:50,rot:0,rx:0,ry:0,hs:[[1,0,0,15],[-1,0,0,15],[0,1,0,15],[0,-1,0,15],[0,0,1,15],[0,0,-1,15],[0.7071,0,0.7071,0]]},params:[]}
 };
 let uid=1,shapes=[],history=[],future=[],lastCommit='',revision=0,worker=null,drawData=null,ready=false,timer=null,slideBase=null;
-const settings={grid:false,guides:false,dims:false,hidden:true,fill:false};
+const settings={grid:false,guides:false,dims:false,hidden:true,fill:false,centerlines:false};
 /* 视图草绘：旧多边形按原路径编译；圆弧与局部保留使用解析截面。坐标为屏幕u/v。 */
 function DraftKit(){
  const E=1e-7;
@@ -1500,10 +1509,114 @@ function OrthographicLines(K,shapes,prep,res){
  }
  return views;
 }
+// Drawing-only construction references. The worker supplies analytic candidates
+// from the same model revision as the ink; the sheet checks them against that ink.
+function CenterlineSeeds(K,prepared){
+ const seeds=[],add=(a,b,ra,rb)=>{
+  const d=b.map((x,k)=>x-a[k]),h=Math.hypot(...d),axis=d.findIndex(x=>Math.abs(x)>h*(1-1e-10));
+  if(h<=1e-8||axis<0||d.some((x,k)=>k!==axis&&Math.abs(x)>h*1e-9))return;
+  seeds.push({a,b,ra,rb,axis});
+ };
+ for(const sh of prepared){
+  if(['cylinder','cone','frustum'].includes(sh.type)){
+   const end=sign=>sh.center.map((x,k)=>x+sign*sh.h/2*sh.basis[2][k]);
+   add(end(-1),end(1),sh.r,sh.type==='cylinder'?sh.r:sh.type==='cone'?0:sh.r2);continue;
+  }
+  const p=sh.profileData;if(!p||!p.edges.every(e=>e.kind==='arc'))continue;
+  const first=p.edges[0],radius=first.r;
+  // A full round sketch is eligible; a rounded corner or semicircular sketch isn't.
+  if(!p.edges.every(e=>Math.abs(e.r-radius)<1e-7&&Math.hypot(...e.center.map((v,i)=>v-first.center[i]))<1e-7)||Math.abs(Math.abs(p.edges.reduce((s,e)=>s+e.angle,0))-2*Math.PI)>1e-7)continue;
+  add(K.profileWorld(sh,[...first.center,p.lo]),K.profileWorld(sh,[...first.center,p.hi]),radius,radius);
+ }
+ return seeds;
+}
+function CenterlineLayout(views,seeds=[]){
+ const frames={V:{axis:1,point:([x,y,z])=>[x,100-z]},W:{axis:0,point:([x,y,z])=>[100-y,100-z]},H:{axis:2,point:([x,y])=>[x,100-y]}};
+ const out={V:[],W:[],H:[]},extension=2;
+ function ink(data){
+  const bins=new Map(),lines=[],bounds=[Infinity,Infinity,-Infinity,-Infinity];
+  for(const kind of ['solid','hidden'])for(const path of data?.[kind]||[])for(let i=1;i<path.length;i++){
+   const a=path[i-1],b=path[i],dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy);if(l<1e-6)continue;
+   const s={a,b,l,d:[dx/l,dy/l],kind};lines.push(s);
+   if(kind==='solid')for(const p of [a,b])for(let k=0;k<2;k++){bounds[k]=Math.min(bounds[k],p[k]);bounds[k+2]=Math.max(bounds[k+2],p[k]);}
+   let last='';const n=Math.ceil(l*1.5);for(let j=0;j<=n;j++){
+    const key=Math.floor(a[0]+dx*j/n)+','+Math.floor(a[1]+dy*j/n);if(key===last)continue;last=key;
+    if(!bins.has(key))bins.set(key,[]);bins.get(key).push(s);
+   }
+  }
+  function near(p,d,tol,kind){const u=Math.floor(p[0]),v=Math.floor(p[1]);
+   for(let y=v-1;y<=v+1;y++)for(let x=u-1;x<=u+1;x++)for(const s of bins.get(x+','+y)||[]){
+    if(kind&&kind!==s.kind||Math.abs(d[0]*s.d[0]+d[1]*s.d[1])<.94)continue;
+    const dx=p[0]-s.a[0],dy=p[1]-s.a[1],t=Math.max(0,Math.min(s.l,dx*s.d[0]+dy*s.d[1]));
+    if((dx-t*s.d[0])**2+(dy-t*s.d[1])**2<=tol*tol)return true;
+   }return false;
+  }
+  return {bounds,lines,near};
+ }
+ const inks=Object.fromEntries(Object.keys(frames).map(v=>[v,ink(views[v])]));
+ function add(view,axis,at,lo,hi,anchor,kind){
+  if(hi-lo<=1e-6)return;
+  out[view].push({axis,at,lo:lo-extension,hi:hi+extension,anchor,kind});
+ }
+ // Reflection has to account for the hidden holes/slots as well as the outer box.
+ for(const [v,{bounds,lines,near}] of Object.entries(inks)){
+  if(!Number.isFinite(bounds[0])||lines.length>12000)continue;
+  for(const axis of [0,1]){
+   const k=1-axis,mid=(bounds[k]+bounds[k+2])/2;if(bounds[axis+2]-bounds[axis]<4||bounds[k+2]-bounds[k]<4)continue;
+   const symmetric=lines.every(s=>{const n=Math.max(1,Math.ceil(s.l/.6)),d=s.d.slice();d[k]*=-1;
+    for(let i=0;i<n;i++){const p=s.a.map((x,j)=>x+(s.b[j]-x)*(i+.5)/n);p[k]=2*mid-p[k];if(!near(p,d,.045,s.kind))return false;}return true;
+   });
+   if(symmetric)add(v,axis,mid,bounds[axis],bounds[axis+2],(bounds[axis]+bounds[axis+2])/2,'symmetry');
+  }
+ }
+ for(const seed of seeds){
+  const endOn=Object.keys(frames).find(v=>frames[v].axis===seed.axis),c=frames[endOn].point(seed.a),circle=inks[endOn];
+  let found=false;
+  for(const r of new Set([seed.ra,seed.rb])){
+   if(!Number.isFinite(r)||r<.095)continue;
+   const tol=Math.min(.07,Math.max(.012,r*.06));let hits=0;
+   for(let i=0;i<32;i++){const a=i*Math.PI/16,x=Math.cos(a),y=Math.sin(a);if(circle.near([c[0]+r*x,c[1]+r*y],[-y,x],tol))hits++;}
+   if(hits<30)continue;found=true;
+   for(const axis of [0,1])add(endOn,axis,c[1-axis],c[axis]-r,c[axis]+r,c[axis],'circle');
+  }
+  if(!found)continue;
+  for(const [v,frame] of Object.entries(frames))if(v!==endOn){
+   const a=frame.point(seed.a),b=frame.point(seed.b),axis=Math.abs(b[0]-a[0])>Math.abs(b[1]-a[1])?0:1,k=1-axis;
+   const h=b[axis]-a[axis];if(Math.abs(h)<.3)continue;
+   const near=inks[v].near,dr=seed.rb-seed.ra;
+   function both(t){const radius=seed.ra+t*dr;if(radius<.095)return false;
+    const u=a[axis]+h*t,tol=Math.min(.07,Math.max(.012,radius*.06)),l=Math.hypot(h,dr);
+    return [-1,1].every(sign=>{const p=[],d=[];p[axis]=u;p[k]=a[k]+sign*radius;d[axis]=h/l;d[k]=sign*dr/l;return near(p,d,tol);});
+   }
+   const n=Math.ceil(Math.abs(h)/.28),sample=(i)=>(i+.5)/n;
+   function edge(x,y,wanted){for(let i=0;i<8;i++){const t=(x+y)/2;if(both(t)===wanted)y=t;else x=t;}return (x+y)/2;}
+   let start=-1;
+   for(let i=0;i<=n;i++){const hit=i<n&&both(sample(i));if(hit&&start<0)start=i;
+    if(!hit&&start>=0){const lo=start===0?0:edge(sample(start-1),sample(start),true),hi=i===n?1:edge(sample(i-1),sample(i),false);
+     if((hi-lo)*Math.abs(h)>=.65){const x=a[axis]+h*lo,y=a[axis]+h*hi;add(v,axis,a[k],Math.min(x,y),Math.max(x,y),(x+y)/2,'axis');}start=-1;
+    }
+   }
+  }
+ }
+ for(const view of Object.keys(out)){
+  const merged=[];
+  for(const s of out[view].sort((a,b)=>a.axis-b.axis||a.at-b.at||a.lo-b.lo)){
+   // A whole-view symmetry line may already pass through a round centre.
+   // Combine its span and give the circular cross the dash phase at that point.
+   const others=merged.filter(t=>t.axis===s.axis&&Math.abs(t.at-s.at)<.001&&t.hi>=s.lo-.02&&s.hi>=t.lo-.02);
+   for(const t of others){s.lo=Math.min(s.lo,t.lo);s.hi=Math.max(s.hi,t.hi);
+    if(t.kind==='circle'&&s.kind!=='circle')s.anchor=t.anchor;
+    if(t.kind==='symmetry'||s.kind==='symmetry'){if(s.kind!=='circle'&&t.kind!=='circle'&&t.kind==='symmetry')s.anchor=t.anchor;s.kind='symmetry';}
+    else if(t.kind==='circle')s.kind='circle';merged.splice(merged.indexOf(t),1);
+   }merged.push(s);
+  }out[view]=merged;
+ }
+ return out;
+}
 const workerSource='('+function(){
- const K=GeometryKernel();self.onmessage=e=>{try{const {shapes,res,revision,kind,estimate}=e.data,start=performance.now(),prep=K.prepare(shapes);if(kind==='mesh'){const mesh=K.mesh(prep,res);self.postMessage({type:'mesh',revision,mesh,meshMs:performance.now()-start},[mesh.positions.buffer,mesh.normals.buffer]);return;}const views=estimate?Object.fromEntries(['V','H','W'].map(view=>[view,K.project(prep,view,res)])):OrthographicLines(K,shapes,prep,res);self.postMessage({type:'views',revision,views,projectionMs:performance.now()-start});}catch(err){self.postMessage({type:'error',message:err.stack||err.message});}};
+ const K=GeometryKernel();self.onmessage=e=>{try{const {shapes,res,revision,kind,estimate}=e.data,start=performance.now(),prep=K.prepare(shapes);if(kind==='mesh'){const mesh=K.mesh(prep,res);self.postMessage({type:'mesh',revision,mesh,meshMs:performance.now()-start},[mesh.positions.buffer,mesh.normals.buffer]);return;}const views=estimate?Object.fromEntries(['V','H','W'].map(view=>[view,K.project(prep,view,res)])):OrthographicLines(K,shapes,prep,res);if(!estimate)views.V.centerSeeds=CenterlineSeeds(K,prep);self.postMessage({type:'views',revision,views,projectionMs:performance.now()-start});}catch(err){self.postMessage({type:'error',message:err.stack||err.message});}};
 }.toString()+')();';
-const workerURL=URL.createObjectURL(new Blob([GeometryKernel.toString(),'\n',FeatureLines.toString(),'\n',OrthographicLines.toString(),'\n',workerSource],{type:'text/javascript'}));
+const workerURL=URL.createObjectURL(new Blob([GeometryKernel.toString(),'\n',FeatureLines.toString(),'\n',OrthographicLines.toString(),'\n',CenterlineSeeds.toString(),'\n',workerSource],{type:'text/javascript'}));
 let meshWorker=null,meshTimer=null,meshTicket=0,meshBuilds=0,projectionBuilds=0,lastMeshResolution=0,meshBusy=false,meshMode='auto';
 try{const saved=localStorage.getItem('orthographic-mesh-mode-v1');if(['fast','fine','auto','ultra'].includes(saved))meshMode=saved;}catch(e){}
 $('meshquality').value=meshMode;
@@ -1611,9 +1724,17 @@ function dimension(a,b,label,horizontal){
  else{s+=line(x1-4,y1,x1+4,y1,'dim')+line(x2-4,y2,x2+4,y2,'dim')+`<text x="${fmt(x1-7)}" y="${fmt((y1+y2)/2)}" transform="rotate(-90 ${fmt(x1-7)} ${fmt((y1+y2)/2)})" class="dimtext">${label}</text>`;}
  return s;
 }
+const sheetCenters=new WeakMap(),centerPref='orthographic-centerlines-v1';
+try{settings.centerlines=localStorage.getItem(centerPref)==='1';}catch(e){}
+$('centerlines').checked=settings.centerlines;
+const centerLegendText=()=>bi('长短点划线：中心线／对称线','Long–short dashes: centre / symmetry lines');
+function sheetCenterMarkup(data){
+ let result=sheetCenters.get(data);if(!result){result=CenterlineLayout(data,data.V.centerSeeds||[]);sheetCenters.set(data,result);}return result;
+}
 function svgMarkup(){
  if(!drawData)return '';
- let s=`<svg xmlns="http://www.w3.org/2000/svg" width="860" height="930" viewBox="0 0 860 930"><title>三视图 · 第一角投影</title><desc>V 从负 Y 看；H 从正 Z 看；W 从负 X 看。图线与立体轮廓同源，以折线近似绘制。</desc><style>text{font-family:'Microsoft YaHei','PingFang SC',sans-serif;fill:#163047;font-size:12px}.frame{fill:none;stroke:#d8e4eb;stroke-width:.7}.guide{stroke:#6ab5c0;stroke-width:.65;stroke-dasharray:5 5;opacity:.8}.dim{stroke:#637c8e;stroke-width:.7}.dimtext{font-size:10px;fill:#637c8e;text-anchor:middle}.grid{stroke:#dae8ee;stroke-width:.55}.solid{fill:none;stroke:#163047;stroke-width:.45;stroke-linecap:round;stroke-linejoin:round}.hidden{fill:none;stroke:#536777;stroke-width:.283333;stroke-dasharray:1.666667 1;stroke-linecap:butt;stroke-linejoin:round}</style><rect width="860" height="930" fill="white"/><text x="34" y="31" style="font-size:16px;font-weight:bold">${markT('正投影 · 三视图','Orthographic · three views')}${replayIndex!==null?markT(' · 回放第 '+replayIndex+' 步',' · replay step '+replayIndex):''}</text><text x="826" y="31" text-anchor="end" style="font-size:11px;fill:#637c8e">第一角 / 等比例模型坐标</text>`;
+ const centers=settings.centerlines?sheetCenterMarkup(drawData):null;
+ let s=`<svg xmlns="http://www.w3.org/2000/svg" width="860" height="930" viewBox="0 0 860 930"><title>三视图 · 第一角投影</title><desc>V 从负 Y 看；H 从正 Z 看；W 从负 X 看。图线与立体轮廓同源，以折线近似绘制。</desc><style>text{font-family:'Microsoft YaHei','PingFang SC',sans-serif;fill:#163047;font-size:12px}.frame{fill:none;stroke:#d8e4eb;stroke-width:.7}.guide{stroke:#6ab5c0;stroke-width:.65;stroke-dasharray:5 5;opacity:.8}.dim{stroke:#637c8e;stroke-width:.7}.dimtext{font-size:10px;fill:#637c8e;text-anchor:middle}.grid{stroke:#dae8ee;stroke-width:.55}.centerline{fill:none;stroke:#526675;stroke-width:.22;stroke-dasharray:5 1.4 .9 1.4;stroke-linecap:butt;pointer-events:none}.solid{fill:none;stroke:#163047;stroke-width:.45;stroke-linecap:round;stroke-linejoin:round}.hidden{fill:none;stroke:#536777;stroke-width:.283333;stroke-dasharray:1.666667 1;stroke-linecap:butt;stroke-linejoin:round}</style><rect width="860" height="930" fill="white"/><text x="34" y="31" style="font-size:16px;font-weight:bold">${markT('正投影 · 三视图','Orthographic · three views')}${replayIndex!==null?markT(' · 回放第 '+replayIndex+' 步',' · replay step '+replayIndex):''}</text><text x="826" y="31" text-anchor="end" style="font-size:11px;fill:#637c8e">第一角 / 等比例模型坐标</text>`;
  for(const [v,r]of Object.entries(RECTS)){
   const label={V:'主视图 V · X / Z',H:'俯视图 H · X / Y',W:'左视图 W · Y / Z'}[v];
   s+=`<text x="${r.x}" y="${r.y-19}" style="font-weight:bold">${label}</text><rect x="${r.x}" y="${r.y}" width="300" height="300" class="frame"/>`;
@@ -1629,18 +1750,25 @@ function svgMarkup(){
  for(const [v,r]of Object.entries(RECTS)){
   const d=drawData[v];s+=`<g transform="translate(${r.x} ${r.y}) scale(3)">`;
   if(settings.fill)s+=`<path d="${paths(d.outline)}" fill="#edf5f8" fill-rule="evenodd"/>`;
+  if(centers?.[v]?.length){
+   s+='<g data-center-lines="'+v+'" pointer-events="none">';
+   for(const {axis,at,lo,hi,anchor,kind} of centers[v]){
+    const d=axis===0?'M'+fmt(lo)+','+fmt(at)+' L'+fmt(hi)+','+fmt(at):'M'+fmt(at)+','+fmt(lo)+' L'+fmt(at)+','+fmt(hi);
+    s+='<path class="centerline" data-center-kind="'+kind+'" stroke-dashoffset="'+fmt(2.5-anchor+lo)+'" d="'+d+'"/>';
+   }s+='</g>';
+  }
   // The silhouette is always kept as a solid path; separate patches contribute internal edges.
   if(settings.hidden)s+=`<path d="${paths(d.hidden)}" class="hidden"/>`;
   s+=`<path d="${paths(d.solid)}" class="solid"/></g>`;
   if(settings.dims&&d.bounds){const [a,b,c,e]=d.bounds;s+=dimension([r.x+a*3,r.y+324],[r.x+c*3,r.y+324],'≈ '+(c-a).toFixed(1),true)+line(r.x+a*3,r.y+e*3,r.x+a*3,r.y+329,'dim')+line(r.x+c*3,r.y+e*3,r.x+c*3,r.y+329,'dim');s+=dimension([r.x-23,r.y+b*3],[r.x-23,r.y+e*3],'≈ '+(e-b).toFixed(1),false)+line(r.x-28,r.y+b*3,r.x+a*3,r.y+b*3,'dim')+line(r.x-28,r.y+e*3,r.x+a*3,r.y+e*3,'dim');}
  }
- s+=`<line x1="34" y1="864" x2="826" y2="864" stroke="#d8e4eb" stroke-width="1"/><text x="34" y="887" style="font-size:11px;fill:#637c8e">实线：可见轮廓　虚线：不可见轮廓${settings.dims?'　尺寸：投影外包范围近似值':''}</text><text x="836" y="887" text-anchor="end" style="font-size:10px;fill:#8fa6b5">© 2026 zeder11 · github.com/zeder11/three-view-workbench</text><text x="34" y="908" style="font-size:10px;fill:#637c8e">模型域 0–100 · 采样 ${drawData.V.res} × ${drawData.V.res} · 亚像素细化 / 矢量折线 · 学习辅助，请核对细小及相贯特征</text></svg>`;
+ s+=`<line x1="34" y1="864" x2="826" y2="864" stroke="#d8e4eb" stroke-width="1"/><text x="34" y="887" style="font-size:11px;fill:#637c8e">实线：可见轮廓　虚线：不可见轮廓${settings.dims?'　尺寸：投影外包范围近似值':''}</text><text x="836" y="887" text-anchor="end" style="font-size:10px;fill:#8fa6b5">© 2026 zeder11 · github.com/zeder11/three-view-workbench</text><text x="34" y="908" style="font-size:10px;fill:#637c8e">模型域 0–100 · 采样 ${drawData.V.res} × ${drawData.V.res} · 亚像素细化 / 矢量折线 · 学习辅助，请核对细小及相贯特征</text>${centers&&Object.values(centers).some(a=>a.length)?'<text data-center-legend="" data-i18n="off" x="34" y="923" style="font-size:10px;fill:#637c8e">'+centerLegendText()+'</text>':''}</svg>`;
  if(typeof i18nSvg==='function')s=i18nSvg(s);
  return s;
 }
 function renderSheet(){if(drawData){$('sheet').innerHTML=svgMarkup();replayDiffOverlay();if(typeof projectionRefresh==='function')projectionRefresh();}}
-function updateSheetFoldState(){const el=$('sheetfoldstate');if(!el)return;const map=[['grid','网格'],['guides','对应线'],['pointguides','定位'],['dims','尺寸'],['hidden','虚线'],['fill','填充']];const on=map.filter(a=>{const n=$(a[0]);return n&&n.checked;}).map(a=>a[1]);el.innerHTML=on.length?on.map(w=>'<span>'+w+'</span>').join('<span class="foldsep"> · </span>'):'<span>全部关闭</span>';}
-for(const k of Object.keys(settings))$(k).onchange=()=>{settings[k]=$(k).checked;renderSheet();updateSheetFoldState();};
+function updateSheetFoldState(){const el=$('sheetfoldstate');if(!el)return;const map=[['grid','网格'],['guides','对应线'],['pointguides','定位'],['dims','尺寸'],['hidden','虚线'],['fill','填充'],['centerlines','中心线']];const on=map.filter(a=>{const n=$(a[0]);return n&&n.checked;}).map(a=>a[1]);el.innerHTML=on.length?on.map(w=>'<span>'+w+'</span>').join('<span class="foldsep"> · </span>'):'<span>全部关闭</span>';}
+for(const k of Object.keys(settings))$(k).onchange=()=>{settings[k]=$(k).checked;if(k==='centerlines')try{localStorage.setItem(centerPref,settings[k]?'1':'0');}catch(e){}renderSheet();updateSheetFoldState();};
 (function(){const fold=$('sheetfold');if(!fold)return;updateSheetFoldState();fold.addEventListener('change',updateSheetFoldState);const key='orthographic-sheetfold-v1';try{fold.open=localStorage.getItem(key)==='1';}catch(e){}fold.addEventListener('toggle',()=>{try{localStorage.setItem(key,fold.open?'1':'0');}catch(e){}});})();
 $('svg').onclick=()=>{if(!ready)return;try{download(new Blob([svgMarkup()],{type:'image/svg+xml;charset=utf-8'}),'三视图_矢量.svg');toast(bi('已导出真实 SVG 路径；可用浏览器或矢量软件打开。','SVG exported. Open it in a browser or vector editor.'));}catch(e){fail(bi('导出失败：'+e.message+'。图纸还在，可以再试一次。','Export failed: '+e.message+' The sheet is still here; try again.'));}};
 $('png').onclick=async()=>{
@@ -1668,7 +1796,21 @@ function FeatureLines(K,shapes,options={}){
  const accelerated=options.accelerate!==false,stats={pairs:0,skippedPairs:0,occlusionRays:0,rayShapes:0,skippedRayShapes:0,occlusionCacheHits:0};
  const domain=K.prepare([{type:'box',op:'add',cx:50,cy:50,cz:50,sx:100,sy:100,sz:100,rot:0}])[0];
  function basis(n){const u=unit(cross(n,Math.abs(n[2])<.8?[0,0,1]:[0,1,0]));return [u,cross(n,u)];}
- function put(s,owner,id,smooth=null){s.owners=[owner];s.smoothGroups=[smooth];s.ownerNormals=[s.n||null];const old=unique.get(id);if(old){old.owners.push(owner);old.smoothGroups.push(smooth);old.ownerNormals.push(s.n||null);return old;}unique.set(id,s);surfaces.push(s);return s;}
+ function put(s,owner,id,smooth=null,arcPatch=null){
+  s.owners=[owner];s.smoothGroups=[smooth];s.ownerNormals=[s.n||null];s.arcPatches=[arcPatch];
+  const bucket=unique.get(id)||[];
+  // Rounded drawing IDs are useful for sampled projections, but are not a
+  // promise of identical analytic cylinders. A tiny centre offset can turn a
+  // tangent generator into a fake intersection on the neighbouring arc.
+  const old=bucket.find(t=>{
+   if(s.kind!=='cylinder'||t.kind!=='cylinder')return true;
+   const d=sub(t.center,s.center),radial=sub(d,mul(s.axis,dot(d,s.axis)));
+   const tol=64*Number.EPSILON*Math.max(1,t.r,s.r,Math.hypot(...s.center),Math.hypot(...t.center));
+   return Math.abs(s.r-t.r)<=tol&&Math.hypot(...radial)<=tol&&Math.hypot(...cross(s.axis,t.axis))<=64*Number.EPSILON;
+  });
+  if(old){old.owners.push(owner);old.smoothGroups.push(smooth);old.ownerNormals.push(s.n||null);old.arcPatches.push(arcPatch);return old;}
+  bucket.push(s);unique.set(id,bucket);surfaces.push(s);return s;
+ }
  function world(sh,p){return add(sh.center,[0,1,2].map(k=>sh.basis.reduce((v,b,j)=>v+b[k]*p[j],0)));}
  function ownerSurfaces(sh,prefix){
   const out=[];
@@ -1689,7 +1831,8 @@ function FeatureLines(K,shapes,options={}){
      s.map=(t,z)=>add(center,add(add(mul(u,e.r*Math.cos(t)),mul(v,e.r*Math.sin(t))),mul(axis,z)));
      s.f=q=>{const t=sub(q,center);return (Math.hypot(dot(t,u),dot(t,v))-e.r)*sign;};
      s.normal=q=>{const t=sub(q,center),x=dot(t,u),y=dot(t,v),r=Math.hypot(x,y)||1;return mul(add(mul(u,x/r),mul(v,y/r)),sign);};
-     put(s,sh,prefix+sh.surfaces[i+2]);out.push(s);
+     const onPatch=q=>{const p=sub(q,center),turn=2*Math.PI,angle=Math.atan2(dot(p,v),dot(p,u)),rel=((Math.sign(e.angle)*(angle-e.start)%turn)+turn)%turn;return rel<=Math.abs(e.angle)+1e-8||rel>=turn-1e-8;};
+     put(s,sh,prefix+sh.surfaces[i+2],null,onPatch);out.push(s);
     }
    });sh.featureSurfaces=out;return;
   }
@@ -1708,7 +1851,7 @@ function FeatureLines(K,shapes,options={}){
  prep.forEach(sh=>ownerSurfaces(sh,'s'));ownerSurfaces(domain,'domain');
  const overlaps=(a,b)=>a.every((v,k)=>k>=3||v<=b[k+3]+.00002&&a[k+3]>=b[k]-.00002);
  for(const s of surfaces)s.bounds=[0,1,2,3,4,5].map(k=>(k<3?Math.min:Math.max)(...s.owners.map(sh=>sh.bounds[k])));
- function patch(s,p){return s.owners.some(sh=>(sh.profileData?K.profileField(sh,p)<.00002:sh.featureSurfaces.every(v=>v.f(p)<.00002)));}
+ function patch(s,p){return s.owners.some((sh,i)=>(!s.arcPatches[i]||s.arcPatches[i](p))&&(sh.profileData?K.profileField(sh,p)<.00002:sh.featureSurfaces.every(v=>v.f(p)<.00002)));}
   const inside=p=>accelerated&&options.material!==false?K.modelInside(prep,p):K.modelField(prep,p)<0;
  // Opposite faces of two contiguous pieces in the same draft operation are
  // triangulation partitions, not exposed patches. At an arc vertex they can
@@ -1782,7 +1925,7 @@ function FeatureLines(K,shapes,options={}){
   if(hi<=lo)return;
   let ranges=[[lo,hi]];
   // 先精确裁剪有限面，避免很短的棱恰好落在两个均匀采样点之间。
-  if(a.kind==='plane'&&b.kind==='plane'&&a.owners&&b.owners){ranges=[];for(const x of a.owners)for(const y of b.owners){for(const u of K.intersections(x,p,d))for(const v of K.intersections(y,p,d)){const l=Math.max(lo,u[0],v[0]),h=Math.min(hi,u[1],v[1]);if(h>l+1e-8)ranges.push([l,h]);}}ranges.sort((x,y)=>x[0]-y[0]);const merged=[];for(const r of ranges){const last=merged.at(-1);if(last&&r[0]<=last[1]+1e-8)last[1]=Math.max(last[1],r[1]);else merged.push(r);}ranges=merged;}
+  if(a.kind==='plane'&&b.kind==='plane'&&a.owners&&b.owners){ranges=[];for(const x of a.owners)for(const y of b.owners){for(const u of K.clipEdge(x,p,d))for(const v of K.clipEdge(y,p,d)){const l=Math.max(lo,u[0],v[0]),h=Math.min(hi,u[1],v[1]);if(h>l+1e-8)ranges.push([l,h]);}}ranges.sort((x,y)=>x[0]-y[0]);const merged=[];for(const r of ranges){const last=merged.at(-1);if(last&&r[0]<=last[1]+1e-8)last[1]=Math.max(last[1],r[1]);else merged.push(r);}ranges=merged;}
   for(const [l,h]of ranges)curve(out,t=>add(p,mul(d,l+(h-l)*t)),Math.max(1,Math.ceil((h-l)/.6)),a,b,test);
  }
  function circle(out,c,u,v,r,a,b,test){if(r<1e-6)return;curve(out,t=>add(c,add(mul(u,r*Math.cos(t*2*Math.PI)),mul(v,r*Math.sin(t*2*Math.PI)))),Math.max(96,Math.ceil(2*Math.PI*r/.6)),a,b,test);}
@@ -3890,6 +4033,7 @@ const i18nNorm=s=>String(s).replace(/\s+/g,' ').trim();
 Object.assign(I18N_UI,{"圆弧截面示例":"Arc section example","局部缩径示例":"Local reduction example","文字 / 图片 → 可编辑模型":"Text / image → editable model","类型":"Type","运算":"Operation","轴":"Axis","尺寸 / 旋转（模型单位）":"Size / rotation (model units)","中心":"Centre","读数":"Reading","值":"Value","单位":"Unit","来源":"Source","换算到模型单位":"In model units","模型采用的假设 / 本工具的调整":"Assumptions / workbench adjustments","不支持 / 没做的特征":"Unsupported / omitted features","应用前请先确认这几件事":"Review before applying","我核对了上面的理解、尺寸和假设，可以应用":"I reviewed the interpretation, dimensions and assumptions","这一版哪里不对？":"What should change in this result?","按说明修正":"Revise from instructions","会带着上一版的图片、模型和你的说明再问一次 AI；结果同样要你核对、确认后才会应用。":"Sends the previous image, model and your instructions to AI again. Review the new result before applying.","丢弃这份结果":"Discard result","应用后就是一次普通编辑：「撤销」或 Ctrl+Z 可以退回，之后也能继续拖滑杆改参数。":"Applying is one ordinary edit. Undo or Ctrl+Z restores the previous model; parameters remain editable."});
 Object.assign(I18N_FRAG,{"单位 ":"Unit "," · 置信度 ":" · confidence "," · 用时 ":" · time ","自动缩放 ×":"Uniform scale ×","（原尺寸跨度 ":" (source span "," 工作单位，并居中到 (50,50,50)）":" workbench units, centred at (50,50,50))","识别出 ":"Generated ","（从上到下运算）":" (evaluated from top to bottom)","长 ":"Length "," × 宽 ":" × width "," × 高 ":" × height ","半径 ":"Radius "," · 高 ":" · height ","从图上读到的数字（":"Readings ("," 个）":")","AI 有 ":"AI has "," 个问题需要你确认（它先按假设建了）":" questions for review (currently built using assumptions)","AI 自己标了置信度 low":"AI reported low confidence","AI 没有给出置信度（界面上按 medium 显示）":"AI omitted confidence (shown as medium)","本机快速采样未看到实体（可能被切空，或特征太细），请核对三视图预览":"Local fast sampling found no solid; it may be empty or too thin. Check the three-view preview."});
 Object.assign(I18N_UI,{'已读取粘贴的 JSON · 请核对预览':'Pasted JSON loaded · Review the preview','已生成 · 请核对预览':'Generated · Review the preview','已按说明修正 · 请核对预览':'Revised · Review the preview','已生成 · 请核对预览（已自动重试一次）':'Generated · Review the preview (retried once)','已按说明修正 · 请核对预览（已自动重试一次）':'Revised · Review the preview (retried once)'});
+Object.assign(I18N_UI,{'中心线／对称线':'Centre / symmetry lines','中心线':'Centre lines'});
 const I18N_UI_NORM=(()=>{const m=Object.create(null);for(const k in I18N_UI)m[i18nNorm(k)]=I18N_UI[k];return m;})();
 const I18N_FRAG_KEYS=Object.keys(I18N_FRAG).sort((a,b)=>b.length-a.length);
 let I18N_RE=null;
@@ -3987,6 +4131,7 @@ const I18N_ATTR_UI={
  "起个名字，例如 3-53":"Give it a name, e.g. 3-53"
 };
 function i18nAttrNorm(s){return String(s).replace(/（/g,"(").replace(/）/g,")").replace(/：/g,":").replace(/，/g,",").replace(/\u3000/g," ").replace(/\s+/g," ").trim();}
+I18N_ATTR_UI['按当前投影显示圆孔轴线和视图对称线，导出时保留']='Show bore axes and view symmetry lines; include them in exports';
 const I18N_ATTR_NORM={};
 for(const k of Object.keys(I18N_ATTR_UI))I18N_ATTR_NORM[i18nAttrNorm(k)]=I18N_ATTR_UI[k];
 function i18nAttrTx(s){
@@ -4072,6 +4217,7 @@ function i18nSet(lang){
  const b=$('langbtn');
  if(b){b.textContent=LANG==='en'?'中文':'EN';b.title=LANG==='en'?'Switch back to Chinese':'Switch to English';b.setAttribute('aria-label',b.title);}
  i18nApply(document.body);syncStepLabels();
+ const centerLegend=$('sheet').querySelector('[data-center-legend]');if(centerLegend)centerLegend.textContent=centerLegendText();
  if($('draftdialog').open)draftRefresh();
  return LANG;
 }
@@ -5065,7 +5211,15 @@ Object.assign(I18N_UI,{"完成编辑后更新三视图和立体，可撤销。�
 
 i18nBoot();
 if(window.__markBootAnnotations){try{markRestore(window.__markBootAnnotations);}catch(e){/* 标注只用于辅助，恢复失败不影响模型。 */}window.__markBootAnnotations=null;}
-</script><script>
+</script><style>
+#sectionfullcontrols,#sectionfullactions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#sectionfullcontrols{border-top:1px solid #dbe6eb;padding-top:7px;font-size:12px}
+#sectionfullcontrols label{display:inline-flex;gap:7px;align-items:center}
+#sectionfullcontrols select{padding:5px;min-height:32px}
+#sectionfullactions{margin:8px 0}
+#sectionfullfigure svg{display:block;width:100%;height:auto;border:1px solid #d8e4eb}
+#sectionfullcontrols[hidden],#sectionfullfigure[hidden],#sectionfullactions[hidden],#sectionpanes[hidden],#sectionreverse[hidden]{display:none!important}
+</style><script>
 /* Section scans use final CSG intervals, not display triangles or cutter masks. */
 function SectionSliceKit(K){
  const frame=(view,p,v)=>view==='V'?[[0,p,100-v],[1,0,0]]:view==='H'?[[0,100-v,p],[1,0,0]]:[[p,100,100-v],[0,-1,0]];
@@ -5082,9 +5236,83 @@ function SectionLocatorKit(view,p){
  return view==='V'?{H:[0,100-p,100,100-p],W:[100-p,0,100-p,100]}:view==='W'?{V:[p,0,p,100],H:[p,0,p,100]}:{V:[0,100-p,100,100-p],W:[0,100-p,100,100-p]};
 }
 
+/* A full section uses the original projection engine on a temporary half-solid.
+   Hatching is clipped separately to material actually crossed by the plane. */
+function FullSectionKit(K, features){
+ const base={V:{depth:1,sign:1,ref:'H',u:0,us:1,v:2,vs:-1},W:{depth:0,sign:1,ref:'V',u:1,us:-1,v:2,vs:-1},H:{depth:2,sign:-1,ref:'V',u:0,us:1,v:1,vs:-1}};
+ function frame(view,reverse=false){
+  const f=base[view];if(!f)throw Error('Invalid section direction');
+  const sign=f.sign*(reverse?-1:1),us=f.us*(reverse?-1:1);
+  const dir=[0,0,0];dir[f.depth]=-sign;
+  const point=p=>[us>0?p[f.u]:100-p[f.u],f.vs>0?p[f.v]:100-p[f.v]];
+  const world=(x,y,p)=>{const q=[];q[f.depth]=p;q[f.u]=us>0?x:100-x;q[f.v]=f.vs>0?y:100-y;return q;};
+  return {...f,sign,dir,point,world};
+ }
+ function plane(view,p,reverse){
+  const {depth,dir}=frame(view,reverse),s={type:'plane',op:'sub',cx:50,cy:50,cz:50,rot:0,rx:0,ry:0};
+  s[['cx','cy','cz'][depth]]=p;
+  // The kernel subtracts the +local-W half-space.
+  if(depth===0)s.ry=dir[0]*90;
+  else if(depth===1)s.rx=-dir[1]*90;
+  else if(dir[2]<0)s.rx=180;
+  return s;
+ }
+ function drawing(data,f,position){
+  const cut=[],rear=[],hidden=[],tol=.0002;
+  function unpack(buf,seen){
+   for(let i=0;i<buf.length;i+=8){
+    const a=f.point(buf.subarray(i,i+3)),b=f.point(buf.subarray(i+3,i+6));
+    if(Math.hypot(b[0]-a[0],b[1]-a[1])<=.0001)continue;
+    const bucket=!seen?hidden:position!==undefined&&Math.abs(buf[i+f.depth]-position)<tol&&Math.abs(buf[i+3+f.depth]-position)<tol?cut:rear;
+    bucket.push([a,b]);
+   }
+  }
+  unpack(data.visible,true);if(position===undefined)unpack(data.hidden,false);
+  return {cut:K.stitch(cut,.012),rear:K.stitch(rear,.012),hidden:K.stitch(hidden,.012)};
+ }
+ function hatch(prep,f,p){
+  if(p<=0||p>=100)return [];
+  const delta=Math.min(.0001,p/2,(100-p)/2),strokes=[];
+  for(let c=1.7;c<200;c+=2.55){
+   const lo=Math.max(0,c-100),hi=Math.min(100,c),origin=f.world(0,c,p),end=f.world(1,c-1,p),d=end.map((x,i)=>x-origin[i]);
+   const sides=[p-delta,p+delta].map(q=>K.ray(prep,f.world(0,c,q),d));
+   let i=0,j=0;
+   while(i<sides[0].length&&j<sides[1].length){
+    const a=sides[0][i],b=sides[1][j],l=Math.max(lo,a[0],b[0]),r=Math.min(hi,a[1],b[1]);
+    if(r-l>.0001)strokes.push([[l,c-l],[r,c-r]]);
+    if(a[1]<b[1])i++;else j++;
+   }
+  }
+  return strokes;
+ }
+ function compute(shapes,prep,view,p,reverse=false,original=null){
+  if(!Number.isFinite(p)||p<0||p>100)throw Error('Invalid section position');
+  const f=frame(view,reverse),ref=frame(f.ref);
+  const refLines=original?{rear:original[f.ref].solid,hidden:original[f.ref].hidden}:drawing(features(K,shapes).lines(ref.dir),ref);
+  const empty=f.sign>0?p===100:p===0,noCut=f.sign>0?p===0:p===100;
+  const kept=noCut?shapes:[...shapes,plane(view,p,reverse)];
+  const d=empty||!shapes.length?{cut:[],rear:[]}:drawing(features(K,kept).lines(f.dir),f,noCut?undefined:p);
+  return {cut:d.cut,rear:d.rear,hatch:hatch(prep,f,p),ref:refLines,refView:f.ref};
+ }
+ function markers(view,p,reverse,bounds){
+  const f=frame(view,reverse),r=frame(f.ref),at=r.point(f.world(50,50,p)),along=r.point(f.world(50,50,p+f.sign)),vertical=view==='W';
+  const d=vertical?[along[0]-at[0],0]:[0,along[1]-at[1]],k=vertical?1:0;
+  // Keep arrows just outside the model where possible, in the same frame as the source view.
+  const ends=bounds?[bounds[k]-4,bounds[k+2]+4]:[8,92];
+  return ends.map(pos=>{const tip=at.slice();tip[k]=pos;return {tip,tail:tip.map((v,i)=>v-7*d[i]),d};});
+ }
+ const demo=()=>[
+  {type:'box',op:'add',cx:50,cy:50,cz:36,sx:62,sy:68,sz:42},
+  {type:'box',op:'sub',cx:50,cy:50,cz:52,sx:26,sy:75,sz:24},
+  {type:'box',op:'add',cx:50,cy:74,cz:46,sx:14,sy:15,sz:12},
+  {type:'box',op:'add',cx:35,cy:26,cz:64,sx:14,sy:14,sz:14}
+ ];
+ return {frame,plane,compute,markers,demo};
+}
+
 (function sectionViewer(){
  const wb=window.__workbench,$=id=>document.getElementById(id),t=(a,b)=>document.documentElement.lang==='en'?b:a;
- const S={view:'V',position:50,source:'model',worker:null,busy:false,pending:null,id:0,model:'',timer:null,filled:0,res:360};
+ const S={view:'V',position:50,source:'model',worker:null,busy:false,pending:null,id:0,model:'',timer:null,filled:0,res:360,mode:'slice',reverse:false,fullData:null};
  const button=document.createElement('button');button.id='sectionopen';button.type='button';button.dataset.i18n='off';$('expand3d').before(button);
  const dialog=document.createElement('dialog');dialog.id='sectiondialog';dialog.dataset.i18n='off';
  dialog.innerHTML='<div class="section-head"><h2 id="sectiontitle"></h2><button id="sectionclose"></button></div><div class="section-tools"><label><span id="sectiondirlabel"></span><select id="sectionview"><option value="V"></option><option value="W"></option><option value="H"></option></select></label><label class="section-position"><span id="sectionposlabel"></span><input id="sectionrange" type="range" min="0" max="100" step=".1" value="50"><input id="sectionnumber" type="number" min="0" max="100" step=".1" value="50"></label></div><p id="sectionlocation"></p><canvas id="sectioncanvas" width="720" height="720"></canvas><p id="sectionstatus" role="status" aria-live="polite"></p><button id="sectionretry" hidden></button><div class="section-examples"><span id="sectionexamplelabel"></span><button id="sectionblind"></button><button id="sectionthrough"></button><button id="sectionmodel"></button></div><p id="sectionnote"></p>';
@@ -5101,22 +5329,24 @@ function SectionLocatorKit(view,p){
   if(!dialog.open)return;
   const lines=SectionLocatorKit(S.view,S.position),views=S.compare?S.compare.views:wb.getViews(),replay=wb.getLearning().replayIndex!==null,ready=wb.getState().ready;
   const svgRef=$('sheet').querySelector('svg'),lang=document.documentElement.lang;
-  const next=[S.view,S.position,S.source,views,replay,ready,svgRef,lang],cached=S.locatorCache;
+  const next=[S.view,S.position,S.source,views,replay,ready,svgRef,lang,S.mode,S.reverse,S.fullData],cached=S.locatorCache;
   if(cached&&next.every((v,i)=>v===cached[i])&&(S.source!=='model'||replay||!ready||svgRef?.querySelector('[data-section-locator]')))return;
   S.locatorCache=next;
-  const source=S.compare?t('候选A参照；A/B共用坐标','Candidate A reference; shared A/B coordinates'):S.source==='model'?t('当前模型','Current model'):t('示例坐标示意','Example coordinates');
+  const source=S.compare?t('候选A参照；A/B共用坐标','Candidate A reference; shared A/B coordinates'):S.source==='model'?t('当前模型','Current model'):t('示例坐标','Example coordinates');
   const path=ps=>(ps||[]).map(line=>line.map((p,i)=>(i?'L':'M')+p[0]+','+p[1]).join(' ')).join(' ');
-  const marks=q=>q?'<line data-section-position x1="'+q[0]+'" y1="'+q[1]+'" x2="'+q[2]+'" y2="'+q[3]+'" stroke="#bd673d" stroke-width="1.2" stroke-dasharray="4 1.5"/><circle cx="'+q[0]+'" cy="'+q[1]+'" r="1.6" fill="#bd673d"/><circle cx="'+q[2]+'" cy="'+q[3]+'" r="1.6" fill="#bd673d"/>':'';
-  locator.innerHTML='<p>'+t('剖切位置 · 橙线随滑块移动','Cut position · orange lines follow the slider')+' · '+source+(replay?t('（回放中仅示意坐标）',' (coordinate guide during replay)'):'')+'</p><div class="section-locator-views">'+['V','W','H'].map(v=>{
-   const d=(S.source==='model'||S.compare)&&!replay&&ready?views?.[v]:null,q=lines[v],name={V:t('主视图 V','Front V'),W:t('左视图 W','Left W'),H:t('俯视图 H','Top H')}[v];
-   return '<figure data-locator-view="'+v+'"><figcaption>'+name+(v===S.view?' · '+t('正对剖面','section face'):'')+'</figcaption><svg viewBox="-3 -3 106 106" role="img" aria-label="'+name+' '+t('剖切位置','cut position')+'"><rect width="100" height="100" fill="'+(v===S.view?'#eef7f9':'white')+'" stroke="'+(v===S.view?'#087c91':'#d8e4eb')+'" stroke-width=".6"/><path d="'+path(d?.hidden)+'" fill="none" stroke="#afbdc6" stroke-width=".6" stroke-dasharray="2 1.4"/><path d="'+path(d?.solid)+'" fill="none" stroke="#8195a3" stroke-width=".6"/>'+marks(q)+'</svg></figure>';
+  const primary=fullOn()?fullKit.frame(S.view,S.reverse).ref:null;
+  const primaryBounds=S.fullData?refBounds(S.fullData.ref):views?.[primary]?.bounds;
+  const marks=(q,v)=>v===primary?cutMarks(primaryBounds):q?'<line data-section-position x1="'+q[0]+'" y1="'+q[1]+'" x2="'+q[2]+'" y2="'+q[3]+'" stroke="#bd673d" stroke-width="1.2" stroke-dasharray="4 1.5"/><circle cx="'+q[0]+'" cy="'+q[1]+'" r="1.6" fill="#bd673d"/><circle cx="'+q[2]+'" cy="'+q[3]+'" r="1.6" fill="#bd673d"/>':'';
+  locator.innerHTML='<p>'+(primary?t('剖切位置 · 箭头指向观察方向','Cut location · arrows show the viewing direction'):t('剖切位置 · 橙线随滑块移动','Cut position · orange lines follow the slider'))+' · '+source+(replay?t('（回放中仅示意坐标）',' (coordinate guide during replay)'):'')+'</p><div class="section-locator-views">'+['V','W','H'].map(v=>{
+   const d=v===primary&&S.fullData?{solid:S.fullData.ref.rear,hidden:S.fullData.ref.hidden}:(S.source==='model'||S.compare)&&!replay&&ready?views?.[v]:null,q=lines[v],name={V:t('主视图 V','Front V'),W:t('左视图 W','Left W'),H:t('俯视图 H','Top H')}[v];
+   return '<figure data-locator-view="'+v+'"><figcaption>'+name+(v===S.view?' · '+t('正对剖面','section face'):'')+'</figcaption><svg viewBox="'+(v===primary?'-14 -14 128 128':'-3 -3 106 106')+'" role="img" aria-label="'+name+' '+t('剖切位置','cut position')+'"><rect width="100" height="100" fill="'+(v===S.view?'#eef7f9':'white')+'" stroke="'+(v===S.view?'#087c91':'#d8e4eb')+'" stroke-width=".6"/><path d="'+path(d?.hidden)+'" fill="none" stroke="#afbdc6" stroke-width=".6" stroke-dasharray="2 1.4"/><path d="'+path(d?.solid)+'" fill="none" stroke="#8195a3" stroke-width=".6"/>'+marks(q,v)+'</svg></figure>';
   }).join('')+'</div>';
   document.querySelectorAll('#sheet [data-section-locator]').forEach(e=>e.remove());
   if(S.source!=='model'||replay||!ready)return;
   const svg=$('sheet').querySelector('svg');if(!svg)return;
   const g=document.createElementNS('http://www.w3.org/2000/svg','g');g.dataset.sectionLocator='';g.setAttribute('pointer-events','none');g.setAttribute('aria-hidden','true');
   const rects={V:[70,80],W:[490,80],H:[70,500]};
-  g.innerHTML=Object.entries(lines).map(([v,q])=>'<svg x="'+rects[v][0]+'" y="'+rects[v][1]+'" width="300" height="300" viewBox="0 0 100 100" overflow="visible">'+marks(q)+'</svg>').join('');svg.append(g);
+  g.innerHTML=Object.entries(lines).map(([v,q])=>'<svg x="'+rects[v][0]+'" y="'+rects[v][1]+'" width="300" height="300" viewBox="0 0 100 100" overflow="visible">'+marks(q,v)+'</svg>').join('');svg.append(g);
  }
  new MutationObserver(()=>{if(dialog.open)locate();}).observe($('sheet'),{childList:true});
 
@@ -5125,6 +5355,88 @@ function SectionLocatorKit(view,p){
  const aFigure=document.createElement('figure'),aCaption=document.createElement('figcaption');aCaption.id='sectioncaptiona';aFigure.append(aCaption);
  const mainCanvas=$('sectioncanvas');mainCanvas.before(panes);aFigure.append(mainCanvas);panes.append(aFigure);
  const bFigure=document.createElement('figure');bFigure.id='sectionfigureb';bFigure.innerHTML='<figcaption id="sectioncaptionb"></figcaption><canvas id="sectioncanvasb" width="720" height="720"></canvas>';panes.append(bFigure);
+ // Full section controls live in the same dialog as the existing slice preview.
+ const fullKit=FullSectionKit(wb.kernel,FeatureLines);
+ const fullControls=document.createElement('div');fullControls.id='sectionfullcontrols';
+ fullControls.innerHTML='<label><span id="sectionmodelabel"></span><select id="sectionmode"><option value="slice"></option><option value="full"></option></select></label><button id="sectionreverse" type="button" hidden></button>';
+ controlbar.append(fullControls);
+ const fullFigure=document.createElement('div');fullFigure.id='sectionfullfigure';fullFigure.hidden=true;
+ panes.after(fullFigure);
+ const fullActions=document.createElement('div');fullActions.id='sectionfullactions';fullActions.hidden=true;
+ fullActions.innerHTML='<button type="button" id="sectionfullsvg" disabled>SVG</button><button type="button" id="sectionfullpng" disabled>PNG</button>';
+ legend.after(fullActions);
+ const comparisonExample=document.createElement('button');comparisonExample.id='sectioncontrast';comparisonExample.type='button';
+ $('sectionmodel').before(comparisonExample);
+ const fullOn=()=>S.mode==='full'&&!S.compare;
+ const num=n=>+n.toFixed(3);
+ const strokes=lines=>lines.map(path=>path.map(([x,y],i)=>(i?'L':'M')+num(x)+','+num(y)).join(' ')).join(' ');
+ function refBounds(ref){
+  const points=ref.rear.flat();if(!points.length)return null;
+  return points.reduce((b,[x,y])=>[Math.min(x,b[0]),Math.min(y,b[1]),Math.max(x,b[2]),Math.max(y,b[3])],[Infinity,Infinity,-Infinity,-Infinity]);
+ }
+ function cutMarks(bounds){
+  const marks=fullKit.markers(S.view,S.position,S.reverse,bounds),[a,b]=marks;
+  const line=(from,to)=>'M'+from.map(num).join(',')+' L'+to.map(num).join(',');
+  return '<g data-section-aa="" fill="#182b39" stroke="#182b39"><path d="'+line(a.tip,b.tip)+'" stroke-width=".26" stroke-dasharray="4 1 .65 1" fill="none"/>'+marks.map(({tip,tail,d},i)=>{
+   const v=[-d[1],d[0]],n=i?1:-1;
+   const arrow=[tip,tip.map((x,j)=>x-2.6*d[j]+.85*v[j]),tip.map((x,j)=>x-2.6*d[j]-.85*v[j])];
+   const l=tip.map((x,j)=>x-6*d[j]+3.4*n*Math.abs(v[j]));
+   return '<path data-section-arrow="'+i+'" d="'+line(tail,tip)+'" stroke-width=".6"/><polygon points="'+arrow.map(p=>p.map(num).join(',')).join(' ')+'" stroke="none"/><text x="'+num(l[0])+'" y="'+num(l[1])+'" style="font:3.8px sans-serif;fill:#182b39" stroke="none" text-anchor="middle" dominant-baseline="central">A</text>';
+  }).join('')+'</g>';
+ }
+ function svgForFull(data){
+  const viewNames={V:t('主视图','Front view'),H:t('俯视图','Top view'),W:t('左视图','Left view')};
+  const f=fullKit.frame(S.view,S.reverse),direction=(f.sign>0?'+':'−')+'XYZ'[f.depth];
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="512" viewBox="0 0 900 512" role="img" aria-label="A–A">'+
+   '<title>A–A '+t('全剖视图','Full section')+'</title><rect width="900" height="512" fill="#fff"/>'+
+   '<g><text x="30" y="29" style="font:18px sans-serif;fill:#182b39">'+t('剖切位置 · ','Cut location · ')+viewNames[data.refView]+'</text><text x="470" y="29" style="font:18px sans-serif;fill:#182b39">A–A · '+t('全剖视图','Full section')+'</text></g>'+
+   '<g fill="none" stroke="#d8e4eb"><rect x="30" y="43" width="400" height="408"/><rect x="470" y="43" width="400" height="408"/></g>'+
+   '<g transform="translate(65 82) scale(3.3)" fill="none" stroke="#182b39"><path data-section-reference-hidden="" d="'+strokes(data.ref.hidden)+'" stroke-width=".27" stroke-dasharray="1.65 1"/><path data-section-reference="" d="'+strokes(data.ref.rear)+'" stroke-width=".48"/>'+cutMarks(refBounds(data.ref))+'</g>'+
+   '<g transform="translate(505 82) scale(3.3)" fill="none" stroke="#182b39" stroke-linecap="round" stroke-linejoin="round"><path data-section-hatch="" d="'+strokes(data.hatch)+'" stroke-width=".19"/><path data-section-rear="" d="'+strokes(data.rear)+'" stroke-width=".48"/><path data-section-cut="" d="'+strokes(data.cut)+'" stroke-width=".48"/></g>'+
+   '<g><text x="30" y="479" style="font:13px sans-serif;fill:#405b6c">'+t('沿 ','Look along ')+direction+' · '+'XYZ'[f.depth]+' = '+num(S.position)+'</text><text x="470" y="479" style="font:13px sans-serif;fill:#405b6c">'+t('斜线：剖到的材料 · 实线：可见轮廓','Hatch: cut material · Solid: visible edges')+'</text></g></svg>';
+ }
+ function fullText(){
+  const on=fullOn(),f=fullKit.frame(S.view,S.reverse);
+  fullControls.hidden=!!S.compare;fullFigure.hidden=!on;fullActions.hidden=!on;panes.hidden=on;locator.hidden=on;
+  $('sectionmode').value=on?'full':'slice';
+  $('sectionmodelabel').textContent=t('显示','Show');
+  $('sectionmode').options[0].textContent=t('只看断面','Cut face only');
+  $('sectionmode').options[1].textContent=t('全剖视图','Full section');
+  $('sectionreverse').hidden=!on;
+  $('sectionreverse').textContent=t('反转方向','Reverse direction')+' · '+(f.sign>0?'+':'−')+'XYZ'[f.depth];
+  comparisonExample.textContent=t('断面与全剖示例','Cut face vs full section');
+  comparisonExample.setAttribute('aria-pressed',String(S.source==='contrast'));
+  $('sectionfullsvg').textContent=t('导出 A–A SVG','Export A–A SVG');
+  $('sectionfullpng').textContent=t('导出 PNG','Export PNG');
+  if(on){
+   $('sectionlegend').textContent=t('剖到的材料画斜线；切面后方可见的边画实线。','Hatching shows cut material; visible edges behind the cut are solid.');
+   $('sectionnote').textContent=t('单个平面，沿三个基本方向剖切。图纸坐标采用模型单位；细小相贯和薄壁仍需对照核对。','One plane along a principal direction. Drawing coordinates use model units; check small intersections and thin walls.');
+   if(S.fullData)fullFigure.innerHTML=svgForFull(S.fullData);
+  }
+ }
+ function setFullResult(data){
+  S.fullData=data;fullFigure.innerHTML=data?svgForFull(data):'';
+  $('sectionfullsvg').disabled=$('sectionfullpng').disabled=!data||!(data.cut.length||data.rear.length)||S.busy;
+ }
+ function fullStatus(){return S.fullData?.hatch.length?t('A–A 全剖视图已更新','A–A full section updated'):S.fullData?.rear.length||S.fullData?.cut.length?t('没有剖面线；已显示剩余的可见轮廓','No hatching; showing the remaining visible edges'):t('当前观察方向没有剩余材料','No remaining material in this direction');}
+ $('sectionmode').onchange=e=>{S.mode=e.target.value;refresh();};
+ $('sectionreverse').onclick=()=>{S.reverse=!S.reverse;refresh();};
+ comparisonExample.onclick=()=>{S.source='contrast';S.view='V';S.position=50;S.reverse=false;$('sectionview').value='V';$('sectionrange').value=$('sectionnumber').value=50;refresh();};
+ const exportable=()=>dialog.open&&fullOn()&&S.fullData&&!S.busy&&S.source!=='compare'&&(S.source!=='model'||JSON.stringify(wb.getShapes())===S.model);
+ $('sectionfullsvg').onclick=()=>{if(exportable())download(new Blob([svgForFull(S.fullData)],{type:'image/svg+xml'}),'A-A-'+t('全剖视图','full-section')+'.svg');};
+ $('sectionfullpng').onclick=async()=>{
+  if(!exportable())return;
+  const id=S.id,url=URL.createObjectURL(new Blob([svgForFull(S.fullData)],{type:'image/svg+xml'}));
+  try{
+   const img=new Image();img.src=url;await img.decode();
+   const canvas=document.createElement('canvas');canvas.width=1800;canvas.height=1024;
+   canvas.getContext('2d').drawImage(img,0,0,1800,1024);
+   const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+   if(!blob)throw Error('PNG');
+   if(id===S.id&&exportable())download(blob,'A-A-'+t('全剖视图','full-section')+'.png');
+  }catch(e){if(id===S.id&&dialog.open)toast(t('PNG 导出失败，可重试或导出 SVG。','PNG export failed. Retry or export SVG.'));}
+  finally{URL.revokeObjectURL(url);}
+ };
  function pairLayout(){
   const pair=S.compare;dialog.classList.toggle('section-pair',!!pair);panes.classList.toggle('section-panes-pair',!!pair);bFigure.hidden=!pair;aCaption.hidden=!pair;
   if(pair){$('sectioncaptiona').textContent='A · '+t('方案 ','Construction ')+pair.labels[0];$('sectioncaptionb').textContent='B · '+t('方案 ','Construction ')+pair.labels[1];}
@@ -5159,10 +5471,10 @@ function SectionLocatorKit(view,p){
   $('sectionexamplelabel').textContent=t('对照示例（仅预览）：','Compare examples (preview only):');$('sectionblind').textContent=t('盲孔','Blind hole');$('sectionthrough').textContent=t('通孔','Through hole');$('sectionmodel').textContent=t('我的模型','My model');
   $('sectionretry').textContent=t('重试剖面','Retry section');$('sectionnote').textContent=t('斜线：剖到的材料；留白：孔槽或实体外部。使用最终模型、模型坐标与等比例采样，预览不修改作业。薄壁可能小于采样间距；这是内部观察剖面。','Hatching: cut material. White: voids or outside the solid. Uses the final model, model coordinates and equal-scale sampling; your work is unchanged. Thin walls may be smaller than the sampling interval. This is an internal section preview.');
   if(S.compare)$('sectionnote').textContent=t('A/B分别按原模型采用对应候选后剖切，共用方向和坐标。斜线为材料、留白为孔槽或外部；预览不改作业。本层相同不表示整个实体相同，薄壁受采样限制。','A/B section the original model with each respective candidate applied, using one direction and coordinate. Hatching is material; white is void or outside. Your work is unchanged. Equal sections at one plane do not imply identical solids; thin walls remain sampling-limited.');
-  $('sectionlocation').textContent=(S.compare?t('候选A / B · 同方向同位置','Candidates A / B · shared plane'):S.source==='model'?t('最终模型','Final model'):S.source==='blind'?t('盲孔示例 · 底部留有材料','Blind-hole example · material remains below'):t('通孔示例 · 孔穿过底面','Through-hole example · hole reaches the bottom'))+' · '+axis+' = '+Number(S.position.toFixed(1))+' · '+t('横向/纵向：','Horizontal / vertical: ')+({V:'X / Z',W:'Y(-) / Z',H:'X / Y(-)'}[S.view]);
-  for(const key of ['blind','through','model'])$('section'+key).setAttribute('aria-pressed',String(S.source===key));if(dialog.open)locate();
+  $('sectionlocation').textContent=(S.compare?t('候选A / B · 同方向同位置','Candidates A / B · shared plane'):S.source==='model'?t('最终模型','Final model'):S.source==='contrast'?t('台阶与凹槽示例','Step and recess example'):S.source==='blind'?t('盲孔示例 · 底部留有材料','Blind-hole example · material remains below'):t('通孔示例 · 孔穿过底面','Through-hole example · hole reaches the bottom'))+' · '+axis+' = '+Number(S.position.toFixed(1))+' · '+t('横向/纵向：','Horizontal / vertical: ')+((fullOn()&&S.reverse?{V:'X(-) / Z',W:'Y / Z',H:'X(-) / Y(-)'}:{V:'X / Z',W:'Y(-) / Z',H:'X / Y(-)'})[S.view]);
+  for(const key of ['blind','through','model'])$('section'+key).setAttribute('aria-pressed',String(S.source===key));fullText();if(dialog.open)locate();
  }
- function stop(){clearLocator();if(S.worker)S.worker.terminate();S.worker=null;S.pending=null;S.busy=false;S.id++;clearInterval(S.timer);S.timer=null;}
+ function stop(){clearLocator();setFullResult(null);if(S.worker)S.worker.terminate();S.worker=null;S.pending=null;S.busy=false;S.id++;clearInterval(S.timer);S.timer=null;}
  function draw(rows,canvas=$('sectioncanvas')){
   const n=rows.length,mask=new Uint8Array(n*n);S.filled=0;
   for(let y=0;y<n;y++)for(const [a,b]of rows[y])for(let x=Math.max(0,Math.ceil(a*n/100-.5));x<Math.min(n,Math.ceil(b*n/100-.5));x++){mask[y*n+x]=1;S.filled++;}
@@ -5174,23 +5486,32 @@ function SectionLocatorKit(view,p){
   }
   const off=document.createElement('canvas');off.width=off.height=n;off.getContext('2d').putImageData(img,0,0);ctx.imageSmoothingEnabled=false;ctx.clearRect(0,0,720,720);ctx.drawImage(off,0,0,720,720);return mask;
  }
+ function sectionWorker(){
+  const K=GeometryKernel(),kit=SectionSliceKit(K),full=FullSectionKit(K,FeatureLines);let key='',keyB='',prep,prepB,original=null;
+  self.onmessage=e=>{const q=e.data;try{
+   const next=JSON.stringify(q.shapes);if(next!==key){prep=K.prepare(q.shapes);original=null;key=next;}
+   if(q.full){original||=OrthographicLines(K,q.shapes,K.prepare(q.shapes),160);self.postMessage({id:q.id,full:full.compute(q.shapes,prep,q.view,q.position,q.reverse,original)});return;}
+   let rowsB=null;if(q.shapesB){const b=JSON.stringify(q.shapesB);if(b!==keyB){prepB=K.prepare(q.shapesB);keyB=b;}rowsB=kit.scan(prepB,q.view,q.position,q.res);}
+   self.postMessage({id:q.id,rows:kit.scan(prep,q.view,q.position,q.res),rowsB});
+  }catch(err){self.postMessage({id:q.id,error:String(err.message||err)});}};
+ }
  function send(job){
   if(!S.worker){
-   const source=GeometryKernel.toString()+'\n'+SectionSliceKit.toString()+'\nconst K=GeometryKernel(),kit=SectionSliceKit(K);let key="",keyB="",prep,prepB;onmessage=e=>{const q=e.data;try{const next=JSON.stringify(q.shapes);if(next!==key){prep=K.prepare(q.shapes);key=next;}let rowsB=null;if(q.shapesB){const b=JSON.stringify(q.shapesB);if(b!==keyB){prepB=K.prepare(q.shapesB);keyB=b;}rowsB=kit.scan(prepB,q.view,q.position,q.res);}postMessage({id:q.id,rows:kit.scan(prep,q.view,q.position,q.res),rowsB});}catch(err){postMessage({id:q.id,error:String(err.message||err)});}};';
+   const source=[GeometryKernel,FeatureLines,OrthographicLines,SectionSliceKit,FullSectionKit,sectionWorker].map(f=>f.toString()).join('\n')+'\nsectionWorker();';
    const url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));try{S.worker=new Worker(url);}finally{URL.revokeObjectURL(url);}
    const worker=S.worker;S.worker.onmessage=e=>{if(!dialog.open||S.worker!==worker)return;if(S.compare&&JSON.stringify(wb.getShapes())!==S.compare.base){tick();return;}
     // A normal-model request can also become stale before the next polling tick.
-    if(S.source==='model'&&JSON.stringify(wb.getShapes())!==S.model){S.busy=false;S.pending=null;refresh();return;}S.busy=false;const q=e.data;if(S.pending){const next=S.pending;S.pending=null;send(next);return;}if(q.id!==S.id)return;if(q.error){fail(q.error);return;}const maskA=draw(q.rows);if(S.compare&&q.rowsB){const maskB=draw(q.rowsB,$('sectioncanvasb'));S.difference=maskA.reduce((n,v,i)=>n+Number(v!==maskB[i]),0);S.filled=maskA.reduce((n,v)=>n+v,0)+maskB.reduce((n,v)=>n+v,0);}else S.difference=null;$('sectionstatus').textContent=(S.filled?t('剖面已更新','Section updated'):t('此位置没有剖到材料','No material intersects this position'))+' · '+S.res+t('行采样',' scan rows')+(S.compare?(S.difference?t(' · 此位置材料不同',' · Material differs here'):t(' · 此位置未发现材料差别，不代表实体相同',' · No sampled material difference here; solids may still differ')):'');};
+    if(S.source==='model'&&JSON.stringify(wb.getShapes())!==S.model){S.busy=false;S.pending=null;refresh();return;}S.busy=false;const q=e.data;if(S.pending){const next=S.pending;S.pending=null;send(next);return;}if(q.id!==S.id)return;if(q.error){fail(q.error);return;}if(q.full){S.filled=q.full.hatch.length;setFullResult(q.full);$('sectionstatus').textContent=fullStatus();locate();return;}const maskA=draw(q.rows);if(S.compare&&q.rowsB){const maskB=draw(q.rowsB,$('sectioncanvasb'));S.difference=maskA.reduce((n,v,i)=>n+Number(v!==maskB[i]),0);S.filled=maskA.reduce((n,v)=>n+v,0)+maskB.reduce((n,v)=>n+v,0);}else S.difference=null;$('sectionstatus').textContent=(S.filled?t('剖面已更新','Section updated'):t('此位置没有剖到材料','No material intersects this position'))+' · '+S.res+t('行采样',' scan rows')+(S.compare?(S.difference?t(' · 此位置材料不同',' · Material differs here'):t(' · 此位置未发现材料差别，不代表实体相同',' · No sampled material difference here; solids may still differ')):'');};
    S.worker.onerror=()=>{if(S.worker===worker)fail(t('剖面计算失败，请重试。','Section computation failed. Retry.'));};
   }
   S.busy=true;S.worker.postMessage(job);
  }
  function fail(error){stop();$('sectioncanvas').getContext('2d').clearRect(0,0,720,720);$('sectioncanvasb').getContext('2d').clearRect(0,0,720,720);S.filled=0;$('sectionstatus').textContent=t('剖面未完成：','Section incomplete: ')+error;$('sectionretry').hidden=false;}
  function refresh(){
-  if(!dialog.open)return;text();$('sectionretry').hidden=true;$('sectionstatus').textContent=t('正在计算剖面…','Computing section…');
+  if(!dialog.open)return;setFullResult(null);text();$('sectionretry').hidden=true;$('sectionstatus').textContent=t('正在计算剖面…','Computing section…');
   $('sectioncanvas').style.opacity='.45';$('sectioncanvasb').style.opacity='.45';
-  const model=S.compare?S.compare.models[0]:S.source==='model'?wb.getShapes():SectionSliceKit(wb.kernel).example(S.source);S.model=JSON.stringify(wb.getShapes());
-  const job={id:++S.id,view:S.view,position:S.position,shapes:model,shapesB:S.compare?S.compare.models[1]:null,res:S.res};
+  const model=S.compare?S.compare.models[0]:S.source==='model'?wb.getShapes():S.source==='contrast'?fullKit.demo():SectionSliceKit(wb.kernel).example(S.source);S.model=JSON.stringify(wb.getShapes());
+  const job={id:++S.id,view:S.view,position:S.position,shapes:model,shapesB:S.compare?S.compare.models[1]:null,res:S.res,full:fullOn(),reverse:S.reverse};
   try{if(S.busy)S.pending=job;else send(job);}catch(e){fail(e.message);}
  }
  // Remove stale dimming only once the current request has actually rendered.
@@ -5201,10 +5522,10 @@ function SectionLocatorKit(view,p){
  $('sectionview').onchange=e=>{S.view=e.target.value;refresh();};
  const position=e=>{const v=Number(e.target.value);if(e.target.value===''||!Number.isFinite(v)||v<0||v>100){e.target.value=S.position;return;}S.position=v;$('sectionrange').value=$('sectionnumber').value=v;refresh();};
  $('sectionrange').oninput=position;$('sectionnumber').oninput=position;
- for(const type of ['blind','through','model'])$('section'+type).onclick=()=>{S.compare=null;S.source=type;if(type!=='model'){S.view='V';S.position=50;$('sectionview').value='V';$('sectionrange').value=$('sectionnumber').value=50;}refresh();};
+ for(const type of ['blind','through','model'])$('section'+type).onclick=()=>{S.compare=null;S.source=type;if(type!=='model'){S.reverse=false;S.view='V';S.position=50;$('sectionview').value='V';$('sectionrange').value=$('sectionnumber').value=50;}refresh();};
  $('sectionretry').onclick=()=>{refresh();if(!S.timer)S.timer=setInterval(tick,500);};
- new MutationObserver(()=>{text();if(dialog.open&&$('sectionretry').hidden)$('sectionstatus').textContent=S.busy?t('正在计算剖面…','Computing section…'):(S.filled?t('剖面已更新','Section updated'):t('此位置没有剖到材料','No material intersects this position'))+' · '+S.res+t('行采样',' scan rows')+(S.compare&&S.difference!==null&&!S.busy?(S.difference?t(' · 此位置材料不同',' · Material differs here'):t(' · 此位置未发现材料差别，不代表实体相同',' · No sampled material difference here; solids may still differ')):'');}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});text();
- wb.section={open,compare,close:()=>dialog.close(),state:()=>({open:dialog.open,busy:S.busy,view:S.view,position:S.position,source:S.source,comparison:!!S.compare,difference:S.difference??null,filled:S.filled,res:S.res})};
+ new MutationObserver(()=>{text();if(dialog.open&&$('sectionretry').hidden)$('sectionstatus').textContent=S.busy?t('正在计算剖面…','Computing section…'):fullOn()?fullStatus():(S.filled?t('剖面已更新','Section updated'):t('此位置没有剖到材料','No material intersects this position'))+' · '+S.res+t('行采样',' scan rows')+(S.compare&&S.difference!==null&&!S.busy?(S.difference?t(' · 此位置材料不同',' · Material differs here'):t(' · 此位置未发现材料差别，不代表实体相同',' · No sampled material difference here; solids may still differ')):'');}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});text();
+ wb.section={open,compare,close:()=>dialog.close(),state:()=>({open:dialog.open,busy:S.busy,view:S.view,position:S.position,source:S.source,comparison:!!S.compare,mode:fullOn()?'full':'slice',reverse:S.reverse,fullReady:!!S.fullData,difference:S.difference??null,filled:S.filled,res:S.res})};
 })();
 
 </script></body></html>

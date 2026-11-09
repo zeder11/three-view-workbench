@@ -1,6 +1,12 @@
-# Three-View Workbench · v0.5.2
+# Three-View Workbench · v0.6.0
 
 [中文说明](README.zh-CN.md) · [Open this build](https://zeder11.github.io/three-view-workbench/app/three-view-workbench.html)
+
+v0.6.0 adds an exportable A–A full section to **Inspect a section**, with three principal planes and reversible viewing direction. The existing cut face and A/B comparison remain available.
+
+This release also restores missing straight edges that end at tangent sketch arcs and removes false seams caused by using a neighbouring arc's support circle. This applies to drawings, 3D outlines, and SVG export. Existing model JSON files need no conversion.
+
+Enable **Centre / symmetry lines** in the drawing options to add centre crosses, bore axes and whole-view symmetry lines. The option is off by default. When enabled, PNG and SVG exports include the marks. Only axes supported by the current projection are drawn; ordinary corner rounds and oblique bores are excluded. Try the [bracket with multiple bores](examples/centerlines-bracket.json).
 
 v0.5.2 fixes missing hidden bore lines where a hole crosses a coplanar joint. The top drawing, SVG export and 3D hidden-line view now show the two bore lines. Existing models open without conversion.
 
@@ -24,11 +30,11 @@ Choose A/B in the candidate comparison, then select **Section A/B at the same po
 
 ## Locate the cutting plane
 
-Three locator views inside the section dialog follow its slider. The selected direction is marked as the section face; orange lines locate the plane in the other two views. Temporary sheet overlays disappear on close and never enter the model or exports. Examples and step replay use coordinate guides rather than borrowing an unrelated workpiece or intermediate silhouette.
+In cut-face mode, three locator views follow the slider. The selected direction is marked as the section face, and orange lines locate it in the other two views. Temporary sheet overlays disappear on close and are excluded from the model and ordinary three-view export. A–A has its own export.
 
 ## Inspect a section
 
-Select **Inspect a section** beside the 3D preview title. Choose a front, side or top section and move its coordinate slider or number field. Final boolean material is hatched; voids remain white. Blind/through-hole examples affect only this preview; **My model** returns to your work. Closing changes no model, history or saved file. The 360-row material scan may miss very thin features. This is an internal section preview, without full engineering section annotations, projected geometry behind the cut, or export.
+Select **Inspect a section** beside the 3D preview. Choose a front, side or top plane and set its position. **Cut face only** hatches cut material; **Full section** adds visible edges behind the plane and a source view with A–A arrows. Reverse the viewing direction or export the annotated pair as SVG or PNG. Try **Cut face vs full section** to see when the step behind the recess becomes visible. **My model** returns to your work. Neither mode changes the model or its history. This version supports one cutting plane at a time.
 
 ## Compare candidate constructions directly
 
@@ -40,7 +46,7 @@ Tool intervals use model coordinates, not measured source dimensions or proof th
 
 This batch fixes stale references and traces when opening another project, late file/image loads overwriting newer choices, false success after a rejected edit, and AI provenance persistence. Provenance is restored only when it matches the model geometry and is cleared after manual geometry changes. Seventeen targeted browser cases were added alongside core modeling, projection, file and sketch regressions, without additional confirmation steps.
 
-Model JSON may contain a cropped reference image; exported drawings do not. Geometry, projection and mesh algorithms are unchanged in this batch. Tests use local fixtures and mocked AI responses; actual homework accuracy, real provider recognition and physical-device use still need checking.
+Model JSON may contain a cropped reference image; exported drawings do not. This release adds A–A full-section views plus centre and symmetry lines, and fixes outlines that were missing near arcs. Projections are still computed by sampling; recognition accuracy was not verified against a live AI provider, so check results against your own problems.
 
 ## Satisfy multiple trace conditions together
 
