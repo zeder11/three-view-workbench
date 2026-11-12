@@ -2,3 +2,10 @@ _test/backups/
 *.log
 .DS_Store
 Thumbs.db
+
+# Internal workspaces and private materials must stay outside this public package.
+/_test/
+/题库/
+/私有评测/
+/.codex-remote-attachments/
+*.har
