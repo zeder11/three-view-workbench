@@ -68,7 +68,7 @@
       <h1>三视图工作台<span>three-view workbench · 工程制图学习工具</span></h1>
       <p class="lede">描截面、拉伸、挖槽、切一刀，用视图把立体一步步搭出来，再回头核对三视图。<b>离线单文件，双击就能用。</b></p>
     </div>
-    <p class="tag">PolyForm NC · v0.6.0</p>
+    <p class="tag">PolyForm NC · v0.6.1</p>
   </header>
 
   <div class="actions">
@@ -76,9 +76,9 @@
       <b>▶ 打开工作台</b>
       <small>直接在浏览器中使用</small>
     </a>
-    <a class="btn" href="app/three-view-workbench.html" download="three-view-workbench-v0.6.0.html">
+    <a class="btn" href="app/three-view-workbench.html" download="three-view-workbench-v0.6.1.html">
       <b>⬇ 下载离线版</b>
-      <small>单个 HTML，约 748 KB，下载后可离线打开</small>
+      <small>单个 HTML，约 854 KiB，下载后可离线打开</small>
     </a>
     <a class="btn" href="https://github.com/zeder11/three-view-workbench/archive/refs/heads/main.zip">
       <b>源码 ZIP</b>
@@ -87,7 +87,7 @@
   </div>
   <p class="hint">普通建模、导入和图纸导出可离线完成。主动使用在线 AI 建模或复核时，输入的文字、图片或复核图会按功能发送给所选服务商。</p>
 
-  <p class="hint">v0.6.0：新增 A–A 全剖视图和中心线／对称线，并修复圆弧附近的轮廓漏线。可直接打开原模型 JSON。</p>
+  <p class="hint">v0.6.1：完善全剖与中心线、AI 独立预览和复核范围，修复相切轮廓及安全保存。旧模型可直接打开。</p>
 
   <figure class="shot">
     <img src="docs/app-desktop.png" alt="三视图工作台界面截图：左侧建模步骤，中间三视图，右侧立体预览">
@@ -95,14 +95,15 @@
 
   <h2>本次更新</h2>
   <ul class="feat">
-    <li><b>A–A 全剖视图</b>：在「剖开看看」里对照断面与全剖。全剖还会画出剖切面后方可见的边，可反转方向并导出带箭头的 SVG 或 PNG。</li>
-    <li><b>中心线／对称线</b>：在「图纸辅助」开启，圆孔可标十字或孔轴，对称视图可标对称轴。标记会随图纸导出。</li>
-    <li><b>圆弧轮廓修复</b>：补回圆弧端点附近漏画的斜边，去掉相邻圆弧之间的假接缝。原来的模型 JSON 可以直接打开。</li>
+    <li><b>相切轮廓修复</b>：补回本该可见的外框，避免错画成虚线。只补真实的投影边界，普通光滑接缝仍不画。</li>
+    <li><b>全剖与中心线</b>：A–A 全剖、腰圆与全剖中心线、联动只读 3D，支持图纸导出。</li>
+    <li><b>AI 核对与保存</b>：独立预览、限定复核可改步骤、明确模型恢复，以及接口和导入安全修复。</li>
+    <li><b>旧模型直接兼容</b>：保留全剖视图、中心线和原有建模功能，不必修改半径或重新建模。</li>
   </ul>
 
   <figure class="small">
-    <img src="docs/cut-preview.png" alt="剖开看看：左边是剖切位置和方向箭头，右边是带剖面线和后方可见轮廓的 A–A 全剖视图" width="720">
-    <figcaption>左图定位 A–A，右图显示全剖。凹槽后方的台阶可见，所以画实线；剖到的材料才画斜线。</figcaption>
+    <img src="docs/cut-preview.png" alt="剖开看看：左侧定位剖切面，中间绘制带中心线的 A–A 全剖，右侧联动只读立体" width="720">
+    <figcaption>左图定位 A–A，中图显示全剖与中心线，右侧立体帮助核对切到的位置。只有剖到的材料画斜线。</figcaption>
   </figure>
 
   <figure class="small">
@@ -110,6 +111,7 @@
     <figcaption>手机上同一界面：常用入口更紧凑，三视图更早出现。</figcaption>
   </figure>
 
+  <p class="hint"><a href="README.zh-CN.md">快速开始</a> · <a href="docs/guide.zh-CN.md">完整手册</a> · <a href="RELEASE_NOTES.zh-CN.md">完整更新说明</a></p>
   <h2>能做什么</h2>
   <ul class="feat">
     <li><b>描截面拉伸</b>：三角形、梯形、L 形，直线与圆弧可逐段组合；圆弧接缝不会画成一排棱线</li>
@@ -124,7 +126,7 @@
     <li><b>轮廓显示</b>：按原始曲面生成连续轮廓，去除网格毛边；被遮挡棱用虚线显示</li>
     <li><b>3D 质量</b>：快速 42³／精细 84³／超精细 128³，调整实体细腻度；轮廓清晰度独立</li>
     <li><b>中英切换</b>：右上角一键切换，导出图纸跟着换语言</li>
-    <li><b>命名记录</b>：把模型连视角、显示模式和缩略图存进浏览器本地，起名如 <code>3-53</code>，随时回看</li>
+    <li><b>命名记录</b>：把模型连视角、显示模式和缩略图存进浏览器本地，起名如 <code>圆孔支座</code>，随时回看</li>
   </ul>
 
   <p class="note"><b>先说清楚：</b>它是采样法计算，不是精确 CAD。比一个采样格还窄的槽或薄片可能消失（可调高精度）；立体网格比三视图粗，只用来理解，想更顺可以切「超精细 · 128³」。AI 部分只给候选，需自己核对。建议当核对工具，<b>不要直接把结果当作业答案</b>。</p>
