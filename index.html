@@ -68,7 +68,7 @@
       <h1>三视图工作台<span>three-view workbench · 工程制图学习工具</span></h1>
       <p class="lede">描截面、拉伸、挖槽、切一刀，用视图把立体一步步搭出来，再回头核对三视图。<b>离线单文件，双击就能用。</b></p>
     </div>
-    <p class="tag">PolyForm NC · v0.6.1</p>
+    <p class="tag">PolyForm NC · v0.6.2</p>
   </header>
 
   <div class="actions">
@@ -76,9 +76,9 @@
       <b>▶ 打开工作台</b>
       <small>直接在浏览器中使用</small>
     </a>
-    <a class="btn" href="app/three-view-workbench.html" download="three-view-workbench-v0.6.1.html">
+    <a class="btn" href="app/three-view-workbench.html" download="three-view-workbench-v0.6.2.html">
       <b>⬇ 下载离线版</b>
-      <small>单个 HTML，约 854 KiB，下载后可离线打开</small>
+      <small>单个 HTML，约 1.06 MB，下载后可离线打开</small>
     </a>
     <a class="btn" href="https://github.com/zeder11/three-view-workbench/archive/refs/heads/main.zip">
       <b>源码 ZIP</b>
@@ -87,7 +87,7 @@
   </div>
   <p class="hint">普通建模、导入和图纸导出可离线完成。主动使用在线 AI 建模或复核时，输入的文字、图片或复核图会按功能发送给所选服务商。</p>
 
-  <p class="hint">v0.6.1：完善全剖与中心线、AI 独立预览和复核范围，修复相切轮廓及安全保存。旧模型可直接打开。</p>
+  <p class="hint">v0.6.2：AI 建模新增圆弧拱顶、圆底 U 槽和半圆环拱的参数构造；程序计算曲线，旧模型继续可用。</p>
 
   <figure class="shot">
     <img src="docs/app-desktop.png" alt="三视图工作台界面截图：左侧建模步骤，中间三视图，右侧立体预览">
@@ -95,15 +95,17 @@
 
   <h2>本次更新</h2>
   <ul class="feat">
-    <li><b>相切轮廓修复</b>：补回本该可见的外框，避免错画成虚线。只补真实的投影边界，普通光滑接缝仍不画。</li>
-    <li><b>全剖与中心线</b>：A–A 全剖、腰圆与全剖中心线、联动只读 3D，支持图纸导出。</li>
-    <li><b>AI 核对与保存</b>：独立预览、限定复核可改步骤、明确模型恢复，以及接口和导入安全修复。</li>
-    <li><b>旧模型直接兼容</b>：保留全剖视图、中心线和原有建模功能，不必修改半径或重新建模。</li>
+    <li><b>参数曲线构造</b>：圆弧拱顶、圆底 U 槽、半圆环拱由 AI 给结构尺寸、程序算圆弧与相切，减少手算弦高和相切位置的几何错误。</li>
+    <li><b>对照纠错</b>：原题与模型并排，普通文字修正也能看前后图；内置本地线图核对只比较相对线条，并明确标注哪些视图未核对。</li>
+    <li><b>本地细调 · 实验</b>：选定可改的孔槽和字段后在后台估值并联合核对三视图，可停止、可放弃，保留后仍需正常应用；不发送 AI 请求。</li>
+    <li><b>题图辅助与材料检查</b>：从清晰正投影中提取相对比例和部分直线范围；本机检查声明孔段与接触间隙，发现后可只修检查涉及的步骤。</li>
   </ul>
 
+  <p class="hint"><a href="README.zh-CN.md">快速开始</a> · <a href="RELEASE_NOTES.zh-CN.md">完整更新说明</a> · <a href="docs/stability.zh-CN.md">稳定基线与验证范围</a></p>
+
   <figure class="small">
-    <img src="docs/cut-preview.png" alt="剖开看看：左侧定位剖切面，中间绘制带中心线的 A–A 全剖，右侧联动只读立体" width="720">
-    <figcaption>左图定位 A–A，中图显示全剖与中心线，右侧立体帮助核对切到的位置。只有剖到的材料画斜线。</figcaption>
+    <img src="docs/cut-preview.png" alt="剖开看看：左边是剖切位置与观察方向，中间是带剖面线的 A–A 全剖视图，右边是联动立体" width="720">
+    <figcaption>左图定位 A–A 剖切位置，中图是全剖：剖到的材料画斜线，剖切面后方还看得见的边画实线，右侧立体帮助核对切到的位置。</figcaption>
   </figure>
 
   <figure class="small">
@@ -111,7 +113,6 @@
     <figcaption>手机上同一界面：常用入口更紧凑，三视图更早出现。</figcaption>
   </figure>
 
-  <p class="hint"><a href="README.zh-CN.md">快速开始</a> · <a href="docs/guide.zh-CN.md">完整手册</a> · <a href="RELEASE_NOTES.zh-CN.md">完整更新说明</a></p>
   <h2>能做什么</h2>
   <ul class="feat">
     <li><b>描截面拉伸</b>：三角形、梯形、L 形，直线与圆弧可逐段组合；圆弧接缝不会画成一排棱线</li>
