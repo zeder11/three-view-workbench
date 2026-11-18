@@ -1,8 +1,12 @@
-# Three-View Workbench · v0.6.2
+# Three-View Workbench · v0.7.0
 
-This release is in **stabilization**: the feature scope is fixed, reproducible defects take priority, and existing experimental labels remain. AI models require review. [Baseline and usage notes](docs/stability.md).
+[简体中文](README.zh-CN.md) · [Open the workbench](app/three-view-workbench.html) · [Release notes](RELEASE_NOTES.md) · [Build verification](docs/stability.md)
 
-**Drawing aid · pixel observations** supplies a common relative envelope and some longer line spans/endpoints from clear orthographic drawings to both built-in generation and external-AI instructions. Explicitly attached sources also provide advisory ratio checks for pasted JSON. No model edits, extra AI calls or application confirmations are added. Unreliable sources fall back to the existing flow; improved recognition accuracy is not guaranteed. [Scope and use](docs/source-observations.md).
+**New cross-view cues for checking holes.** In clear first-angle drawings, the workbench associates isolated top-view circles with compatible boundary pairs in the front and left views. It can also estimate relative centres and radii and correct slight rotation when the drawing direction is reliable. Built-in generation and copied AI instructions use the same evidence. [Scope and use](docs/source-observations.md)
+
+The AI panel groups common actions while keeping preview, review and apply available. One small paired trial produced identical correct geometry with cross-view cues off and on. Overall first-pass accuracy remains unmeasured.
+
+## Features from earlier versions
 
 **Refine locally · experimental** is available in Compare / correct. Explicit cut/field permissions, background computation, cancellation and before/after review share the existing flow. Retain a proposal before normal application; no AI request is sent. Supports only clear complete three-view drawings and independent simple cuts. [Scope and use](docs/local-refinement.md).
 

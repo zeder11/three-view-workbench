@@ -2,6 +2,8 @@
 
 For clear first-angle three-view drawings or an upper-front/lower-top pair, the workbench can measure a common relative envelope and some longer horizontal/vertical ink segments before a request. This is a reading aid, not an inference of the whole solid, materials, bore depth, or overall correctness.
 
+v0.7.0 can also measure a bounded number of isolated, closed near-circles and report relative centres and radii. A top-view circle may be linked to compatible vertical boundary pairs in the front and left views. Missing views, conflicts and ambiguous occlusion fall back to other available observations. Check the original for holes, bosses, through/blind relationships and dimensions.
+
 ## Use
 
 - Built-in generation: use **Generate model** as before. Available observations accompany the original image in the same request; no additional AI call is added.
@@ -14,6 +16,6 @@ Before treating a horizontal line as a bore bottom, check its endpoints and span
 
 ## Scope and fallback
 
-Only sufficiently clear orthographic linework with reliable region separation and a common scale is supported. Isometric/section drawings, an explicit third-angle instruction, tilted photographs, dense annotations, clipping and unresolved auxiliary lines retain the source and original generation path. Unknown information is not turned into a constraint. A local worker is bounded to about 2.5 seconds; failure never automatically resends an AI request. Cancelled or stale callbacks cannot overwrite another candidate.
+Only sufficiently clear orthographic linework with reliable region separation and a common scale is supported. If a slightly rotated drawing has a reliable common direction, the workbench uses a temporary deskewed copy for pixel analysis. The original stays intact. Isometric/section drawings, an explicit third-angle instruction, severe perspective distortion, dense annotations, clipping and unresolved auxiliary lines retain the source and original generation path. Unknown information is not turned into a constraint. A local worker is bounded to about 2.5 seconds; failure never automatically resends an AI request. Cancelled or stale callbacks cannot overwrite another candidate.
 
 Observations are cached in page memory only, excluded from model JSON and autosave metadata. The ratio advisory adds no application confirmation and performs no automatic resizing. It cannot replace drawing dimensions or manual review, prove a unique solid, or guarantee improved accuracy for DeepSeek, GPT or other models.

@@ -1,14 +1,9 @@
-# v0.6.2 stabilization baseline
+# v0.7.0 build and verification
 
-2026-11-15. The current feature scope is fixed for everyday use and reproducible defect fixes. This does not certify AI recognition of complex drawings.
+Open [the workbench included here](../app/three-view-workbench.html). You can export your current model JSON as a backup before updating. The included examples remain importable.
 
-Open [the workbench in this package](../app/three-view-workbench.html). Export your current model JSON before updating. Older files are retained and existing models remain importable.
+Offline workflows include model import, three views, 2D and 3D previews, drawing export and undo. The generation workflow was tested with a mocked endpoint. Check online AI results against the original drawing. See the [drawing aid guide](source-observations.md) for usage.
 
-- Modeling, three views, solid preview, centrelines, full sections and export keep their existing workflows. Preview and local checks make no AI requests.
-- Review an AI result before applying it; applying is undoable. Drawing observations help with proportions and some line segments. Bore type, through/blind relationships and complex layers still need comparison with the source.
-- Linework comparison, local refinement and structure-first generation retain their experimental labels. No new entry points are added during stabilization, and experimental output is not a correctness certificate.
-- At a configured budget of 32768, truncated or empty output does not automatically repeat the same request. Truncated text remains an unaccepted draft; an explicit retry may incur charges. One bounded retry is retained when the budget can increase or a specific parameter can be corrected.
+In one paired test on a synthetic drawing, Argon produced identical correct geometry with cross-view cues enabled and disabled. Overall first-pass accuracy remains unmeasured.
 
-Local checks cover parameter/provenance protection, persistence, input safety, preview cancellation and workers, projection/solid outlines, centrelines, full sections and compatibility of independently constructed generic models. Offline and fake-provider tests do not measure real AI recognition accuracy.
-
-No extra physical-device acceptance is required for this pass. Narrow-screen and touch checks are browser emulation; concrete issues can be reproduced during use. BUILD-BASELINE.json and SHA256SUMS.txt record this package baseline.
+See [BUILD-BASELINE.json](../BUILD-BASELINE.json) for the application size and hash and [SHA256SUMS.txt](../SHA256SUMS.txt) to verify the package files.

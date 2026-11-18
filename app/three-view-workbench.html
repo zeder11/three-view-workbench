@@ -3802,6 +3802,12 @@ function extract(input,options={}){
  // An explicit V/H pair may have a curved front and a rectangular top.
  // One aligned frame establishes page axes; shared X scale is still required.
  if(outer.filter(c=>c.axisLike).length<Math.min(expected,expected===2?1:RULES.axisViews))return failure('axes-uncertain','缺少可确认的水平／竖直边界；可能旋转、倾斜或并非支持的线图。',{regions:outer});
+ // Thin appendages must not silently redefine an otherwise thick view envelope.
+ // Abstain rather than guessing whether a one-pixel attached frame is a dimension.
+ if(input.sourceStroke>=2){const support=new Uint8Array(mask.length);for(let y=0;y<h-1;y++)for(let x=0;x<w-1;x++){const i=y*w+x,ids=[i,i+1,i+w,i+w+1];if(ids.reduce((n,j)=>n+Number(!!mask[j]),0)>=3)for(const j of ids)if(mask[j])support[j]=1;}
+  const thick=components(support,w,h,0).filter(c=>c.pixels.length>=100&&Math.min(c.bounds[2]-c.bounds[0],c.bounds[3]-c.bounds[1])>=24);
+  for(const r of outer){const b=r.bounds,area=(b[2]-b[0])*(b[3]-b[1]);const main=thick.filter(c=>c.bounds.every((v,i)=>i<2?v>=b[i]:v<=b[i])).sort((a,c)=>(c.bounds[2]-c.bounds[0])*(c.bounds[3]-c.bounds[1])-(a.bounds[2]-a.bounds[0])*(a.bounds[3]-a.bounds[1]))[0];if(main){const t=main.bounds,ratio=(t[2]-t[0])*(t[3]-t[1])/area;if(ratio>=.65&&ratio<.98&&b.some((v,i)=>Math.abs(v-t[i])>=4))return failure('annotations-uncertain','细线外伸与主轮廓范围不一致，未把可能的标注当作实体外包。',{regions:outer});}}
+ }
  const sorted=[...outer].sort((a,b)=>a.bounds[1]-b.bounds[1]||a.bounds[0]-b.bounds[0]);let regions;
  if(expected===3){const top=sorted.slice(0,2).sort((a,b)=>a.bounds[0]-b.bounds[0]);regions={V:top[0],W:top[1],H:sorted[2]};}else regions={V:sorted[0],H:sorted[1]};
  const {V,W,H}=regions,span=(r,i)=>r.bounds[i+2]-r.bounds[i],mid=(r,i)=>(r.bounds[i]+r.bounds[i+2])/2,near=(a,b,span)=>Math.abs(a-b)<=Math.max(4,span*RULES.axisAlignment),same=(a,b)=>Math.abs(a-b)<=Math.max(3,Math.max(a,b)*RULES.scaleTolerance);
@@ -3811,7 +3817,7 @@ function extract(input,options={}){
  let calibration={mode:'relative',millimetresChecked:false,assumptions:['第一角投影及所选视图集合由调用方明确指定。','源图各视图使用同一像素比例，尚未做照片透视校正。','无可信尺寸锚点；全局统一放大／缩小无法据此判错。']};
  if(options.anchor){const a=options.anchor;if(!['X','Y','Z'].includes(a.axis)||typeof a.span!=='number'||!Number.isFinite(a.span)||a.span<=0||a.unit!=='mm'||a.source!=='user')return failure('anchor-invalid','绝对尺寸锚点须来自用户明确确认的正数毫米尺寸，不接受 AI 自报读数。',{regions});calibration={...calibration,mode:'absolute',millimetresChecked:true,anchor:{axis:a.axis,span:a.span,unit:'mm',source:'user'},pixelsPerMillimetre:dimensionsPx[a.axis]/a.span,assumptions:calibration.assumptions.slice(0,2)};}
  const panels=[];for(const [view,r]of Object.entries(regions)){const b=r.bounds,pad=RULES.padding,crop=[Math.max(0,b[0]-pad),Math.max(0,b[1]-pad),Math.min(w,b[2]+pad),Math.min(h,b[3]+pad)],regionMask=new Uint8Array((crop[2]-crop[0])*(crop[3]-crop[1])),ignore=ignored?new Uint8Array(regionMask.length):null;let n=0;
-  for(let y=crop[1];y<crop[3];y++)for(let x=crop[0];x<crop[2];x++)if(mask[y*w+x]){const i=(y-crop[1])*(crop[2]-crop[0])+x-crop[0];regionMask[i]=1;if(ignore)ignore[i]=ignored[y*w+x]?1:0;n++;}
+  for(let y=crop[1];y<crop[3];y++)for(let x=crop[0];x<crop[2];x++)if(mask[y*w+x]){const i=(y-crop[1])*(crop[2]-crop[0])+x-crop[0];regionMask[i]=1;if(ignore)ignore[i]=ignored[y*w+x]?(Number(ignored[y*w+x])&12)||1:0;n++;}
   panels.push({view,bounds:b,crop,cropWidth:crop[2]-crop[0],cropHeight:crop[3]-crop[1],mask:regionMask,ignore,sourceStroke:Number.isFinite(input.sourceStroke)?Math.max(1,Math.min(8,input.sourceStroke)):null,ink:n,center:[mid(r,0)-crop[0],mid(r,1)-crop[1]],pixelToCanonical:canonicalScale,worldBounds:[0,0,100,100]});
  }
  return {status:'prepared',scope:'clean first-angle linework with provisional source-derived registration',regions,dimensionsPx,canonicalScale,calibration,panels,assumptions:calibration.assumptions,automaticModelAcceptance:false};
@@ -3866,10 +3872,13 @@ function prepare(input){validate(input);const {mask,w,h}=input,cleaned=new Uint8
  for(const f of initial.regions){const lows=[],highs=[];for(const a of f.segments){const n=Math.floor((a[0]+a[1]-1)/2);let lo=0,hi=0;while(lo>-5&&at(f.vertical?f.row+lo-1:n,f.vertical?n:f.row+lo-1))lo--;while(hi<5&&at(f.vertical?f.row+hi+1:n,f.vertical?n:f.row+hi+1))hi++;lows.push(lo);highs.push(hi);}const lo=median(lows),hi=median(highs),thickness=hi-lo+1,structuralStroke=frameStroke(mask,w,h,frames);
   const conflict=frames.some(b=>{const coordinate=f.vertical?b[0]:b[1],other=f.vertical?b[2]:b[3],low=f.vertical?b[1]:b[0],high=f.vertical?b[3]:b[2];return (Math.abs(f.row-coordinate)<=2||Math.abs(f.row-other)<=2)&&f.segments.some(a=>Math.min(a[1],high)-Math.max(a[0],low)>Math.min(50,(high-low)*.4));});
   if(thickness>2||conflict||structuralStroke<thickness+1){unresolved.push({axis:f.axis,reason:conflict?'boundary-overlap':'stroke-width'});continue;}
-  const major=f.vertical?h:w,selection=new Uint8Array(major);for(const a of f.segments)for(let n=a[0];n<a[1];n++)selection[n]=1;for(const pat of f.patterns||[]){if(pat.period<24||pat.period>120)continue;for(let n=Math.max(0,pat.anchor-2*pat.period);n<Math.min(major,pat.end+2*pat.period);n++){const phase=((n-pat.anchor)%pat.period+pat.period)%pat.period;if(phase<pat.long||phase>=pat.shortOffset&&phase<pat.shortOffset+pat.short)selection[n]=1;}}const spans=[];let from=-1;for(let n=0;n<=major;n++){if(n<major&&selection[n]&&from<0)from=n;if((n===major||!selection[n])&&from>=0){spans.push([from,n]);from=-1;}}
+  // Do not extrapolate a centreline into a separate view with collinear real edges.
+  const owners=frames.filter(b=>f.row>=(f.vertical?b[0]:b[1])&&f.row<(f.vertical?b[2]:b[3])).map(b=>({b,overlap:f.segments.reduce((s,a)=>s+Math.max(0,Math.min(a[1],f.vertical?b[3]:b[2])-Math.max(a[0],f.vertical?b[1]:b[0])),0)})).filter(x=>x.overlap>0).sort((a,b)=>b.overlap-a.overlap),owner=owners[0]?.b;
+  const major=f.vertical?h:w,selection=new Uint8Array(major);for(const a of f.segments)for(let n=a[0];n<a[1];n++)selection[n]=1;for(const pat of f.patterns||[]){if(pat.period<24||pat.period>120)continue;for(let n=Math.max(0,pat.anchor-2*pat.period);n<Math.min(major,pat.end+2*pat.period);n++){const phase=((n-pat.anchor)%pat.period+pat.period)%pat.period;if(phase<pat.long||phase>=pat.shortOffset&&phase<pat.shortOffset+pat.short)selection[n]=1;}}if(owner){const low=(f.vertical?owner[1]:owner[0])-8,high=(f.vertical?owner[3]:owner[2])+8;for(let n=0;n<major;n++)if(n<low||n>=high||frames.some(b=>b!==owner&&f.row>=(f.vertical?b[0]:b[1])&&f.row<(f.vertical?b[2]:b[3])&&n>=(f.vertical?b[1]:b[0])&&n<(f.vertical?b[3]:b[2])))selection[n]=0;}else{const low=Math.min(...f.segments.map(a=>a[0])),high=Math.max(...f.segments.map(a=>a[1]));for(let n=0;n<major;n++)if(n<low||n>=high)selection[n]=0;}const spans=[];let from=-1;for(let n=0;n<=major;n++){if(n<major&&selection[n]&&from<0)from=n;if((n===major||!selection[n])&&from>=0){spans.push([from,n]);from=-1;}}
   let nRemoved=0;for(const a of spans)for(let n=a[0];n<a[1];n++){let aLo=lo,aHi=hi;while(aLo>-6&&at(f.vertical?f.row+aLo-1:n,f.vertical?n:f.row+aLo-1))aLo--;while(aHi<6&&at(f.vertical?f.row+aHi+1:n,f.vertical?n:f.row+aHi+1))aHi++;
    // Any perpendicular extension may be a genuine crossing. Leave it intact.
-   if(aLo<lo||aHi>hi){for(let d=lo;d<=hi;d++){const x=f.vertical?f.row+d:n,y=f.vertical?n:f.row+d;if(at(x,y))uncertain[y*w+x]=1;}continue;}let curved=false;for(let dn=-6;dn<=6&&!curved;dn++){const q=n+dn;if(q<0||q>=(f.vertical?h:w))continue;let qlo=lo,qhi=hi;while(qlo>lo-5&&at(f.vertical?f.row+qlo-1:q,f.vertical?q:f.row+qlo-1))qlo--;while(qhi<hi+5&&at(f.vertical?f.row+qhi+1:q,f.vertical?q:f.row+qhi+1))qhi++;if((qlo<lo||qhi>hi)&&qhi-qlo+1<=thickness+4)curved=true;}if(curved){for(let d=lo;d<=hi;d++){const x=f.vertical?f.row+d:n,y=f.vertical?n:f.row+d;if(at(x,y))uncertain[y*w+x]=1;}continue;}for(let d=lo;d<=hi;d++){const x=f.vertical?f.row+d:n,y=f.vertical?n:f.row+d;if(cleaned[y*w+x])nRemoved++;remove(x,y);}}
+   if(aLo<lo||aHi>hi){for(let d=lo;d<=hi;d++){const x=f.vertical?f.row+d:n,y=f.vertical?n:f.row+d;// Bits 4/8 mark the centreline axis; perpendicular solid ink is retained.
+    if(at(x,y))uncertain[y*w+x]|=f.vertical?8:4;}continue;}let curved=false;for(let dn=-6;dn<=6&&!curved;dn++){const q=n+dn;if(q<0||q>=(f.vertical?h:w))continue;let qlo=lo,qhi=hi;while(qlo>lo-5&&at(f.vertical?f.row+qlo-1:q,f.vertical?q:f.row+qlo-1))qlo--;while(qhi<hi+5&&at(f.vertical?f.row+qhi+1:q,f.vertical?q:f.row+qhi+1))qhi++;if((qlo<lo||qhi>hi)&&qhi-qlo+1<=thickness+4)curved=true;}if(curved){for(let d=lo;d<=hi;d++){const x=f.vertical?f.row+d:n,y=f.vertical?n:f.row+d;if(at(x,y))uncertain[y*w+x]=1;}continue;}for(let d=lo;d<=hi;d++){const x=f.vertical?f.row+d:n,y=f.vertical?n:f.row+d;if(cleaned[y*w+x])nRemoved++;remove(x,y);}}
   if(nRemoved)centrelines++;
  }
  // Dimensions: require opposing arrowheads, two endpoint extensions, a nearby
@@ -3885,7 +3894,7 @@ function prepare(input){validate(input);const {mask,w,h}=input,cleaned=new Uint8
    for(let n=left-8;n<=right+8;n++)for(let d=-5;d<=5;d++){const [x,y]=xy(n,row+d);if(!inside(x,y,1))remove(x,y);}for(const tip of endpoints)for(let r=Math.min(edge,row)-8;r<=Math.max(edge,row)+8;r++)for(let d=-2;d<=2;d++){const [x,y]=xy(tip+d,r);if(!inside(x,y,1))remove(x,y);}for(const c of text)for(const i of c.pixels){const x=i%w,y=Math.floor(i/w);if(!inside(x,y,1))remove(x,y);}dimensions++;distance+=8;
   }}
  }
- let count=0,uncertainPixels=0;for(let i=0;i<removed.length;i++){count+=removed[i];if(!cleaned[i])uncertain[i]=0;uncertainPixels+=uncertain[i];}const remaining=inspect({mask:cleaned,w,h});return {mask:cleaned,removed,uncertain,uncertainPixels,centrelines,dimensions,removedPixels:count,unresolved:unresolved.length>0||initial.limitReached||remaining.suspected,unresolvedRegions:unresolved,sourceStroke:frameStroke(mask,w,h,frames),sourcePixelsPreserved:true,dimensionsRecognized:false,lineStylesVerified:false};}
+ let count=0,uncertainPixels=0;for(let i=0;i<removed.length;i++){count+=removed[i];if(!cleaned[i])uncertain[i]=0;uncertainPixels+=Number(!!uncertain[i]);}const remaining=inspect({mask:cleaned,w,h});return {mask:cleaned,removed,uncertain,uncertainPixels,centrelines,dimensions,removedPixels:count,unresolved:unresolved.length>0||initial.limitReached||remaining.suspected,unresolvedRegions:unresolved,sourceStroke:frameStroke(mask,w,h,frames),sourcePixelsPreserved:true,dimensionsRecognized:false,lineStylesVerified:false};}
 module.exports={inspect,prepare};
 
  return module.exports;})();
@@ -3941,13 +3950,2618 @@ module.exports={assess};
  * sends a provider request or changes the workbench. Source association is
  * explicit, candidate-owned and memory-only, including the pasted-JSON route. Explicit revisions alone can reuse current
  * observations; no check, attachment or copy sends a provider request. */
+function SourceCircleKit() {
+const VERSION = 'source-circles-v1';
+const AXES = Object.freeze({ V: ['X', 'Z'], W: ['Y', 'Z'], H: ['X', 'Y'] });
+const MAX_PIXELS = 4000000;
+const BINS = 36;
+const FRAME_DESC = 'per-axis maximum observed ink envelopes; panel bounding minima; X right, Y rear, Z up; one shared scale; longest observed extent=100';
+const LIMITS = Object.freeze({
+  MAX_CIRCLES_PER_VIEW: 4,
+  MAX_CIRCLES_TOTAL: 12,
+  MAX_PANEL_PIXELS: 2000000,
+  MAX_SCAN_PIXELS: 3000000,
+  MAX_COMPONENTS_PER_VIEW: 600,
+  MAX_COMPONENTS_TOTAL: 1500,
+  MAX_CANDIDATES_TOTAL: 500,
+  MAX_CAVITY_PIXELS: 800000,
+  MAX_WORK_PIXELS: 3000000,
+  MAX_SERIALIZED_BYTES: 4096
+});
+
+function utf8ByteLength(str) {
+  let bytes = 0;
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if (code <= 0x7f) {
+      bytes += 1;
+    } else if (code <= 0x7ff) {
+      bytes += 2;
+    } else if (code >= 0xd800 && code <= 0xdbff && i + 1 < str.length) {
+      const next = str.charCodeAt(i + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) {
+        bytes += 4;
+        i++;
+      } else {
+        bytes += 3;
+      }
+    } else {
+      bytes += 3;
+    }
+  }
+  return bytes;
+}
+
+function clampCap(value, hardMax) {
+  if (value === undefined || value === null) return hardMax;
+  if (typeof value !== 'number' || Number.isNaN(value) || value < 0) return -1;
+  if (value === Infinity) return hardMax;
+  return Math.min(hardMax, Math.floor(value));
+}
+
+function resolveLimits(options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const limits = {
+    maxCirclesPerView: clampCap(opts.maxCirclesPerView, LIMITS.MAX_CIRCLES_PER_VIEW),
+    maxCirclesTotal: clampCap(opts.maxCirclesTotal, LIMITS.MAX_CIRCLES_TOTAL),
+    maxPanelPixels: clampCap(opts.maxPanelPixels, LIMITS.MAX_PANEL_PIXELS),
+    maxScanPixels: clampCap(opts.maxScanPixels, LIMITS.MAX_SCAN_PIXELS),
+    maxComponentsPerView: clampCap(opts.maxComponentsPerView, LIMITS.MAX_COMPONENTS_PER_VIEW),
+    maxComponentsTotal: clampCap(opts.maxComponentsTotal, LIMITS.MAX_COMPONENTS_TOTAL),
+    maxCandidatesTotal: clampCap(opts.maxCandidatesTotal, LIMITS.MAX_CANDIDATES_TOTAL),
+    maxCavityPixels: clampCap(opts.maxCavityPixels, LIMITS.MAX_CAVITY_PIXELS),
+    maxWorkPixels: clampCap(opts.maxWorkPixels, LIMITS.MAX_WORK_PIXELS),
+    maxSerializedBytes: clampCap(opts.maxSerializedBytes, LIMITS.MAX_SERIALIZED_BYTES)
+  };
+  for (const k of Object.keys(limits)) {
+    if (limits[k] < 0) return null;
+  }
+  return limits;
+}
+
+const quant = x => Math.round(x * 10) / 10;
+const toTenths = x => Math.round(x * 10);
+const same = (a, b) => Math.abs(a - b) <= Math.max(3, Math.max(a, b) * 0.035);
+
+function isIndexable(arr) {
+  return Array.isArray(arr) || (ArrayBuffer.isView(arr) && !(arr instanceof DataView));
+}
+
+function unavailable(reason) {
+  return {
+    state: 'unavailable',
+    reason,
+    circles: [],
+    automaticAcceptance: false,
+    materialInferred: false
+  };
+}
+
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)];
+}
+
+/**
+ * Validate source structure and compute shared axis envelopes & scale,
+ * matching input/source-evidence.cjs rules without mutating inputs.
+ */
+function prepareLayout(source, limits, budget) {
+  if (!source || typeof source !== 'object' || source.status !== 'prepared') {
+    return { ok: false, result: unavailable('layout') };
+  }
+  const panels = Array.isArray(source.panels) ? source.panels : null;
+  if (!panels || panels.length < 2) {
+    return { ok: false, result: unavailable('layout') };
+  }
+  const rawViews = panels.map(p => p && p.view);
+  if (new Set(rawViews).size !== rawViews.length) {
+    return { ok: false, result: unavailable('layout') };
+  }
+  const viewsKey = [...rawViews].sort().join('');
+  if (viewsKey !== 'HVW' && viewsKey !== 'HV') {
+    return { ok: false, result: unavailable('layout') };
+  }
+
+  const dims = source.dimensionsPx;
+  if (!dims || typeof dims !== 'object' || !['X', 'Y', 'Z'].every(k => Number.isFinite(dims[k]) && dims[k] >= 20)) {
+    return { ok: false, result: unavailable('scale') };
+  }
+
+  const spans = { X: [], Y: [], Z: [] };
+  for (const p of panels) {
+    const b = p && p.bounds;
+    const c = p && p.crop;
+    const w = p && p.cropWidth;
+    const h = p && p.cropHeight;
+    if (
+      !AXES[p && p.view] ||
+      !Array.isArray(b) || !Array.isArray(c) || b.length !== 4 || c.length !== 4 ||
+      !b.every(Number.isInteger) || !c.every(Number.isInteger) ||
+      !Number.isInteger(w) || !Number.isInteger(h) || w <= 0 || h <= 0 || w * h > MAX_PIXELS ||
+      !isIndexable(p.mask) || p.mask.length !== w * h ||
+      (p.ignore != null && (!isIndexable(p.ignore) || p.ignore.length !== w * h)) ||
+      c[0] < 0 || c[1] < 0 || c[2] - c[0] !== w || c[3] - c[1] !== h ||
+      b[0] < c[0] || b[1] < c[1] || b[2] > c[2] || b[3] > c[3] ||
+      b[2] <= b[0] || b[3] <= b[1]
+    ) {
+      return { ok: false, result: unavailable('bounds') };
+    }
+
+    const x0 = b[0] - c[0];
+    const y0 = b[1] - c[1];
+    const x1 = b[2] - c[0];
+    const y1 = b[3] - c[1];
+    const rowSpan = x1 - x0;
+    if (rowSpan * (y1 - y0) > limits.maxPanelPixels || w * h > limits.maxPanelPixels) {
+      return { ok: false, result: unavailable('budget') };
+    }
+    let ink = 0;
+    for (let y = y0; y < y1; y++) {
+      budget.scanPixels += rowSpan;
+      if (budget.scanPixels > limits.maxScanPixels) {
+        return { ok: false, result: unavailable('budget') };
+      }
+      const row = y * w;
+      for (let x = x0; x < x1; x++) {
+        if (p.mask[row + x]) ink++;
+      }
+    }
+    if (ink === 0) {
+      return { ok: false, result: unavailable('empty') };
+    }
+    AXES[p.view].forEach((axis, i) => spans[axis].push(b[i + 2] - b[i]));
+  }
+
+  for (const k of ['X', 'Y', 'Z']) {
+    const arr = spans[k];
+    if (!arr.length) return { ok: false, result: unavailable('scale') };
+    const mn = Math.min(...arr);
+    const mx = Math.max(...arr);
+    const avg = arr.reduce((s, v) => s + v, 0) / arr.length;
+    if (!same(mn, mx) || !same(dims[k], avg)) {
+      return { ok: false, result: unavailable('scale') };
+    }
+  }
+
+  const envelope = {
+    X: Math.max(...spans.X),
+    Y: Math.max(...spans.Y),
+    Z: Math.max(...spans.Z)
+  };
+  const maxSpan = Math.max(envelope.X, envelope.Y, envelope.Z);
+  if (!(maxSpan > 0)) return { ok: false, result: unavailable('scale') };
+
+  const scale = 100 / maxSpan;
+  const extent = {
+    X: quant(envelope.X * scale),
+    Y: quant(envelope.Y * scale),
+    Z: quant(envelope.Z * scale)
+  };
+
+  return { ok: true, panels, scale, extent };
+}
+
+/**
+ * Extract 8-connected ink components strictly inside localBounds [x0, y0, x1, y1).
+ * 8-connectivity preserves 1px-thin diagonal circle pixels as a single loop.
+ */
+function extractComponents8(mask, cropW, x0, y0, x1, y1, budget, limits) {
+  const bw = x1 - x0;
+  const bh = y1 - y0;
+  const area = bw * bh;
+  const seen = new Uint8Array(area);
+  const queue = new Int32Array(area);
+  const out = [];
+  let panelCompCount = 0;
+
+  for (let ly = 0; ly < bh; ly++) {
+    budget.scanPixels += bw;
+    if (budget.scanPixels > limits.maxScanPixels) {
+      budget.aborted = true;
+      return null;
+    }
+    const gy0 = y0 + ly;
+    const gRow = gy0 * cropW;
+    const lRow = ly * bw;
+    for (let lx = 0; lx < bw; lx++) {
+      const startL = lRow + lx;
+      if (seen[startL] || !mask[gRow + x0 + lx]) continue;
+
+      panelCompCount++;
+      budget.components++;
+      if (panelCompCount > limits.maxComponentsPerView || budget.components > limits.maxComponentsTotal) {
+        budget.aborted = true;
+        return null;
+      }
+
+      seen[startL] = 1;
+      let head = 0;
+      let tail = 0;
+      queue[tail++] = startL;
+
+      const pixels = [];
+      let minX = cropW;
+      let minY = y1;
+      let maxX = -1;
+      let maxY = -1;
+
+      while (head < tail) {
+        budget.workPixels++;
+        if (budget.workPixels > limits.maxWorkPixels) {
+          budget.aborted = true;
+          return null;
+        }
+        const cur = queue[head++];
+        const cx = cur % bw;
+        const cy = (cur / bw) | 0;
+        const gx = x0 + cx;
+        const gy = y0 + cy;
+
+        pixels.push(gy * cropW + gx);
+        if (gx < minX) minX = gx;
+        if (gy < minY) minY = gy;
+        if (gx > maxX) maxX = gx;
+        if (gy > maxY) maxY = gy;
+
+        const nyMin = cy > 0 ? cy - 1 : 0;
+        const nyMax = cy + 1 < bh ? cy + 1 : bh - 1;
+        const nxMin = cx > 0 ? cx - 1 : 0;
+        const nxMax = cx + 1 < bw ? cx + 1 : bw - 1;
+
+        for (let ny = nyMin; ny <= nyMax; ny++) {
+          const nLRow = ny * bw;
+          const nGRow = (y0 + ny) * cropW + x0;
+          for (let nx = nxMin; nx <= nxMax; nx++) {
+            const nl = nLRow + nx;
+            if (!seen[nl] && mask[nGRow + nx]) {
+              seen[nl] = 1;
+              queue[tail++] = nl;
+            }
+          }
+        }
+      }
+
+      out.push({
+        pixels,
+        bounds: [minX, minY, maxX + 1, maxY + 1]
+      });
+    }
+  }
+  return out;
+}
+
+/**
+ * Topological closure test via 4-connected background flood-fill.
+ * An 8-connected closed loop separates 4-connected background into an exterior
+ * and exactly one enclosed interior cavity. Any >=1px gap leaks to the border.
+ */
+function inspectCavity(comp, cropW, budget, limits) {
+  const [bx0, by0, bx1, by1] = comp.bounds;
+  const gw = bx1 - bx0 + 2;
+  const gh = by1 - by0 + 2;
+  const size = gw * gh;
+  if (size > limits.maxCavityPixels || budget.workPixels + size > limits.maxWorkPixels) {
+    budget.aborted = true;
+    return null;
+  }
+  budget.workPixels += size;
+  const grid = new Uint8Array(size);
+  const queue = new Int32Array(size);
+
+  const pixels = comp.pixels;
+  for (let i = 0; i < pixels.length; i++) {
+    const g = pixels[i];
+    const gx = g % cropW;
+    const gy = (g / cropW) | 0;
+    grid[(gy - by0 + 1) * gw + (gx - bx0 + 1)] = 1;
+  }
+
+  // Flood exterior background from padded border (0, 0)
+  grid[0] = 2;
+  let head = 0;
+  let tail = 0;
+  queue[tail++] = 0;
+
+  while (head < tail) {
+    const cur = queue[head++];
+    const x = cur % gw;
+    const y = (cur / gw) | 0;
+    if (x + 1 < gw && grid[cur + 1] === 0) { grid[cur + 1] = 2; queue[tail++] = cur + 1; }
+    if (x > 0 && grid[cur - 1] === 0) { grid[cur - 1] = 2; queue[tail++] = cur - 1; }
+    if (y + 1 < gh && grid[cur + gw] === 0) { grid[cur + gw] = 2; queue[tail++] = cur + gw; }
+    if (y > 0 && grid[cur - gw] === 0) { grid[cur - gw] = 2; queue[tail++] = cur - gw; }
+  }
+
+  const cavities = [];
+  for (let i = 0; i < size; i++) {
+    if (grid[i] !== 0) continue;
+    grid[i] = 3;
+    head = 0;
+    tail = 0;
+    queue[tail++] = i;
+    let area = 0;
+    while (head < tail) {
+      const cur = queue[head++];
+      area++;
+      const x = cur % gw;
+      const y = (cur / gw) | 0;
+      if (x + 1 < gw && grid[cur + 1] === 0) { grid[cur + 1] = 3; queue[tail++] = cur + 1; }
+      if (x > 0 && grid[cur - 1] === 0) { grid[cur - 1] = 3; queue[tail++] = cur - 1; }
+      if (y + 1 < gh && grid[cur + gw] === 0) { grid[cur + gw] = 3; queue[tail++] = cur + gw; }
+      if (y > 0 && grid[cur - gw] === 0) { grid[cur - gw] = 3; queue[tail++] = cur - gw; }
+    }
+    cavities.push(area);
+  }
+
+  if (cavities.length !== 1 || cavities[0] < 12) return null;
+  return cavities[0];
+}
+
+/**
+ * Mean-centered Kasa algebraic circle center fit, followed by mean radial distance.
+ */
+function fitCircle(pixels, cropW) {
+  const n = pixels.length;
+  if (n < 24) return null;
+
+  let sx = 0;
+  let sy = 0;
+  for (let i = 0; i < n; i++) {
+    const g = pixels[i];
+    sx += g % cropW;
+    sy += (g / cropW) | 0;
+  }
+  const mx = sx / n;
+  const my = sy / n;
+
+  let Suu = 0;
+  let Svv = 0;
+  let Suv = 0;
+  let Suuu = 0;
+  let Svvv = 0;
+  let Suuv = 0;
+  let Suvv = 0;
+  for (let i = 0; i < n; i++) {
+    const g = pixels[i];
+    const u = (g % cropW) - mx;
+    const v = ((g / cropW) | 0) - my;
+    const u2 = u * u;
+    const v2 = v * v;
+    Suu += u2;
+    Svv += v2;
+    Suv += u * v;
+    Suuu += u2 * u;
+    Svvv += v2 * v;
+    Suuv += u2 * v;
+    Suvv += u * v2;
+  }
+
+  const det = Suu * Svv - Suv * Suv;
+  if (det <= 1e-6) return null;
+
+  const rhs1 = Suuu + Suvv;
+  const rhs2 = Suuv + Svvv;
+  const a = 0.5 * (Svv * rhs1 - Suv * rhs2) / det;
+  const b = 0.5 * (Suu * rhs2 - Suv * rhs1) / det;
+  const cx = mx + a;
+  const cy = my + b;
+
+  const dists = new Float64Array(n);
+  const thetas = new Float64Array(n);
+  let sumR = 0;
+  for (let i = 0; i < n; i++) {
+    const g = pixels[i];
+    const dx = (g % cropW) - cx;
+    const dy = ((g / cropW) | 0) - cy;
+    const d = Math.hypot(dx, dy);
+    dists[i] = d;
+    let ang = Math.atan2(dy, dx);
+    if (ang < 0) ang += 2 * Math.PI;
+    thetas[i] = ang;
+    sumR += d;
+  }
+
+  const R = sumR / n;
+  if (!Number.isFinite(R) || R < 5.5) return null;
+  return { cx, cy, R, dists, thetas };
+}
+
+function hasNearbyIgnore(ignore, cropW, localBounds, cx, cy, margin) {
+  if (!ignore) return false;
+  const [x0, y0, x1, y1] = localBounds;
+  const ix0 = Math.max(x0, Math.floor(cx - margin));
+  const iy0 = Math.max(y0, Math.floor(cy - margin));
+  const ix1 = Math.min(x1, Math.ceil(cx + margin) + 1);
+  const iy1 = Math.min(y1, Math.ceil(cy + margin) + 1);
+  const m2 = margin * margin;
+
+  for (let y = iy0; y < iy1; y++) {
+    const dy = y - cy;
+    const dy2 = dy * dy;
+    const row = y * cropW;
+    for (let x = ix0; x < ix1; x++) {
+      if (!ignore[row + x]) continue;
+      const dx = x - cx;
+      if (dx * dx + dy2 <= m2) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Evaluate whether a connected component is a clean, isolated, closed solid circle
+ * with no unhandled crossings, tangent attachments, or ignore overlap.
+ */
+function verifyCircleCandidate(comp, panel, localBounds, budget, limits) {
+  const [bx0, by0, bx1, by1] = comp.bounds;
+  const bw = bx1 - bx0;
+  const bh = by1 - by0;
+  if (Math.min(bw, bh) < 12) return null;
+  if (Math.max(bw, bh) / Math.min(bw, bh) > 1.15) return null;
+
+  budget.candidates++;
+  if (budget.candidates > limits.maxCandidatesTotal) {
+    budget.aborted = true;
+    return null;
+  }
+
+  const cavityArea = inspectCavity(comp, panel.cropWidth, budget, limits);
+  if (cavityArea === null || budget.aborted) return null;
+
+  const fit = fitCircle(comp.pixels, panel.cropWidth);
+  if (!fit) return null;
+
+  const { cx, cy, R, dists, thetas } = fit;
+  const [lx0, ly0, lx1, ly1] = localBounds;
+  if (cx - R < lx0 - 0.5 || cx + R > lx1 - 0.5 || cy - R < ly0 - 0.5 || cy + R > ly1 - 0.5) {
+    return null;
+  }
+
+  const binCount = new Int32Array(BINS);
+  const binSum = new Float64Array(BINS);
+  const binMin = new Float64Array(BINS).fill(Infinity);
+  const binMax = new Float64Array(BINS).fill(-Infinity);
+  const binScale = BINS / (2 * Math.PI);
+
+  for (let i = 0; i < dists.length; i++) {
+    let bin = Math.floor(thetas[i] * binScale);
+    if (bin >= BINS) bin = BINS - 1;
+    const d = dists[i];
+    binCount[bin]++;
+    binSum[bin] += d;
+    if (d < binMin[bin]) binMin[bin] = d;
+    if (d > binMax[bin]) binMax[bin] = d;
+  }
+
+  const meanR = new Float64Array(BINS);
+  const spanR = new Array(BINS);
+  const mins = new Array(BINS);
+  for (let k = 0; k < BINS; k++) {
+    if (binCount[k] === 0) return null;
+    meanR[k] = binSum[k] / binCount[k];
+    spanR[k] = binMax[k] - binMin[k];
+    mins[k] = binMin[k];
+  }
+
+  const typicalSpan = median(spanR);
+  const maxSpan = Math.max(...spanR);
+  if (typicalSpan > 9.5 || maxSpan > typicalSpan + 2.0) return null;
+
+  // Reject any attached tangent stub, interior spoke, or crossing overhang
+  const tol = Math.max(1.5, typicalSpan * 0.6 + 1.1);
+  for (let i = 0; i < dists.length; i++) {
+    const d = dists[i];
+    if (d < 2.0 || d < R - tol || d > R + tol) return null;
+  }
+
+  // Ink count sanity check against annulus circumference * stroke
+  const n = comp.pixels.length;
+  if (n < 2 * Math.PI * R * 0.7 || n > 2 * Math.PI * R * (typicalSpan + 2.2)) {
+    return null;
+  }
+
+  // Verify inner cavity area agrees with median inner radius
+  const rInMedian = median(mins);
+  const rInArea = Math.sqrt(cavityArea / Math.PI);
+  if (rInMedian < 2.5 || rInArea < rInMedian * 0.82 || rInArea > rInMedian * 1.15) {
+    return null;
+  }
+
+  // Circularity & harmonic checks (rejects ellipses and rounded rectangles)
+  const binStep = (2 * Math.PI) / BINS;
+  let sumSqErr = 0;
+  let maxAbsErr = 0;
+  let c2 = 0;
+  let s2 = 0;
+  let c4 = 0;
+  let s4 = 0;
+
+  for (let k = 0; k < BINS; k++) {
+    const mr = meanR[k];
+    const err = Math.abs(mr - R);
+    if (err > maxAbsErr) maxAbsErr = err;
+    sumSqErr += err * err;
+
+    const theta = (k + 0.5) * binStep;
+    c2 += mr * Math.cos(2 * theta);
+    s2 += mr * Math.sin(2 * theta);
+    c4 += mr * Math.cos(4 * theta);
+    s4 += mr * Math.sin(4 * theta);
+  }
+
+  const rmsErr = Math.sqrt(sumSqErr / BINS);
+  const q2 = (2 / BINS) * Math.hypot(c2, s2);
+  const q4 = (2 / BINS) * Math.hypot(c4, s4);
+
+  if (q2 / R > 0.035 || q4 / R > 0.035) return null;
+  if (rmsErr > Math.max(0.85, R * 0.028)) return null;
+  if (maxAbsErr > Math.max(1.5, R * 0.052)) return null;
+
+  // Reject regular polygons (hexagons, octagons, decagons, dodecagons) whose
+  // m-fold corner ripple exceeds pixel quantization noise at resolvable radii.
+  if (R >= 10.5) {
+    for (let m = 6; m <= 12; m++) {
+      if (m >= 10 && R < 16.5) continue;
+      if (m === 12 && R < 26) continue;
+      let cm = 0;
+      let sm = 0;
+      for (let k = 0; k < BINS; k++) {
+        const theta = (k + 0.5) * binStep;
+        cm += meanR[k] * Math.cos(m * theta);
+        sm += meanR[k] * Math.sin(m * theta);
+      }
+      const qm = (2 / BINS) * Math.hypot(cm, sm);
+      const cap = m <= 9
+        ? Math.max(0.24, R * 0.014)
+        : m <= 11
+          ? Math.max(0.22, R * 0.0105)
+          : Math.max(0.22, R * 0.0075);
+      if (qm > cap) return null;
+    }
+  }
+
+  // Exact sorted-pixel angular gap check
+  thetas.sort();
+  let maxGap = 2 * Math.PI + thetas[0] - thetas[thetas.length - 1];
+  for (let i = 1; i < thetas.length; i++) {
+    const gap = thetas[i] - thetas[i - 1];
+    if (gap > maxGap) maxGap = gap;
+  }
+  if (maxGap > Math.max(0.22, 2.5 / R)) return null;
+
+  // Reject any circle touching, crossing, or enclosing an unknown ignore region
+  if (hasNearbyIgnore(panel.ignore, panel.cropWidth, localBounds, cx, cy, R + tol + 2.5)) {
+    return null;
+  }
+
+  return { cx, cy, R };
+}
+
+function observe(source, options) {
+  const limits = resolveLimits(options);
+  if (!limits || limits.maxCirclesPerView < 1 || limits.maxCirclesTotal < 1) {
+    return unavailable('budget');
+  }
+
+  const budget = {
+    scanPixels: 0,
+    components: 0,
+    candidates: 0,
+    workPixels: 0,
+    aborted: false
+  };
+
+  const prep = prepareLayout(source, limits, budget);
+  if (!prep.ok) return prep.result;
+
+  const { panels, scale, extent } = prep;
+  const views = panels.map(p => p.view);
+  const annotationExcluded = panels.some(p => !!p.ignore);
+  const baseEnvelope = {
+    state: 'observed',
+    version: VERSION,
+    layout: 'first-angle-assumed',
+    views,
+    frame: FRAME_DESC,
+    extent,
+    circles: [],
+    truncated: true,
+    truncateReason: 'serialized-bytes',
+    scope: 'relative raster circle observations only',
+    dimensionValuesRead: false,
+    annotationExcluded,
+    materialInferred: false,
+    automaticAcceptance: false
+  };
+  let usedBytes = utf8ByteLength(JSON.stringify(baseEnvelope));
+  if (usedBytes > limits.maxSerializedBytes) {
+    return unavailable('budget');
+  }
+
+  const circles = [];
+  let truncated = false;
+  let truncateReason = null;
+  let hitTotalLimit = false;
+
+  for (const p of panels) {
+    const localBounds = [
+      p.bounds[0] - p.crop[0],
+      p.bounds[1] - p.crop[1],
+      p.bounds[2] - p.crop[0],
+      p.bounds[3] - p.crop[1]
+    ];
+    const [x0, y0, x1, y1] = localBounds;
+    const comps = extractComponents8(p.mask, p.cropWidth, x0, y0, x1, y1, budget, limits);
+    if (budget.aborted || !comps) {
+      return unavailable('budget');
+    }
+
+    const axes = AXES[p.view];
+    const max0 = extent[axes[0]];
+    const max1 = extent[axes[1]];
+    const panelCircles = [];
+
+    for (const comp of comps) {
+      const hit = verifyCircleCandidate(comp, p, localBounds, budget, limits);
+      if (budget.aborted) {
+        return unavailable('budget');
+      }
+      if (!hit) continue;
+
+      const uRaw = p.view === 'W' ? (x1 - 1 - hit.cx) * scale : (hit.cx - x0) * scale;
+      const vRaw = (y1 - 1 - hit.cy) * scale;
+      const rRaw = hit.R * scale;
+
+      const cu = quant(uRaw);
+      const cv = quant(vRaw);
+      const cr = quant(rRaw);
+      if (cr <= 0 || cu < 0 || cu > max0 || cv < 0 || cv > max1) continue;
+
+      const cuT = toTenths(cu);
+      const cvT = toTenths(cv);
+      const max0T = toTenths(max0);
+      const max1T = toTenths(max1);
+      const crT = toTenths(cr);
+
+      if (crT <= 0 || cuT - crT < 0 || cuT + crT > max0T || cvT - crT < 0 || cvT + crT > max1T) {
+        continue;
+      }
+
+      if (panelCircles.length >= limits.maxCirclesPerView) {
+        truncated = true;
+        if (!truncateReason) truncateReason = 'view-limit';
+        break;
+      }
+      if (circles.length + panelCircles.length >= limits.maxCirclesTotal) {
+        truncated = true;
+        truncateReason = 'total-limit';
+        hitTotalLimit = true;
+        break;
+      }
+
+      const candidateEntry = {
+        id: `${p.view}C${panelCircles.length + 1}`,
+        view: p.view,
+        axes: axes.join(''),
+        center: [cu, cv],
+        radius: cr
+      };
+      const entryBytes = utf8ByteLength(JSON.stringify(candidateEntry)) + (circles.length + panelCircles.length > 0 ? 1 : 0);
+      if (usedBytes + entryBytes > limits.maxSerializedBytes) {
+        truncated = true;
+        truncateReason = 'serialized-bytes';
+        hitTotalLimit = true;
+        break;
+      }
+      usedBytes += entryBytes;
+
+      panelCircles.push({
+        view: p.view,
+        axes: axes.join(''),
+        center: [cu, cv],
+        radius: cr
+      });
+    }
+
+    panelCircles.sort((a, b) => a.center[0] - b.center[0] || a.center[1] - b.center[1] || a.radius - b.radius);
+    panelCircles.forEach((c, idx) => {
+      circles.push({
+        id: `${p.view}C${idx + 1}`,
+        ...c
+      });
+    });
+
+    if (hitTotalLimit) break;
+  }
+
+  const result = {
+    state: 'observed',
+    version: VERSION,
+    layout: 'first-angle-assumed',
+    views,
+    frame: FRAME_DESC,
+    extent,
+    circles,
+    truncated,
+    ...(truncated ? { truncateReason } : {}),
+    scope: 'relative raster circle observations only',
+    dimensionValuesRead: false,
+    annotationExcluded,
+    materialInferred: false,
+    automaticAcceptance: false
+  };
+
+  while (result.circles.length > 0 && utf8ByteLength(JSON.stringify(result)) > limits.maxSerializedBytes) {
+    result.circles.pop();
+    result.truncated = true;
+    result.truncateReason = 'serialized-bytes';
+  }
+  if (utf8ByteLength(JSON.stringify(result)) > limits.maxSerializedBytes) {
+    return unavailable('budget');
+  }
+
+  return result;
+}
+
+return { observe, LIMITS };
+}
+
+function SourceOrientationKit() {
+const VERSION = 'source-orientation-v1';
+const LIMITS = Object.freeze({
+  MAX_PIXELS: 4000000,
+  MAX_OUTPUT_PIXELS: 4000000,
+  MIN_WIDTH: 96,
+  MIN_HEIGHT: 96,
+  MIN_INK: 200,
+  MAX_DENSITY: 0.20,
+  MAX_SAMPLE_EDGES: 10000,
+  MAX_COMPONENTS: 1500,
+  MAX_COMPONENT_CHECK: 6,
+  MIN_COMPONENT_INK: 100,
+  MIN_COMPONENT_SPAN: 56,
+  MIN_CORRECT_DEG: 0.45,
+  MAX_CORRECT_DEG: 6.0,
+  MAX_HV_DIFF_DEG: 0.55,
+  MAX_SUBSET_DIFF_DEG: 0.75,
+  MIN_PEAK_ENERGY: 300,
+  MIN_SUBSET_ENERGY: 150,
+  MIN_CONTRAST: 2.2,
+  MIN_SUBSET_CONTRAST: 2.0,
+  MIN_JOINT_RATIO: 0.50,
+  MAX_COMPETING_RATIO: 0.72,
+  SUBSET_IMPROVE_RATIO: 1.18,
+  MAX_WORK_PIXELS: 4000000
+});
+
+function isIndexable(arr) {
+  return Array.isArray(arr) || (ArrayBuffer.isView(arr) && !(arr instanceof DataView));
+}
+
+function clampCap(value, hardMax) {
+  if (value === undefined || value === null) return hardMax;
+  if (typeof value !== 'number' || Number.isNaN(value) || value < 0) return -1;
+  if (value === Infinity) return hardMax;
+  return Math.min(hardMax, value);
+}
+
+function resolveOptions(options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const maxPixels = clampCap(opts.maxPixels, LIMITS.MAX_PIXELS);
+  const maxOutputPixels = clampCap(opts.maxOutputPixels, LIMITS.MAX_OUTPUT_PIXELS);
+  const maxSampleEdges = clampCap(opts.maxSampleEdges, LIMITS.MAX_SAMPLE_EDGES);
+  const maxWorkPixels = clampCap(opts.maxWorkPixels, LIMITS.MAX_WORK_PIXELS);
+  const minCorrectDeg = opts.minCorrectDeg === undefined ? LIMITS.MIN_CORRECT_DEG : clampCap(opts.minCorrectDeg, 2.0);
+  const maxCorrectDeg = opts.maxCorrectDeg === undefined ? LIMITS.MAX_CORRECT_DEG : clampCap(opts.maxCorrectDeg, LIMITS.MAX_CORRECT_DEG);
+  if (
+    maxPixels < 0 || maxOutputPixels < 0 || maxSampleEdges < 100 ||
+    maxWorkPixels < 0 || minCorrectDeg < 0 || maxCorrectDeg <= 0 || minCorrectDeg >= maxCorrectDeg
+  ) {
+    return null;
+  }
+  return {
+    maxPixels: Math.floor(maxPixels),
+    maxOutputPixels: Math.floor(maxOutputPixels),
+    maxSampleEdges: Math.floor(maxSampleEdges),
+    maxWorkPixels: Math.floor(maxWorkPixels),
+    minCorrectDeg,
+    maxCorrectDeg
+  };
+}
+
+function unavailable(reason, extra) {
+  return {
+    state: 'unavailable',
+    action: 'none',
+    reason,
+    ...(extra || {})
+  };
+}
+
+function quant2(x) {
+  return Math.round(x * 100) / 100;
+}
+
+function median(values) {
+  if (!values.length) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[sorted.length >> 1];
+}
+
+function mod90Diff(a, b) {
+  let d = Math.abs(a - b) % 90;
+  if (d > 45) d = 90 - d;
+  return d;
+}
+
+function validateInput(input, opts) {
+  if (!input || typeof input !== 'object') return 'invalid-input';
+  const { w, h, mask, luma } = input;
+  if (
+    !Number.isInteger(w) || !Number.isInteger(h) ||
+    w < LIMITS.MIN_WIDTH || h < LIMITS.MIN_HEIGHT ||
+    w * h > opts.maxPixels ||
+    !isIndexable(mask) || mask.length !== w * h
+  ) {
+    return 'image-size';
+  }
+  if (luma != null && (!isIndexable(luma) || luma.length !== w * h)) {
+    return 'invalid-luma';
+  }
+  return null;
+}
+
+/**
+ * Downsample an array of coordinates uniformly to at most maxCount points,
+ * returning { xs, ys, count, weight }.
+ */
+function samplePoints(rawX, rawY, totalCount, maxCount) {
+  if (totalCount <= maxCount) {
+    const xs = new Int32Array(totalCount);
+    const ys = new Int32Array(totalCount);
+    for (let i = 0; i < totalCount; i++) {
+      xs[i] = rawX[i];
+      ys[i] = rawY[i];
+    }
+    return { xs, ys, count: totalCount, weight: 1 };
+  }
+  const stride = totalCount / maxCount;
+  const xs = new Int32Array(maxCount);
+  const ys = new Int32Array(maxCount);
+  for (let i = 0; i < maxCount; i++) {
+    const idx = Math.min(totalCount - 1, Math.floor(i * stride));
+    xs[i] = rawX[idx];
+    ys[i] = rawY[idx];
+  }
+  return { xs, ys, count: maxCount, weight: totalCount / maxCount };
+}
+
+/**
+ * Compute linear-splatted 1D projection concentration energy for a point cloud.
+ * angleDeg is rotation angle of the drawing relative to upright axes.
+ * isVertical=false projects horizontal-like edges along (-x*sin + y*cos).
+ * isVertical=true projects vertical-like edges along (x*cos + y*sin).
+ */
+function scoreProjection(pts, angleDeg, isVertical, w, h, histBuf, smooth) {
+  const { xs, ys, count, weight } = pts;
+  if (count < 24) return 0;
+  const rad = (angleDeg * Math.PI) / 180;
+  const c = Math.cos(rad);
+  const s = Math.sin(rad);
+  let minP = Infinity;
+  let maxP = -Infinity;
+  if (!isVertical) {
+    const corners = [0, -w * s, h * c, -w * s + h * c];
+    for (let i = 0; i < 4; i++) {
+      if (corners[i] < minP) minP = corners[i];
+      if (corners[i] > maxP) maxP = corners[i];
+    }
+  } else {
+    const corners = [0, w * c, h * s, w * c + h * s];
+    for (let i = 0; i < 4; i++) {
+      if (corners[i] < minP) minP = corners[i];
+      if (corners[i] > maxP) maxP = corners[i];
+    }
+  }
+  const bins = Math.ceil(maxP - minP) + 5;
+  if (bins > histBuf.length) return 0;
+  histBuf.fill(0, 0, bins);
+
+  const shift = 1 - minP;
+  if (!isVertical) {
+    for (let i = 0; i < count; i++) {
+      const p = -xs[i] * s + ys[i] * c + shift;
+      const b0 = p | 0;
+      const f = p - b0;
+      histBuf[b0] += (1 - f) * weight;
+      histBuf[b0 + 1] += f * weight;
+    }
+  } else {
+    for (let i = 0; i < count; i++) {
+      const p = xs[i] * c + ys[i] * s + shift;
+      const b0 = p | 0;
+      const f = p - b0;
+      histBuf[b0] += (1 - f) * weight;
+      histBuf[b0 + 1] += f * weight;
+    }
+  }
+
+  let energy = 0;
+  if (smooth) {
+    const tau = 6;
+    for (let b = 0; b < bins - 1; b++) {
+      const v = histBuf[b] + histBuf[b + 1];
+      if (v > tau) {
+        const d = v - tau;
+        energy += d * d;
+      }
+    }
+  } else {
+    const tau = 4;
+    for (let b = 0; b < bins; b++) {
+      const v = histBuf[b];
+      if (v > tau) {
+        const d = v - tau;
+        energy += d * d;
+      }
+    }
+  }
+  return energy;
+}
+
+function refineAngle(pts, centerDeg, halfRangeDeg, stepDeg, isVertical, w, h, histBuf, smooth) {
+  let bestAngle = centerDeg;
+  let bestScore = -1;
+  const nSteps = Math.round((halfRangeDeg * 2) / stepDeg);
+  for (let i = 0; i <= nSteps; i++) {
+    const a = centerDeg - halfRangeDeg + i * stepDeg;
+    const sc = scoreProjection(pts, a, isVertical, w, h, histBuf, smooth);
+    if (sc > bestScore) {
+      bestScore = sc;
+      bestAngle = a;
+    }
+  }
+  return { angle: bestAngle, score: bestScore };
+}
+
+function checkSubsetAgreement(rawX, rawY, count, isVertical, globalDeg, w, h, histBuf, maxDiffDeg) {
+  if (count < 40) return { ok: true, skipped: true };
+  const pts = samplePoints(rawX, rawY, count, 6000);
+  const scores = [];
+  let bestAng = globalDeg;
+  let bestScore = -1;
+  const baseScore = scoreProjection(pts, globalDeg, isVertical, w, h, histBuf, true);
+
+  for (let a = globalDeg - 4.5; a <= globalDeg + 4.5001; a += 0.25) {
+    const sc = scoreProjection(pts, a, isVertical, w, h, histBuf, true);
+    scores.push(sc);
+    if (sc > bestScore) {
+      bestScore = sc;
+      bestAng = a;
+    }
+  }
+  const med = median(scores);
+  if (bestScore < LIMITS.MIN_SUBSET_ENERGY || bestScore < med * LIMITS.MIN_SUBSET_CONTRAST) {
+    return { ok: true, weak: true, bestAngle: quant2(bestAng), bestScore };
+  }
+  const fine = refineAngle(pts, bestAng, 0.3, 0.05, isVertical, w, h, histBuf, true);
+  const fineAtGlobal = scoreProjection(pts, globalDeg, isVertical, w, h, histBuf, true);
+  const diff = Math.abs(fine.angle - globalDeg);
+  if (diff > maxDiffDeg && fine.score > fineAtGlobal * LIMITS.SUBSET_IMPROVE_RATIO && fine.score > baseScore * LIMITS.SUBSET_IMPROVE_RATIO) {
+    return { ok: false, bestAngle: quant2(fine.angle), diff: quant2(diff), ratio: quant2(fine.score / Math.max(1, fineAtGlobal)) };
+  }
+  return { ok: true, bestAngle: quant2(fine.angle), diff: quant2(diff) };
+}
+
+/**
+ * Extract major 8-connected components for per-view orientation consistency check.
+ */
+function extractMajorComponents(mask, w, h, inkCount, maxWorkPixels) {
+  const n = w * h;
+  const seen = new Uint8Array(n);
+  const queue = new Int32Array(Math.min(n, Math.max(256, inkCount + 16)));
+  const major = [];
+  let work = 0;
+  let totalComps = 0;
+
+  for (let y = 0; y < h; y++) {
+    const row = y * w;
+    for (let x = 0; x < w; x++) {
+      const start = row + x;
+      if (seen[start] || !mask[start]) continue;
+      totalComps++;
+      if (totalComps > LIMITS.MAX_COMPONENTS) {
+        return { aborted: true, reason: 'budget', major };
+      }
+
+      seen[start] = 1;
+      let head = 0;
+      let tail = 0;
+      queue[tail++] = start;
+      let compInk = 1;
+      let minX = x;
+      let maxX = x;
+      let minY = y;
+      let maxY = y;
+
+      while (head < tail) {
+        if (++work > maxWorkPixels) {
+          return { aborted: true, reason: 'budget', major };
+        }
+        const cur = queue[head++];
+        const cx = cur % w;
+        const cy = (cur / w) | 0;
+        const y0 = cy > 0 ? cy - 1 : 0;
+        const y1 = cy + 1 < h ? cy + 1 : h - 1;
+        const x0 = cx > 0 ? cx - 1 : 0;
+        const x1 = cx + 1 < w ? cx + 1 : w - 1;
+        for (let ny = y0; ny <= y1; ny++) {
+          const nrow = ny * w;
+          for (let nx = x0; nx <= x1; nx++) {
+            const ni = nrow + nx;
+            if (!seen[ni] && mask[ni]) {
+              seen[ni] = 1;
+              if (tail < queue.length) queue[tail++] = ni;
+              compInk++;
+              if (nx < minX) minX = nx;
+              if (nx > maxX) maxX = nx;
+              if (ny < minY) minY = ny;
+              if (ny > maxY) maxY = ny;
+            }
+          }
+        }
+      }
+
+      const bw = maxX - minX + 1;
+      const bh = maxY - minY + 1;
+      if (compInk >= LIMITS.MIN_COMPONENT_INK && Math.max(bw, bh) >= LIMITS.MIN_COMPONENT_SPAN) {
+        major.push({
+          ink: compInk,
+          bounds: [minX, minY, maxX + 1, maxY + 1],
+          area: bw * bh
+        });
+      }
+    }
+  }
+
+  const outerMajor = major.filter(a => !major.some(b =>
+    a !== b &&
+    a.bounds[0] >= b.bounds[0] && a.bounds[1] >= b.bounds[1] &&
+    a.bounds[2] <= b.bounds[2] && a.bounds[3] <= b.bounds[3] &&
+    a.area < b.area
+  ));
+  outerMajor.sort((a, b) => b.area - a.area || b.ink - a.ink);
+  return { aborted: false, major: outerMajor.slice(0, LIMITS.MAX_COMPONENT_CHECK) };
+}
+
+function estimate(input, options) {
+  const opts = resolveOptions(options);
+  if (!opts) return unavailable('budget');
+  const err = validateInput(input, opts);
+  if (err) return unavailable(err);
+
+  const { w, h, mask } = input;
+  let ink = 0;
+  let inkMinX = w;
+  let inkMaxX = -1;
+  let inkMinY = h;
+  let inkMaxY = -1;
+
+  const rawHX = [];
+  const rawHY = [];
+  const rawVX = [];
+  const rawVY = [];
+
+  for (let y = 0; y < h; y++) {
+    const row = y * w;
+    for (let x = 0; x < w; x++) {
+      const on = mask[row + x] ? 1 : 0;
+      if (!on) continue;
+      ink++;
+      if (x < inkMinX) inkMinX = x;
+      if (x > inkMaxX) inkMaxX = x;
+      if (y < inkMinY) inkMinY = y;
+      if (y > inkMaxY) inkMaxY = y;
+      if (y > 0 && !mask[row - w + x]) {
+        rawHX.push(x);
+        rawHY.push(y);
+      }
+      if (x > 0 && !mask[row + x - 1]) {
+        rawVX.push(x);
+        rawVY.push(y);
+      }
+    }
+  }
+
+  if (ink < LIMITS.MIN_INK || ink > w * h * LIMITS.MAX_DENSITY) {
+    return unavailable('image-density', { ink });
+  }
+  if (rawHX.length < 40 || rawVX.length < 40) {
+    return unavailable('axes-uncertain', { ink });
+  }
+
+  const ptsH = samplePoints(rawHX, rawHY, rawHX.length, opts.maxSampleEdges);
+  const ptsV = samplePoints(rawVX, rawVY, rawVX.length, opts.maxSampleEdges);
+  const maxBins = Math.ceil(Math.hypot(w, h)) + 12;
+  const histBuf = new Float32Array(maxBins);
+
+  // Coarse grid: 0.25 deg inside [-8, +8], 1 deg elsewhere in [-44, +45]
+  const angles = [];
+  for (let a = -44; a < -8; a += 1) angles.push(a);
+  for (let a = -8; a <= 8.0001; a += 0.25) angles.push(Math.round(a * 100) / 100);
+  for (let a = 9; a <= 45; a += 1) angles.push(a);
+
+  const scoresH = new Array(angles.length);
+  const scoresV = new Array(angles.length);
+  let maxRawH = 0;
+  let maxRawV = 0;
+
+  for (let i = 0; i < angles.length; i++) {
+    const a = angles[i];
+    const sh = scoreProjection(ptsH, a, false, w, h, histBuf, true);
+    const sv = scoreProjection(ptsV, a, true, w, h, histBuf, true);
+    scoresH[i] = sh;
+    scoresV[i] = sv;
+    if (sh > maxRawH) maxRawH = sh;
+    if (sv > maxRawV) maxRawV = sv;
+  }
+
+  if (maxRawH < LIMITS.MIN_PEAK_ENERGY || maxRawV < LIMITS.MIN_PEAK_ENERGY) {
+    return unavailable('axes-uncertain', { maxRawH, maxRawV });
+  }
+
+  const medH = median(scoresH);
+  const medV = median(scoresV);
+  if (maxRawH < medH * LIMITS.MIN_CONTRAST || maxRawV < medV * LIMITS.MIN_CONTRAST) {
+    return unavailable('axes-uncertain', { contrastH: quant2(maxRawH / Math.max(1, medH)), contrastV: quant2(maxRawV / Math.max(1, medV)) });
+  }
+
+  let bestJoint = -1;
+  let bestIdx = -1;
+  const jointScores = new Array(angles.length);
+  for (let i = 0; i < angles.length; i++) {
+    const j = Math.min(scoresH[i] / maxRawH, scoresV[i] / maxRawV);
+    jointScores[i] = j;
+    if (j > bestJoint) {
+      bestJoint = j;
+      bestIdx = i;
+    }
+  }
+
+  const coarseAngle = angles[bestIdx];
+  if (
+    bestJoint < LIMITS.MIN_JOINT_RATIO ||
+    scoresH[bestIdx] < medH * LIMITS.MIN_CONTRAST ||
+    scoresV[bestIdx] < medV * LIMITS.MIN_CONTRAST
+  ) {
+    return unavailable('axes-inconsistent', { coarseAngle, bestJoint: quant2(bestJoint) });
+  }
+
+  // Reject competing distinct global orientation peak (> 2 deg away in 90-deg modulo space)
+  for (let i = 0; i < angles.length; i++) {
+    if (mod90Diff(angles[i], coarseAngle) <= 2.2) continue;
+    if (
+      jointScores[i] > bestJoint * LIMITS.MAX_COMPETING_RATIO &&
+      scoresH[i] >= medH * LIMITS.MIN_CONTRAST &&
+      scoresV[i] >= medV * LIMITS.MIN_CONTRAST
+    ) {
+      return unavailable('orientation-ambiguous', {
+        coarseAngle,
+        competingAngle: angles[i],
+        ratio: quant2(jointScores[i] / bestJoint)
+      });
+    }
+  }
+
+  if (Math.abs(coarseAngle) > opts.maxCorrectDeg + 0.6) {
+    return unavailable('tilt-out-of-range', { estimatedDeg: quant2(coarseAngle) });
+  }
+
+  // Fine independent refinement of horizontal and vertical edge angles around coarseAngle
+  const hPass1 = refineAngle(ptsH, coarseAngle, 0.8, 0.05, false, w, h, histBuf, true);
+  const vPass1 = refineAngle(ptsV, coarseAngle, 0.8, 0.05, true, w, h, histBuf, true);
+  const hFine = refineAngle(ptsH, hPass1.angle, 0.08, 0.01, false, w, h, histBuf, true);
+  const vFine = refineAngle(ptsV, vPass1.angle, 0.08, 0.01, true, w, h, histBuf, true);
+
+  const hvDiff = Math.abs(hFine.angle - vFine.angle);
+  if (hvDiff > LIMITS.MAX_HV_DIFF_DEG) {
+    return unavailable('axes-sheared-or-inconsistent', {
+      hAngleDeg: quant2(hFine.angle),
+      vAngleDeg: quant2(vFine.angle),
+      hvDiffDeg: quant2(hvDiff)
+    });
+  }
+
+  const angleDeg = (hFine.angle * maxRawH + vFine.angle * maxRawV) / (maxRawH + maxRawV);
+  if (Math.abs(angleDeg) > opts.maxCorrectDeg) {
+    return unavailable('tilt-out-of-range', { estimatedDeg: quant2(angleDeg) });
+  }
+
+  // Spatial half checks (perspective keystone / split rotation guard)
+  const midX = (inkMinX + inkMaxX) / 2;
+  const midY = (inkMinY + inkMaxY) / 2;
+  const topHX = [], topHY = [], botHX = [], botHY = [];
+  for (let i = 0; i < rawHX.length; i++) {
+    if (rawHY[i] <= midY) { topHX.push(rawHX[i]); topHY.push(rawHY[i]); }
+    else { botHX.push(rawHX[i]); botHY.push(rawHY[i]); }
+  }
+  const leftVX = [], leftVY = [], rightVX = [], rightVY = [];
+  for (let i = 0; i < rawVX.length; i++) {
+    if (rawVX[i] <= midX) { leftVX.push(rawVX[i]); leftVY.push(rawVX[i]); }
+    else { rightVX.push(rawVX[i]); rightVY.push(rawVX[i]); }
+  }
+
+  const topChk = checkSubsetAgreement(topHX, topHY, topHX.length, false, angleDeg, w, h, histBuf, LIMITS.MAX_SUBSET_DIFF_DEG);
+  if (!topChk.ok) return unavailable('orientation-inconsistent', { part: 'top-H', estimatedDeg: quant2(angleDeg), ...topChk });
+  const botChk = checkSubsetAgreement(botHX, botHY, botHX.length, false, angleDeg, w, h, histBuf, LIMITS.MAX_SUBSET_DIFF_DEG);
+  if (!botChk.ok) return unavailable('orientation-inconsistent', { part: 'bottom-H', estimatedDeg: quant2(angleDeg), ...botChk });
+  const leftChk = checkSubsetAgreement(leftVX, leftVY, leftVX.length, true, angleDeg, w, h, histBuf, LIMITS.MAX_SUBSET_DIFF_DEG);
+  if (!leftChk.ok) return unavailable('orientation-inconsistent', { part: 'left-V', estimatedDeg: quant2(angleDeg), ...leftChk });
+  const rightChk = checkSubsetAgreement(rightVX, rightVY, rightVX.length, true, angleDeg, w, h, histBuf, LIMITS.MAX_SUBSET_DIFF_DEG);
+  if (!rightChk.ok) return unavailable('orientation-inconsistent', { part: 'right-V', estimatedDeg: quant2(angleDeg), ...rightChk });
+
+  // Major connected component consistency check (per-view independent tilt)
+  const compInfo = extractMajorComponents(mask, w, h, ink, opts.maxWorkPixels);
+  if (compInfo.aborted) {
+    return unavailable('budget');
+  }
+
+  for (let ci = 0; ci < compInfo.major.length; ci++) {
+    const b = compInfo.major[ci].bounds;
+    const cx0 = Math.max(1, b[0]);
+    const cy0 = Math.max(1, b[1]);
+    const cx1 = Math.min(w, b[2]);
+    const cy1 = Math.min(h, b[3]);
+    const cHX = [], cHY = [], cVX = [], cVY = [];
+    for (let y = cy0; y < cy1; y++) {
+      const row = y * w;
+      for (let x = cx0; x < cx1; x++) {
+        if (!mask[row + x]) continue;
+        if (!mask[row - w + x]) { cHX.push(x); cHY.push(y); }
+        if (!mask[row + x - 1]) { cVX.push(x); cVY.push(y); }
+      }
+    }
+    const ch = checkSubsetAgreement(cHX, cHY, cHX.length, false, angleDeg, w, h, histBuf, LIMITS.MAX_SUBSET_DIFF_DEG);
+    if (!ch.ok) return unavailable('orientation-inconsistent', { part: 'component-H-' + ci, estimatedDeg: quant2(angleDeg), ...ch });
+    const cv = checkSubsetAgreement(cVX, cVY, cVX.length, true, angleDeg, w, h, histBuf, LIMITS.MAX_SUBSET_DIFF_DEG);
+    if (!cv.ok) return unavailable('orientation-inconsistent', { part: 'component-V-' + ci, estimatedDeg: quant2(angleDeg), ...cv });
+  }
+
+  const absDeg = Math.abs(angleDeg);
+  const action = absDeg < opts.minCorrectDeg ? 'unchanged' : 'rectify';
+
+  return {
+    state: 'ready',
+    version: VERSION,
+    action,
+    angleDeg: action === 'unchanged' ? 0 : quant2(angleDeg),
+    rawAngleDeg: quant2(angleDeg),
+    hAngleDeg: quant2(hFine.angle),
+    vAngleDeg: quant2(vFine.angle),
+    hvDiffDeg: quant2(hvDiff),
+    contrastH: quant2(maxRawH / Math.max(1, medH)),
+    contrastV: quant2(maxRawV / Math.max(1, medV)),
+    ink,
+    sourcePixelsPreserved: true
+  };
+}
+
+function rectify(input, estOrOptions, maybeOptions) {
+  let est = null;
+  let optsInput = maybeOptions;
+  if (estOrOptions && typeof estOrOptions === 'object' && typeof estOrOptions.state === 'string') {
+    est = estOrOptions;
+  } else {
+    optsInput = estOrOptions;
+  }
+  const opts = resolveOptions(optsInput);
+  if (!opts) return unavailable('budget');
+  const err = validateInput(input, opts);
+  if (err) return unavailable(err);
+
+  if (!est) {
+    est = estimate(input, optsInput);
+  }
+  if (!est || est.state !== 'ready') {
+    return est || unavailable('failed');
+  }
+
+  const { w, h, mask, luma } = input;
+  if (est.action === 'unchanged' || Math.abs(est.angleDeg) < opts.minCorrectDeg) {
+    return {
+      state: 'ready',
+      version: VERSION,
+      action: 'unchanged',
+      angleDeg: 0,
+      rawAngleDeg: est.rawAngleDeg ?? 0,
+      w,
+      h,
+      mask,
+      transform: {
+        angleDeg: 0,
+        pivotIn: [w / 2, h / 2],
+        pivotOut: [w / 2, h / 2],
+        inSize: [w, h],
+        outSize: [w, h]
+      },
+      sourcePixelsPreserved: true
+    };
+  }
+
+  const deg = est.rawAngleDeg ?? est.angleDeg;
+  if (!Number.isFinite(deg) || Math.abs(deg) > opts.maxCorrectDeg) {
+    return unavailable('tilt-out-of-range', { estimatedDeg: deg });
+  }
+
+  const rad = (deg * Math.PI) / 180;
+  const c = Math.cos(rad);
+  const s = Math.sin(rad);
+  const absC = Math.abs(c);
+  const absS = Math.abs(s);
+
+  const ow = Math.ceil(w * absC + h * absS);
+  const oh = Math.ceil(h * absC + w * absS);
+  if (ow < LIMITS.MIN_WIDTH || oh < LIMITS.MIN_HEIGHT || ow * oh > opts.maxOutputPixels) {
+    return unavailable('budget');
+  }
+
+  const inCx = w / 2;
+  const inCy = h / 2;
+  const outCx = ow / 2;
+  const outCy = oh / 2;
+  const outMask = new Uint8Array(ow * oh);
+  const useLuma = luma != null;
+  let outInk = 0;
+  let inInk = est.ink || 0;
+  if (!inInk) {
+    for (let i = 0; i < mask.length; i++) if (mask[i]) inInk++;
+  }
+
+  // Backward mapping: rectified (rx+0.5, ry+0.5) -> tilted (sx+0.5, sy+0.5)
+  // Forward tilt by +rad was: (tx, ty) = R(+rad) * (ux, uy).
+  // So rectifying by -rad implies backward map uses R(+rad).
+  for (let ry = 0; ry < oh; ry++) {
+    const dy = ry + 0.5 - outCy;
+    const rowBaseX = inCx - dy * s - 0.5;
+    const rowBaseY = inCy + dy * c - 0.5;
+    const outRow = ry * ow;
+
+    for (let rx = 0; rx < ow; rx++) {
+      const dx = rx + 0.5 - outCx;
+      const sx = rowBaseX + dx * c;
+      const sy = rowBaseY + dx * s;
+      if (sx <= -0.5 || sx >= w - 0.5 || sy <= -0.5 || sy >= h - 0.5) continue;
+
+      const x0 = Math.floor(sx);
+      const y0 = Math.floor(sy);
+      const fx = sx - x0;
+      const fy = sy - y0;
+      const x1 = x0 + 1;
+      const y1 = y0 + 1;
+
+      const cx0 = x0 < 0 ? 0 : x0 >= w ? w - 1 : x0;
+      const cx1 = x1 < 0 ? 0 : x1 >= w ? w - 1 : x1;
+      const cy0 = y0 < 0 ? 0 : y0 >= h ? h - 1 : y0;
+      const cy1 = y1 < 0 ? 0 : y1 >= h ? h - 1 : y1;
+
+      const w00 = (1 - fx) * (1 - fy);
+      const w10 = fx * (1 - fy);
+      const w01 = (1 - fx) * fy;
+      const w11 = fx * fy;
+
+      if (useLuma) {
+        const l00 = x0 >= 0 && x0 < w && y0 >= 0 && y0 < h ? luma[cy0 * w + cx0] : 255;
+        const l10 = x1 >= 0 && x1 < w && y0 >= 0 && y0 < h ? luma[cy0 * w + cx1] : 255;
+        const l01 = x0 >= 0 && x0 < w && y1 >= 0 && y1 < h ? luma[cy1 * w + cx0] : 255;
+        const l11 = x1 >= 0 && x1 < w && y1 >= 0 && y1 < h ? luma[cy1 * w + cx1] : 255;
+        const val = w00 * l00 + w10 * l10 + w01 * l01 + w11 * l11;
+        if (val < 145) {
+          outMask[outRow + rx] = 1;
+          outInk++;
+        }
+      } else {
+        const m00 = x0 >= 0 && x0 < w && y0 >= 0 && y0 < h && mask[cy0 * w + cx0] ? 1 : 0;
+        const m10 = x1 >= 0 && x1 < w && y0 >= 0 && y0 < h && mask[cy0 * w + cx1] ? 1 : 0;
+        const m01 = x0 >= 0 && x0 < w && y1 >= 0 && y1 < h && mask[cy1 * w + cx0] ? 1 : 0;
+        const m11 = x1 >= 0 && x1 < w && y1 >= 0 && y1 < h && mask[cy1 * w + cx1] ? 1 : 0;
+        const val = w00 * m00 + w10 * m10 + w01 * m01 + w11 * m11;
+        if (val >= 0.43) {
+          outMask[outRow + rx] = 1;
+          outInk++;
+        }
+      }
+    }
+  }
+
+  if (outInk < LIMITS.MIN_INK || outInk > ow * oh * LIMITS.MAX_DENSITY || outInk < inInk * 0.55 || outInk > inInk * 1.85) {
+    return unavailable('resample-degraded', { inInk, outInk, angleDeg: quant2(deg) });
+  }
+
+  return {
+    state: 'ready',
+    version: VERSION,
+    action: 'rectify',
+    angleDeg: quant2(deg),
+    rawAngleDeg: est.rawAngleDeg ?? quant2(deg),
+    w: ow,
+    h: oh,
+    mask: outMask,
+    inInk,
+    outInk,
+    transform: {
+      angleDeg: quant2(deg),
+      rawAngleDeg: deg,
+      pivotIn: [inCx, inCy],
+      pivotOut: [outCx, outCy],
+      inSize: [w, h],
+      outSize: [ow, oh]
+    },
+    sourcePixelsPreserved: true
+  };
+}
+
+function rectToSource(transform, rx, ry) {
+  if (!transform || !transform.pivotIn || !transform.pivotOut) return null;
+  const rad = ((transform.rawAngleDeg ?? transform.angleDeg ?? 0) * Math.PI) / 180;
+  const c = Math.cos(rad);
+  const s = Math.sin(rad);
+  const dx = rx + 0.5 - transform.pivotOut[0];
+  const dy = ry + 0.5 - transform.pivotOut[1];
+  return [
+    transform.pivotIn[0] + dx * c - dy * s - 0.5,
+    transform.pivotIn[1] + dx * s + dy * c - 0.5
+  ];
+}
+
+function sourceToRect(transform, sx, sy) {
+  if (!transform || !transform.pivotIn || !transform.pivotOut) return null;
+  const rad = ((transform.rawAngleDeg ?? transform.angleDeg ?? 0) * Math.PI) / 180;
+  const c = Math.cos(rad);
+  const s = Math.sin(rad);
+  const dx = sx + 0.5 - transform.pivotIn[0];
+  const dy = sy + 0.5 - transform.pivotIn[1];
+  return [
+    transform.pivotOut[0] + dx * c + dy * s - 0.5,
+    transform.pivotOut[1] - dx * s + dy * c - 0.5
+  ];
+}
+
+function hasClippedOriginalInk(transform, panels, margin = 3) {
+  if (!transform || !transform.inSize || !Array.isArray(panels)) return false;
+  const [inW, inH] = transform.inSize;
+  const rad = ((transform.rawAngleDeg ?? transform.angleDeg ?? 0) * Math.PI) / 180;
+  if (Math.abs(rad) < 1e-6) return false;
+  const c = Math.cos(rad);
+  const s = Math.sin(rad);
+  const [inCx, inCy] = transform.pivotIn;
+  const [outCx, outCy] = transform.pivotOut;
+
+  for (const p of panels) {
+    if (!p || !p.bounds || !p.crop || !p.mask || !p.cropWidth) continue;
+    const cw = p.cropWidth;
+    const ch = p.cropHeight;
+    const cx0 = p.crop[0];
+    const cy0 = p.crop[1];
+    const x0 = Math.max(0, p.bounds[0] - cx0);
+    const y0 = Math.max(0, p.bounds[1] - cy0);
+    const x1 = Math.min(cw, p.bounds[2] - cx0);
+    const y1 = Math.min(ch, p.bounds[3] - cy0);
+
+    for (let ly = y0; ly < y1; ly++) {
+      const ry = cy0 + ly;
+      const dy = ry + 0.5 - outCy;
+      const baseX = inCx - dy * s - 0.5;
+      const baseY = inCy + dy * c - 0.5;
+      const row = ly * cw;
+      for (let lx = x0; lx < x1; lx++) {
+        if (!p.mask[row + lx]) continue;
+        const dx = cx0 + lx + 0.5 - outCx;
+        const sx = baseX + dx * c;
+        const sy = baseY + dx * s;
+        if (sx < margin - 0.5 || sx >= inW - margin - 0.5 || sy < margin - 0.5 || sy >= inH - margin - 0.5) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function prepare(input, options) {
+  const est = estimate(input, options);
+  if (est.state !== 'ready') return est;
+  const rect = rectify(input, est, options);
+  if (rect.state !== 'ready') return rect;
+  return {
+    ...rect,
+    hAngleDeg: est.hAngleDeg,
+    vAngleDeg: est.vAngleDeg,
+    hvDiffDeg: est.hvDiffDeg,
+    contrastH: est.contrastH,
+    contrastV: est.contrastV
+  };
+}
+
+return { VERSION, LIMITS, estimate, rectify, prepare, rectToSource, sourceToRect, hasClippedOriginalInk };
+}
+
+function SourceCorrespondenceKit() {
+const VERSION = 'source-correspondence-v1';
+const AXES = Object.freeze({ V: ['X', 'Z'], W: ['Y', 'Z'], H: ['X', 'Y'] });
+const MAX_PIXELS = 4000000;
+const LIMITS = Object.freeze({
+  MAX_ITEMS: 8,
+  MAX_PANEL_PIXELS: 2000000,
+  MAX_SCAN_PIXELS: 3000000,
+  MAX_WORK_PIXELS: 3000000,
+  MAX_WALLS_PER_VIEW: 64,
+  MAX_SERIALIZED_BYTES: 2048
+});
+
+const quant = x => Math.round(x * 10) / 10;
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const sameScale = (a, b) => Math.abs(a - b) <= Math.max(3, Math.max(a, b) * 0.035);
+
+function isIndexable(arr) {
+  return Array.isArray(arr) || (ArrayBuffer.isView(arr) && !(arr instanceof DataView));
+}
+
+function utf8ByteLength(str) {
+  let bytes = 0;
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if (code <= 0x7f) {
+      bytes += 1;
+    } else if (code <= 0x7ff) {
+      bytes += 2;
+    } else if (code >= 0xd800 && code <= 0xdbff && i + 1 < str.length) {
+      const next = str.charCodeAt(i + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) {
+        bytes += 4;
+        i++;
+      } else {
+        bytes += 3;
+      }
+    } else {
+      bytes += 3;
+    }
+  }
+  return bytes;
+}
+
+function clampCap(value, hardMax) {
+  if (value === undefined || value === null) return hardMax;
+  if (typeof value !== 'number' || Number.isNaN(value) || value < 0) return -1;
+  if (value === Infinity) return hardMax;
+  return Math.min(hardMax, Math.floor(value));
+}
+
+function resolveLimits(options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const limits = {
+    maxItems: clampCap(opts.maxItems, LIMITS.MAX_ITEMS),
+    maxPanelPixels: clampCap(opts.maxPanelPixels, LIMITS.MAX_PANEL_PIXELS),
+    maxScanPixels: clampCap(opts.maxScanPixels, LIMITS.MAX_SCAN_PIXELS),
+    maxWorkPixels: clampCap(opts.maxWorkPixels, LIMITS.MAX_WORK_PIXELS),
+    maxWallsPerView: clampCap(opts.maxWallsPerView, LIMITS.MAX_WALLS_PER_VIEW),
+    maxSerializedBytes: clampCap(opts.maxSerializedBytes, LIMITS.MAX_SERIALIZED_BYTES)
+  };
+  for (const k of Object.keys(limits)) {
+    if (limits[k] < 0) return null;
+  }
+  return limits;
+}
+
+function median(values) {
+  if (!values.length) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)];
+}
+
+function intervalIoU(a0, a1, b0, b1) {
+  const inter = Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
+  const union = Math.max(a1, b1) - Math.min(a0, b0);
+  return union > 0 ? inter / union : 0;
+}
+
+function unavailable(reason, extra) {
+  return {
+    state: 'unavailable',
+    status: 'unavailable',
+    version: VERSION,
+    reason,
+    items: [],
+    unresolved: [],
+    truncated: false,
+    ...(extra || {}),
+    automaticAcceptance: false,
+    materialInferred: false
+  };
+}
+
+function prepareLayout(source, limits, budget) {
+  if (!source || typeof source !== 'object' || source.status !== 'prepared') {
+    return { ok: false, result: unavailable('layout') };
+  }
+  const panels = Array.isArray(source.panels) ? source.panels : null;
+  if (!panels || panels.length < 2) {
+    return { ok: false, result: unavailable('layout') };
+  }
+  const rawViews = panels.map(p => p && p.view);
+  if (new Set(rawViews).size !== rawViews.length) {
+    return { ok: false, result: unavailable('layout') };
+  }
+  const viewsKey = [...rawViews].sort().join('');
+  if (viewsKey === 'HV') {
+    return { ok: false, result: unavailable('missing-view-W') };
+  }
+  if (viewsKey !== 'HVW') {
+    return { ok: false, result: unavailable('layout') };
+  }
+
+  const dims = source.dimensionsPx;
+  if (!dims || typeof dims !== 'object' || !['X', 'Y', 'Z'].every(k => Number.isFinite(dims[k]) && dims[k] >= 20)) {
+    return { ok: false, result: unavailable('scale') };
+  }
+
+  const spans = { X: [], Y: [], Z: [] };
+  const panelMap = {};
+  for (const p of panels) {
+    const b = p && p.bounds;
+    const c = p && p.crop;
+    const w = p && p.cropWidth;
+    const h = p && p.cropHeight;
+    if (
+      !AXES[p && p.view] ||
+      !Array.isArray(b) || !Array.isArray(c) || b.length !== 4 || c.length !== 4 ||
+      !b.every(Number.isInteger) || !c.every(Number.isInteger) ||
+      !Number.isInteger(w) || !Number.isInteger(h) || w <= 0 || h <= 0 || w * h > MAX_PIXELS ||
+      !isIndexable(p.mask) || p.mask.length !== w * h ||
+      (p.ignore != null && (!isIndexable(p.ignore) || p.ignore.length !== w * h)) ||
+      c[0] < 0 || c[1] < 0 || c[2] - c[0] !== w || c[3] - c[1] !== h ||
+      b[0] < c[0] || b[1] < c[1] || b[2] > c[2] || b[3] > c[3] ||
+      b[2] <= b[0] || b[3] <= b[1]
+    ) {
+      return { ok: false, result: unavailable('bounds') };
+    }
+
+    const x0 = b[0] - c[0];
+    const y0 = b[1] - c[1];
+    const x1 = b[2] - c[0];
+    const y1 = b[3] - c[1];
+    const bw = x1 - x0;
+    const bh = y1 - y0;
+    if (bw * bh > limits.maxPanelPixels || w * h > limits.maxPanelPixels) {
+      return { ok: false, result: unavailable('budget') };
+    }
+    let ink = 0;
+    for (let y = y0; y < y1; y++) {
+      budget.scanPixels += bw;
+      if (budget.scanPixels > limits.maxScanPixels) {
+        return { ok: false, result: unavailable('budget') };
+      }
+      const row = y * w;
+      for (let x = x0; x < x1; x++) {
+        if (p.mask[row + x]) ink++;
+      }
+    }
+    if (ink === 0) {
+      return { ok: false, result: unavailable('empty') };
+    }
+    panelMap[p.view] = p;
+    AXES[p.view].forEach((axis, i) => spans[axis].push(b[i + 2] - b[i]));
+  }
+
+  for (const k of ['X', 'Y', 'Z']) {
+    const arr = spans[k];
+    if (!arr.length) return { ok: false, result: unavailable('scale') };
+    const mn = Math.min(...arr);
+    const mx = Math.max(...arr);
+    const avg = arr.reduce((s, v) => s + v, 0) / arr.length;
+    if (!sameScale(mn, mx) || !sameScale(dims[k], avg)) {
+      return { ok: false, result: unavailable('scale') };
+    }
+  }
+
+  const envelope = {
+    X: Math.max(...spans.X),
+    Y: Math.max(...spans.Y),
+    Z: Math.max(...spans.Z)
+  };
+  const maxSpan = Math.max(envelope.X, envelope.Y, envelope.Z);
+  if (!(maxSpan > 0)) return { ok: false, result: unavailable('scale') };
+
+  const scale = 100 / maxSpan;
+  const extent = {
+    X: quant(envelope.X * scale),
+    Y: quant(envelope.Y * scale),
+    Z: quant(envelope.Z * scale)
+  };
+
+  return { ok: true, panels, panelMap, maxSpan, scale, extent };
+}
+
+function getLocalBounds(p) {
+  return [
+    p.bounds[0] - p.crop[0],
+    p.bounds[1] - p.crop[1],
+    p.bounds[2] - p.crop[0],
+    p.bounds[3] - p.crop[1]
+  ];
+}
+
+function hasHorizSupportAt(mask, w, x0, x1, y0, y1, cx, y, wing) {
+  let leftHits = 0;
+  let rightHits = 0;
+  const wy0 = Math.max(y0, y - 1);
+  const wy1 = Math.min(y1 - 1, y + 1);
+  for (let d = wing; d <= wing + 4; d++) {
+    const lx = cx - d;
+    if (lx >= x0) {
+      for (let yy = wy0; yy <= wy1; yy++) {
+        if (mask[yy * w + lx]) { leftHits++; break; }
+      }
+    }
+    const rx = cx + d;
+    if (rx < x1) {
+      for (let yy = wy0; yy <= wy1; yy++) {
+        if (mask[yy * w + rx]) { rightHits++; break; }
+      }
+    }
+  }
+  return leftHits >= 4 || rightHits >= 4;
+}
+
+function hasHorizBoundaryNear(mask, w, x0, x1, y0, y1, cx, yRef, tolPx, wing) {
+  const ya = Math.max(y0, yRef - tolPx);
+  const yb = Math.min(y1 - 1, yRef + tolPx);
+  for (let y = ya; y <= yb; y++) {
+    if (hasHorizSupportAt(mask, w, x0, x1, y0, y1, cx, y, wing)) {
+      return y;
+    }
+  }
+  return -1;
+}
+
+function buildColumnTracks(p, limits, budget) {
+  const [x0, y0, x1, y1] = getLocalBounds(p);
+  const bw = x1 - x0;
+  const bh = y1 - y0;
+  const w = p.cropWidth;
+  const strokeEst = Math.max(1, Math.min(6, Math.round(p.sourceStroke || 2.5)));
+  const wing = Math.max(4, strokeEst + 2);
+
+  const colVertDensity = new Int32Array(bw);
+  for (let lx = 0; lx < bw; lx++) {
+    budget.scanPixels += bh;
+    if (budget.scanPixels > limits.maxScanPixels) {
+      budget.aborted = true;
+      return null;
+    }
+    const gx = x0 + lx;
+    let cnt = 0;
+    for (let y = y0; y < y1; y++) {
+      if (p.mask[y * w + gx] && !hasHorizSupportAt(p.mask, w, x0, x1, y0, y1, gx, y, wing)) {
+        cnt++;
+      }
+    }
+    colVertDensity[lx] = cnt;
+  }
+
+  // Group adjacent columns into stroke tracks without bridging clear white valleys
+  const minTrackDensity = Math.max(5, Math.min(8, Math.round(bh * 0.04)));
+  const tracks = [];
+  let inTrack = false;
+  let tStart = 0;
+  for (let lx = 0; lx <= bw; lx++) {
+    const val = lx < bw ? colVertDensity[lx] : 0;
+    if (!inTrack) {
+      if (val >= minTrackDensity) {
+        inTrack = true;
+        tStart = lx;
+      }
+      continue;
+    }
+    const prevVal = colVertDensity[lx - 1];
+    // Split if density dropped below threshold OR if we crossed a valley and rose again
+    const risingAfterValley = lx < bw && val > prevVal + 2 && prevVal < Math.max(minTrackDensity, colVertDensity[tStart] * 0.35);
+    if (lx === bw || val < minTrackDensity || risingAfterValley) {
+      const tEnd = lx; // half-open in lx
+      let peakVal = -1;
+      let weightedSum = 0;
+      let weightTotal = 0;
+      for (let k = tStart; k < tEnd; k++) {
+        if (colVertDensity[k] > peakVal) peakVal = colVertDensity[k];
+        weightedSum += (x0 + k) * colVertDensity[k];
+        weightTotal += colVertDensity[k];
+      }
+      const centerPx = weightTotal > 0 ? weightedSum / weightTotal : (x0 + (tStart + tEnd - 1) / 2);
+      // Use at most [centerPx - halfCorridor .. centerPx + halfCorridor] within track
+      const halfSpan = Math.max(1, Math.min(2, Math.ceil((tEnd - tStart) / 2)));
+      const subTracks = [];
+      if (tEnd - tStart <= Math.max(5, strokeEst * 2 + 2)) {
+        subTracks.push({
+          gx0: Math.max(x0, Math.floor(centerPx) - halfSpan),
+          gx1: Math.min(x1 - 1, Math.ceil(centerPx) + halfSpan),
+          centerPx
+        });
+      } else {
+        // Wide region with merged/adjacent walls -> scan per sliding 3px column
+        for (let k = tStart; k < tEnd; k += Math.max(1, strokeEst)) {
+          subTracks.push({
+            gx0: Math.max(x0, x0 + k - 1),
+            gx1: Math.min(x1 - 1, x0 + k + 1),
+            centerPx: x0 + k
+          });
+        }
+      }
+      for (const st of subTracks) tracks.push(st);
+      inTrack = false;
+      if (risingAfterValley) {
+        inTrack = true;
+        tStart = lx;
+      }
+    }
+  }
+
+  return { tracks, localBounds: [x0, y0, x1, y1], strokeEst, wing };
+}
+
+function scanTrackSegments(p, track, localBounds, strokeEst, wing, limits, budget) {
+  const [x0, y0, x1, y1] = localBounds;
+  const bh = y1 - y0;
+  const w = p.cropWidth;
+  const { gx0, gx1, centerPx } = track;
+  const cxRound = Math.round(centerPx);
+
+  if (budget.workPixels + bh * 2 > limits.maxWorkPixels) {
+    budget.aborted = true;
+    return null;
+  }
+  budget.workPixels += bh * 2;
+
+  const rawCol = new Uint8Array(bh);
+  const horizCol = new Uint8Array(bh);
+  const ignoreCol = new Uint8Array(bh);
+
+  for (let ly = 0; ly < bh; ly++) {
+    const gy = y0 + ly;
+    const row = gy * w;
+    let hasInk = false;
+    let hasIgn = false;
+    for (let gx = gx0; gx <= gx1; gx++) {
+      if (p.mask[row + gx]) hasInk = true;
+      if (p.ignore && p.ignore[row + gx]) hasIgn = true;
+    }
+    rawCol[ly] = hasInk ? 1 : 0;
+    ignoreCol[ly] = hasIgn ? 1 : 0;
+    if (hasInk && hasHorizSupportAt(p.mask, w, x0, x1, y0, y1, cxRound, gy, wing)) {
+      horizCol[ly] = 1;
+    }
+  }
+
+  // Raw ink runs in local [0..bh) coordinates
+  const runs = [];
+  let rs = -1;
+  for (let ly = 0; ly <= bh; ly++) {
+    if (ly < bh && rawCol[ly] && rs < 0) rs = ly;
+    if ((ly === bh || !rawCol[ly]) && rs >= 0) {
+      let vertRows = 0;
+      let horizRows = 0;
+      let ignHits = 0;
+      for (let k = rs; k < ly; k++) {
+        if (horizCol[k]) horizRows++;
+        else vertRows++;
+        if (ignoreCol[k]) ignHits++;
+      }
+      const len = ly - rs;
+      const isPureHorizCrossing = len <= Math.max(6, strokeEst * 2 + 2) && vertRows <= 2 && horizRows >= 1;
+      runs.push({
+        from: rs,
+        to: ly - 1,
+        len,
+        vertRows,
+        horizRows,
+        hasHoriz: horizRows > 0,
+        isPureHorizCrossing,
+        ignHits
+      });
+      rs = -1;
+    }
+  }
+
+  const out = [];
+  const minContLen = Math.max(8, Math.round(bh * 0.08));
+  const minVertContinuous = Math.max(6, Math.round(minContLen * 0.60));
+
+  // Build dash-token sequence (splitting a single run only if horiz crossing bridged two dashes)
+  const dashTokens = [];
+  const crossingBands = [];
+  for (const r of runs) {
+    if (r.isPureHorizCrossing) {
+      crossingBands.push({ from: r.from, to: r.to });
+      continue;
+    }
+    if (r.hasHoriz && r.len >= 14 && r.len <= 34) {
+      // Split into subruns excluding horizCol to see if horiz bridged two dashes across a gap
+      const sub = [];
+      let ss = -1;
+      for (let k = r.from; k <= r.to + 1; k++) {
+        const isV = k <= r.to && !horizCol[k];
+        if (isV && ss < 0) ss = k;
+        if ((!isV || k === r.to + 1) && ss >= 0) {
+          sub.push([ss, k - 1]);
+          ss = -1;
+        }
+      }
+      const validSubs = sub.filter(s => s[1] - s[0] + 1 >= 4);
+      if (validSubs.length >= 2 && validSubs.every(s => s[1] - s[0] + 1 <= 16)) {
+        for (const s of validSubs) {
+          let ign = 0;
+          for (let k = s[0]; k <= s[1]; k++) if (ignoreCol[k]) ign++;
+          dashTokens.push({
+            from: s[0],
+            to: s[1],
+            len: s[1] - s[0] + 1,
+            hasHoriz: false,
+            crossedGapBefore: true,
+            ignHits: ign
+          });
+        }
+        // Mark interior horiz band as crossing
+        for (let i = 1; i < validSubs.length; i++) {
+          crossingBands.push({ from: validSubs[i - 1][1] + 1, to: validSubs[i][0] - 1 });
+        }
+        continue;
+      }
+    }
+    dashTokens.push({ ...r, crossedGapBefore: false });
+  }
+
+  // Detect regular-dashes chains in dashTokens (keeping track of bridged crossings)
+  const dashSegments = [];
+  const minDashSpan = Math.max(24, Math.min(36, Math.round(bh * 0.08)));
+  for (let k = 0; k < dashTokens.length && k < 96; k++) {
+    if (dashTokens[k].len > 22) continue;
+    const group = [dashTokens[k]];
+    const gapMeta = [];
+    let prev = dashTokens[k];
+
+    for (let n = k + 1; n < dashTokens.length && group.length < 40; n++) {
+      const cur = dashTokens[n];
+      if (cur.len > 22) break;
+      const gap = cur.from - (prev.to + 1);
+      const seed = group[0].len;
+      const crossingInGap = crossingBands.some(cb => cb.to >= prev.to && cb.from <= cur.from);
+      const maxAllowGap = crossingInGap ? Math.max(18, seed * 2.2) : Math.max(13, seed * 1.9);
+      if (gap < 2 || gap > maxAllowGap) break;
+
+      const allowLenRelax = cur.hasHoriz || prev.hasHoriz;
+      const maxLen = allowLenRelax ? seed * 1.85 : seed * 1.5;
+      const minLen = allowLenRelax ? seed * 0.55 : seed * 0.65;
+      if (cur.len < 3 || cur.len > maxLen || cur.len < minLen) break;
+
+      gapMeta.push({ gap, crossingInGap });
+      group.push(cur);
+      prev = cur;
+    }
+
+    if (group.length < 3) continue;
+    const cleanLens = group.filter(g => !g.hasHoriz).map(g => g.len);
+    const allLens = group.map(g => g.len);
+    const ls = cleanLens.length >= 2 ? cleanLens : allLens;
+    const cleanGaps = gapMeta.filter(g => !g.crossingInGap).map(g => g.gap);
+    const allGaps = gapMeta.map(g => g.gap);
+    const gs = cleanGaps.length >= 2 ? cleanGaps : allGaps;
+
+    const lm = median(ls);
+    const gm = median(gs);
+    if (lm < 3 || gm < 2) continue;
+    if (ls.some(v => Math.abs(v - lm) > Math.max(2.5, lm * 0.35))) continue;
+    if (gs.some(v => Math.abs(v - gm) > Math.max(2.5, gm * 0.40))) continue;
+
+    let gFrom = group[0].from;
+    let gTo = group[group.length - 1].to;
+    const totalSpan = gTo - gFrom + 1;
+    const dashInkSum = allLens.reduce((s, v) => s + v, 0);
+    const coverage = dashInkSum / totalSpan;
+    if (coverage < 0.34 || coverage > 0.88 || totalSpan < minDashSpan) continue;
+
+    // Snap ends slightly if a phase gap (<= max(gm + 4, 12)) abuts a genuine horizontal boundary
+    const snapTol = Math.min(14, Math.max(Math.round(gm) + 4, strokeEst * 2 + 5));
+    const topSnapY = hasHorizBoundaryNear(p.mask, w, x0, x1, y0, y1, cxRound, y0 + gFrom - 2, snapTol, wing);
+    if (topSnapY >= y0 && y0 + gFrom - topSnapY >= 1 && y0 + gFrom - topSnapY <= snapTol) {
+      // Only snap up if no separate ink continues immediately above topSnapY in this track
+      let inkAbove = 0;
+      for (let ty = Math.max(0, topSnapY - y0 - 8); ty < topSnapY - y0 - 1; ty++) {
+        if (rawCol[ty] && !horizCol[ty]) inkAbove++;
+      }
+      if (inkAbove === 0) gFrom = Math.max(0, topSnapY - y0);
+    }
+
+    const botSnapY = hasHorizBoundaryNear(p.mask, w, x0, x1, y0, y1, cxRound, y0 + gTo + 2, snapTol, wing);
+    if (botSnapY >= y0 && botSnapY - (y0 + gTo) >= 1 && botSnapY - (y0 + gTo) <= snapTol) {
+      let inkBelow = 0;
+      for (let ty = botSnapY - y0 + 2; ty <= Math.min(bh - 1, botSnapY - y0 + 8); ty++) {
+        if (rawCol[ty] && !horizCol[ty]) inkBelow++;
+      }
+      if (inkBelow === 0) gTo = Math.min(bh - 1, botSnapY - y0);
+    }
+
+    let ignCount = 0;
+    for (let y = gFrom; y <= gTo; y++) {
+      if (ignoreCol[y] && rawCol[y]) ignCount++;
+    }
+
+    dashSegments.push({
+      centerPx,
+      fromY: y0 + gFrom,
+      toY: y0 + gTo,
+      pattern: 'regular-dashes',
+      hasIgnore: ignCount > 0,
+      ignCount
+    });
+    k += group.length - 1;
+  }
+
+  for (const ds of dashSegments) out.push(ds);
+
+  // Extract continuous runs from raw runs (bridging at most 1px single-row raster pinhole)
+  const contCandidates = [];
+  for (let i = 0; i < runs.length; i++) {
+    const r = runs[i];
+    if (r.isPureHorizCrossing) continue;
+    let cFrom = r.from;
+    let cTo = r.to;
+    let vRows = r.vertRows;
+    let ign = r.ignHits;
+    while (i + 1 < runs.length && !runs[i + 1].isPureHorizCrossing && runs[i + 1].from - (cTo + 1) <= 1) {
+      i++;
+      cTo = runs[i].to;
+      vRows += runs[i].vertRows;
+      ign += runs[i].ignHits;
+    }
+    const cLen = cTo - cFrom + 1;
+    if (cLen >= minContLen && vRows >= minVertContinuous) {
+      const fY = y0 + cFrom;
+      const tY = y0 + cTo;
+      // Do not emit a short continuous fragment subsumed inside a regular-dashes span
+      const subsumedByDash = dashSegments.some(ds => {
+        const overlap = Math.max(0, Math.min(ds.toY, tY) - Math.max(ds.fromY, fY));
+        return overlap >= (tY - fY) * 0.65;
+      });
+      if (!subsumedByDash) {
+        contCandidates.push({
+          centerPx,
+          fromY: fY,
+          toY: tY,
+          pattern: 'continuous',
+          hasIgnore: ign > 0,
+          ignCount: ign
+        });
+      }
+    }
+  }
+  for (const cs of contCandidates) out.push(cs);
+
+  return out;
+}
+
+function extractViewWalls(p, scale, maxSpan, limits, budget) {
+  const prep = buildColumnTracks(p, limits, budget);
+  if (!prep || budget.aborted) return null;
+
+  const { tracks, localBounds, strokeEst, wing } = prep;
+  const [x0, y0, x1, y1] = localBounds;
+  const rawSegs = [];
+
+  for (const track of tracks) {
+    const segs = scanTrackSegments(p, track, localBounds, strokeEst, wing, limits, budget);
+    if (!segs || budget.aborted) return null;
+    for (const s of segs) rawSegs.push(s);
+  }
+
+  // Merge nearby segments only if they share pattern, close X, AND high Z overlap
+  const colMergePx = Math.max(3, strokeEst + 2);
+  rawSegs.sort((a, b) => a.centerPx - b.centerPx || (b.toY - b.fromY) - (a.toY - a.fromY));
+  const grouped = [];
+
+  for (const s of rawSegs) {
+    const match = grouped.find(g => {
+      if (g.pattern !== s.pattern) return false;
+      if (Math.abs(g.centerPx - s.centerPx) > colMergePx) return false;
+      return intervalIoU(g.fromY, g.toY, s.fromY, s.toY) >= 0.65;
+    });
+    if (match) {
+      match.members.push(s);
+      match.centerPx = median(match.members.map(m => m.centerPx));
+      match.fromY = median(match.members.map(m => m.fromY));
+      match.toY = median(match.members.map(m => m.toY));
+      match.hasIgnore = match.hasIgnore || s.hasIgnore;
+      match.ignCount = Math.max(match.ignCount, s.ignCount);
+    } else {
+      grouped.push({
+        pattern: s.pattern,
+        centerPx: s.centerPx,
+        fromY: s.fromY,
+        toY: s.toY,
+        hasIgnore: s.hasIgnore,
+        ignCount: s.ignCount,
+        members: [s]
+      });
+      if (grouped.length > limits.MAX_WALLS_PER_VIEW && grouped.length > limits.maxWallsPerView) {
+        return { overflow: true, walls: [] };
+      }
+      if (grouped.length > limits.maxWallsPerView) {
+        return { overflow: true, walls: [] };
+      }
+    }
+  }
+
+  const axisMax = (x1 - 1 - x0) * scale;
+  const zSpanMax = (y1 - 1 - y0) * scale;
+  const walls = [];
+  for (let i = 0; i < grouped.length; i++) {
+    const g = grouped[i];
+    const coordRaw = p.view === 'W' ? (x1 - 1 - g.centerPx) * scale : (g.centerPx - x0) * scale;
+    const zMinRaw = (y1 - 1 - g.toY) * scale;
+    const zMaxRaw = (y1 - 1 - g.fromY) * scale;
+    const coord = clamp(coordRaw, 0, axisMax);
+    const z0 = clamp(Math.min(zMinRaw, zMaxRaw), 0, zSpanMax);
+    const z1 = clamp(Math.max(zMinRaw, zMaxRaw), 0, zSpanMax);
+    if (!(z1 > z0)) continue;
+    walls.push({
+      id: p.view + 'W' + (i + 1),
+      view: p.view,
+      coord,
+      centerPx: g.centerPx,
+      zMin: z0,
+      zMax: z1,
+      pattern: g.pattern,
+      hasIgnore: g.hasIgnore,
+      ignCount: g.ignCount
+    });
+  }
+
+  return { overflow: false, walls, localBounds, strokeEst, wing };
+}
+
+function hasIgnoredInBand(panel, localBounds, coordWorld, scale, bandPx) {
+  if (!panel || !panel.ignore) return false;
+  const [x0, y0, x1, y1] = localBounds;
+  const w = panel.cropWidth;
+  const centerPx = panel.view === 'W' ? (x1 - 1 - coordWorld / scale) : (x0 + coordWorld / scale);
+  const gxMin = Math.max(x0, Math.floor(centerPx - bandPx));
+  const gxMax = Math.min(x1 - 1, Math.ceil(centerPx + bandPx));
+  let hits = 0;
+  let inkHits = 0;
+  for (let y = y0; y < y1; y++) {
+    const row = y * w;
+    for (let x = gxMin; x <= gxMax; x++) {
+      if (panel.ignore[row + x]) {
+        hits++;
+        if (panel.mask[row + x]) inkHits++;
+      }
+    }
+  }
+  return inkHits >= 3 || hits >= 8;
+}
+
+function hasAlignedStraightEdgeInH(panelH, localBoundsH, cxWorld, cyWorld, rWorld, scale) {
+  const [x0, y0, x1, y1] = localBoundsH;
+  const w = panelH.cropWidth;
+  const bh = y1 - y0;
+  const bw = x1 - x0;
+  const cxPx = x0 + cxWorld / scale;
+  const cyPx = y1 - 1 - cyWorld / scale;
+  const rPx = rWorld / scale;
+  const strokeEst = Math.max(1, Math.min(6, Math.round(panelH.sourceStroke || 2.5)));
+  const ringExclude = rPx + strokeEst + 3;
+  const minEdgeLen = Math.max(10, Math.round(rPx * 0.45));
+  const searchHalf = 2;
+
+  // Check collinear vertical straight edges along X = cx +/- R
+  for (const xTarget of [cxPx - rPx, cxPx + rPx]) {
+    const pxBase = Math.round(xTarget);
+    for (let dx = -searchHalf; dx <= searchHalf; dx++) {
+      const px = pxBase + dx;
+      if (px < x0 || px >= x1) continue;
+      let run = 0;
+      for (let y = y0; y < y1; y++) {
+        if (Math.abs(y - cyPx) <= ringExclude) {
+          run = 0;
+          continue;
+        }
+        // Skip thin horizontal outer frame border crossings
+        const onOuterHoriz = (y - y0 <= strokeEst + 1 || y1 - 1 - y <= strokeEst + 1) &&
+          hasHorizSupportAt(panelH.mask, w, x0, x1, y0, y1, px, y, Math.max(4, strokeEst + 2));
+        if (panelH.mask[y * w + px] && !onOuterHoriz) {
+          run++;
+          if (run >= minEdgeLen) return true;
+        } else {
+          run = 0;
+        }
+      }
+    }
+  }
+
+  // Check collinear horizontal straight edges along Y = cy +/- R
+  for (const yTarget of [cyPx - rPx, cyPx + rPx]) {
+    const pyBase = Math.round(yTarget);
+    for (let dy = -searchHalf; dy <= searchHalf; dy++) {
+      const py = pyBase + dy;
+      if (py < y0 || py >= y1) continue;
+      const row = py * w;
+      let run = 0;
+      for (let x = x0; x < x1; x++) {
+        if (Math.abs(x - cxPx) <= ringExclude) {
+          run = 0;
+          continue;
+        }
+        // Skip thin vertical outer frame border crossings
+        const onOuterVert = x - x0 <= strokeEst + 1 || x1 - 1 - x <= strokeEst + 1;
+        if (panelH.mask[row + x] && !onOuterVert && bh >= 10 && bw >= 10) {
+          // Verify pixel is not just a vertical line crossing py by checking top/bottom perpendiculars
+          run++;
+          if (run >= minEdgeLen) return true;
+        } else {
+          run = 0;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+function observe(source, circleObservation, options) {
+  const limits = resolveLimits(options);
+  if (!limits || limits.maxItems < 1 || limits.maxWallsPerView < 4) {
+    return unavailable('budget');
+  }
+
+  const budget = {
+    scanPixels: 0,
+    workPixels: 0,
+    aborted: false
+  };
+
+  const prep = prepareLayout(source, limits, budget);
+  if (!prep.ok) return prep.result;
+
+  const { panelMap, maxSpan, scale, extent } = prep;
+
+  if (!circleObservation || circleObservation.state !== 'observed' || !Array.isArray(circleObservation.circles)) {
+    return unavailable('circles-unavailable', { extent });
+  }
+
+  const hCircles = [];
+  for (const c of circleObservation.circles) {
+    if (!c || c.view !== 'H' || c.axes !== 'XY') continue;
+    if (!Array.isArray(c.center) || c.center.length !== 2 || !c.center.every(Number.isFinite)) continue;
+    if (!Number.isFinite(c.radius) || c.radius <= 0) continue;
+    const [cx, cy] = c.center;
+    const r = c.radius;
+    if (cx - r < -1e-6 || cx + r > extent.X + 1e-6 || cy - r < -1e-6 || cy + r > extent.Y + 1e-6) continue;
+    hCircles.push({
+      id: typeof c.id === 'string' && c.id ? c.id.slice(0, 16) : ('HC' + (hCircles.length + 1)),
+      cx,
+      cy,
+      r
+    });
+  }
+
+  if (
+    circleObservation.truncated &&
+    (circleObservation.truncateReason !== 'view-limit' || hCircles.length >= 4 || hCircles.length === 0)
+  ) {
+    return unavailable('circles-incomplete', { extent });
+  }
+
+  if (hCircles.length === 0) {
+    return {
+      state: 'observed',
+      status: 'none',
+      version: VERSION,
+      layout: 'first-angle-assumed',
+      extent,
+      items: [],
+      unresolved: [],
+      summary: { totalHCircles: 0, matched: 0, unresolved: 0, status: 'none', truncated: false },
+      truncated: false,
+      scope: 'relative cross-view H-circle to V/W vertical wall observations only',
+      dimensionValuesRead: false,
+      materialInferred: false,
+      automaticAcceptance: false
+    };
+  }
+
+  // Conservative serialized budget pre-check
+  const probeEnvelope = {
+    state: 'observed',
+    status: 'observed',
+    version: VERSION,
+    layout: 'first-angle-assumed',
+    extent,
+    items: [],
+    truncated: false
+  };
+  let usedBytes = utf8ByteLength(JSON.stringify(probeEnvelope));
+  if (usedBytes > limits.maxSerializedBytes) {
+    return unavailable('budget');
+  }
+
+  const extV = extractViewWalls(panelMap.V, scale, maxSpan, limits, budget);
+  if (budget.aborted || !extV) return unavailable('budget');
+  if (extV.overflow) return unavailable('budget');
+
+  const extW = extractViewWalls(panelMap.W, scale, maxSpan, limits, budget);
+  if (budget.aborted || !extW) return unavailable('budget');
+  if (extW.overflow) return unavailable('budget');
+
+  const pxWorld = 100 / maxSpan;
+  const wallTol = clamp(1.0 + pxWorld * 2.5, 1.35, 2.0);
+  const centerTol = clamp(0.95 + pxWorld * 2.2, 1.2, 1.7);
+  const widthTol = clamp(1.3 + pxWorld * 3.0, 1.6, 2.2);
+  const zTol = clamp(1.4 + pxWorld * 3.0, 1.6, 2.25);
+  const collisionTol = wallTol * 1.6;
+
+  const hLocalBounds = getLocalBounds(panelMap.H);
+  const vBandPx = Math.max(3, Math.ceil(wallTol / scale));
+
+  // Pre-screen non-concentric shared-wall / occlusion & H straight-edge interference
+  const unresolved = [];
+  const candidates = [];
+
+  for (let i = 0; i < hCircles.length; i++) {
+    const ci = hCircles[i];
+    let circleConflict = null;
+
+    for (let j = 0; j < hCircles.length; j++) {
+      if (i === j) continue;
+      const cj = hCircles[j];
+      const dCenter = Math.hypot(ci.cx - cj.cx, ci.cy - cj.cy);
+      if (dCenter <= wallTol) {
+        if (Math.abs(ci.r - cj.r) <= collisionTol) {
+          circleConflict = 'concentric-wall-collision';
+          break;
+        }
+        continue;
+      }
+      const xWallsI = [ci.cx - ci.r, ci.cx + ci.r];
+      const xWallsJ = [cj.cx - cj.r, cj.cx + cj.r];
+      const yWallsI = [ci.cy - ci.r, ci.cy + ci.r];
+      const yWallsJ = [cj.cy - cj.r, cj.cy + cj.r];
+      if (xWallsI.some(a => xWallsJ.some(b => Math.abs(a - b) <= collisionTol))) {
+        circleConflict = 'shared-x-wall-ambiguity';
+        break;
+      }
+      if (yWallsI.some(a => yWallsJ.some(b => Math.abs(a - b) <= collisionTol))) {
+        circleConflict = 'shared-y-wall-ambiguity';
+        break;
+      }
+    }
+
+    if (circleConflict) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: circleConflict });
+      continue;
+    }
+
+    if (hasAlignedStraightEdgeInH(panelMap.H, hLocalBounds, ci.cx, ci.cy, ci.r, scale)) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'h-aligned-straight-edge' });
+      continue;
+    }
+
+    const vL = extV.walls.filter(w => Math.abs(w.coord - (ci.cx - ci.r)) <= wallTol);
+    const vR = extV.walls.filter(w => Math.abs(w.coord - (ci.cx + ci.r)) <= wallTol);
+    const wM = extW.walls.filter(w => Math.abs(w.coord - (ci.cy - ci.r)) <= wallTol);
+    const wX = extW.walls.filter(w => Math.abs(w.coord - (ci.cy + ci.r)) <= wallTol);
+
+    // Check ignore conflicts first on matched or missing wall bands
+    const ignoreConflict =
+      vL.some(w => w.hasIgnore) ||
+      vR.some(w => w.hasIgnore) ||
+      wM.some(w => w.hasIgnore) ||
+      wX.some(w => w.hasIgnore) ||
+      (vL.length === 0 && hasIgnoredInBand(panelMap.V, extV.localBounds, ci.cx - ci.r, scale, vBandPx)) ||
+      (vR.length === 0 && hasIgnoredInBand(panelMap.V, extV.localBounds, ci.cx + ci.r, scale, vBandPx)) ||
+      (wM.length === 0 && hasIgnoredInBand(panelMap.W, extW.localBounds, ci.cy - ci.r, scale, vBandPx)) ||
+      (wX.length === 0 && hasIgnoredInBand(panelMap.W, extW.localBounds, ci.cy + ci.r, scale, vBandPx));
+
+    if (ignoreConflict) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'ignore-conflict' });
+      continue;
+    }
+
+    if (vL.length === 0 || vR.length === 0) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'missing-wall-V' });
+      continue;
+    }
+    if (wM.length === 0 || wX.length === 0) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'missing-wall-W' });
+      continue;
+    }
+    if (vL.length > 1 || vR.length > 1) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'competing-walls-V' });
+      continue;
+    }
+    if (wM.length > 1 || wX.length > 1) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'competing-walls-W' });
+      continue;
+    }
+
+    const wl = vL[0], wr = vR[0], wm = wM[0], wx = wX[0];
+    if (wl.id === wr.id || !(wl.coord < wr.coord)) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'degenerate-walls-V' });
+      continue;
+    }
+    if (wm.id === wx.id || !(wm.coord < wx.coord)) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'degenerate-walls-W' });
+      continue;
+    }
+
+    if (wl.pattern !== wr.pattern) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'pattern-conflict-V' });
+      continue;
+    }
+    if (wm.pattern !== wx.pattern) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'pattern-conflict-W' });
+      continue;
+    }
+
+    const vMid = (wl.coord + wr.coord) / 2;
+    const vWidth = wr.coord - wl.coord;
+    if (Math.abs(vMid - ci.cx) > centerTol || Math.abs(vWidth - 2 * ci.r) > widthTol) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'bilateral-mismatch-V' });
+      continue;
+    }
+
+    const wMid = (wm.coord + wx.coord) / 2;
+    const wWidth = wx.coord - wm.coord;
+    if (Math.abs(wMid - ci.cy) > centerTol || Math.abs(wWidth - 2 * ci.r) > widthTol || Math.abs(vWidth - wWidth) > widthTol) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'bilateral-mismatch-W' });
+      continue;
+    }
+
+    if (Math.abs(wl.zMin - wr.zMin) > zTol || Math.abs(wl.zMax - wr.zMax) > zTol || intervalIoU(wl.zMin, wl.zMax, wr.zMin, wr.zMax) < 0.78) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'z-conflict-V' });
+      continue;
+    }
+    if (Math.abs(wm.zMin - wx.zMin) > zTol || Math.abs(wm.zMax - wx.zMax) > zTol || intervalIoU(wm.zMin, wm.zMax, wx.zMin, wx.zMax) < 0.78) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'z-conflict-W' });
+      continue;
+    }
+
+    const vZ0 = (wl.zMin + wr.zMin) / 2;
+    const vZ1 = (wl.zMax + wr.zMax) / 2;
+    const wZ0 = (wm.zMin + wx.zMin) / 2;
+    const wZ1 = (wm.zMax + wx.zMax) / 2;
+    if (Math.abs(vZ0 - wZ0) > zTol || Math.abs(vZ1 - wZ1) > zTol || intervalIoU(vZ0, vZ1, wZ0, wZ1) < 0.78) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'z-conflict-VW' });
+      continue;
+    }
+
+    const z0 = quant(clamp((vZ0 + wZ0) / 2, 0, extent.Z));
+    const z1 = quant(clamp((vZ1 + wZ1) / 2, 0, extent.Z));
+    const vx0 = quant(clamp(wl.coord, 0, extent.X));
+    const vx1 = quant(clamp(wr.coord, 0, extent.X));
+    const wy0 = quant(clamp(wm.coord, 0, extent.Y));
+    const wy1 = quant(clamp(wx.coord, 0, extent.Y));
+    if (!(vx0 < vx1 && wy0 < wy1 && z0 < z1)) {
+      unresolved.push({ circleId: ci.id, hCenter: [quant(ci.cx), quant(ci.cy)], hRadius: quant(ci.r), reason: 'degenerate-bounds' });
+      continue;
+    }
+
+    candidates.push({
+      ci,
+      wallIds: [wl.id, wr.id, wm.id, wx.id],
+      item: {
+        circleId: ci.id,
+        hCenter: [quant(ci.cx), quant(ci.cy)],
+        hRadius: quant(ci.r),
+        vX: [vx0, vx1],
+        wY: [wy0, wy1],
+        zRange: [z0, z1],
+        patterns: { V: wl.pattern, W: wm.pattern }
+      }
+    });
+  }
+
+  // Enforce global wall claim uniqueness: any shared wall downgrades all claimants
+  const wallClaims = Object.create(null);
+  for (const cand of candidates) {
+    for (const wid of cand.wallIds) {
+      wallClaims[wid] = (wallClaims[wid] || 0) + 1;
+    }
+  }
+
+  const confirmed = [];
+  for (const cand of candidates) {
+    if (cand.wallIds.some(wid => wallClaims[wid] > 1)) {
+      unresolved.push({
+        circleId: cand.ci.id,
+        hCenter: cand.item.hCenter,
+        hRadius: cand.item.hRadius,
+        reason: 'shared-wall-claim'
+      });
+    } else {
+      confirmed.push(cand.item);
+    }
+  }
+
+  confirmed.sort((a, b) => a.hCenter[0] - b.hCenter[0] || a.hCenter[1] - b.hCenter[1] || a.hRadius - b.hRadius);
+
+  // Enforce item count and serialized byte caps cleanly
+  const items = [];
+  let truncated = false;
+  let runningBytes = usedBytes;
+  for (const item of confirmed) {
+    if (items.length >= limits.maxItems) {
+      truncated = true;
+      break;
+    }
+    const itemBytes = utf8ByteLength(JSON.stringify(item)) + (items.length > 0 ? 1 : 0);
+    if (runningBytes + itemBytes > limits.maxSerializedBytes) {
+      truncated = true;
+      break;
+    }
+    runningBytes += itemBytes;
+    items.push(item);
+  }
+
+  const status = items.length === 0
+    ? 'none'
+    : (items.length === hCircles.length && unresolved.length === 0 && !truncated ? 'observed' : 'partial');
+
+  const result = {
+    state: 'observed',
+    status,
+    version: VERSION,
+    layout: 'first-angle-assumed',
+    extent,
+    items,
+    unresolved,
+    truncated,
+    summary: {
+      totalHCircles: hCircles.length,
+      matched: items.length,
+      unresolved: unresolved.length,
+      status,
+      truncated
+    },
+    scope: 'relative cross-view H-circle to V/W vertical wall observations only',
+    dimensionValuesRead: false,
+    materialInferred: false,
+    automaticAcceptance: false
+  };
+
+  while (result.items.length > 0 && utf8ByteLength(JSON.stringify(result)) > limits.maxSerializedBytes) {
+    result.items.pop();
+    result.truncated = true;
+    result.summary.matched = result.items.length;
+    result.summary.truncated = true;
+    result.status = result.items.length === 0 ? 'none' : 'partial';
+    result.summary.status = result.status;
+  }
+
+  if (result.items.length === 0 && truncated) {
+    return unavailable('budget');
+  }
+
+  return result;
+}
+
+return { VERSION, LIMITS, observe };
+}
+
 function SourceEvidenceKit(){
  const VERSION='source-lines-v1',AXES={V:['X','Z'],W:['Y','Z'],H:['X','Y']};
  const quant=x=>Math.round(x*10)/10,median=a=>{a=[...a].sort((x,y)=>x-y);return a[Math.floor(a.length/2)]};
  function runs(a){let out=[],s=-1;for(let i=0;i<=a.length;i++){if(i<a.length&&a[i]&&s<0)s=i;if((i===a.length||!a[i])&&s>=0){out.push([s,i]);s=-1}}return out}
  function scan(p,vertical){const {mask,ignore,cropWidth:w,cropHeight:h}=p,major=vertical?h:w,minor=vertical?w:h,b=p.bounds.map((v,i)=>v-p.crop[i%2]),start=Math.max(0,Math.floor(vertical?b[0]:b[1])),end=Math.min(minor,Math.ceil(vertical?b[2]:b[3])),lo=Math.max(0,Math.floor(vertical?b[1]:b[0])),hi=Math.min(major,Math.ceil(vertical?b[3]:b[2])),span=hi-lo,raw=[];
   const minimum=Math.max(16,span*.20),at=(i,j)=>vertical?i*w+j:j*w+i;
-  for(let j=start;j<end;j++){const a=new Uint8Array(major);for(let i=lo;i<hi;i++)a[i]=mask[at(i,j)]&&!ignore?.[at(i,j)]?1:0;const rr=runs(a);
+  for(let j=start;j<end;j++){const a=new Uint8Array(major);for(let i=lo;i<hi;i++){const index=at(i,j),v=ignore?.[index]||0,blocked=v&&((v&12)===0||(v&1)||(v&(vertical?8:4)));a[i]=mask[index]&&!blocked?1:0;}const rr=runs(a);
    for(const r of rr)if(r[1]-r[0]>=minimum)raw.push({row:j,from:r[0],to:r[1]-1,pattern:'continuous'});
    // A bounded run of nearly equal dashes is an observed pattern, not an
    // assertion that this is a hidden edge or that an opening is blind.
@@ -3968,19 +6582,80 @@ function SourceEvidenceKit(){
   // Bounds are half-open ink envelopes; line coordinates are pixel centres.
   // One scale preserves every span, including allowed cross-view variation.
   for(const p of panels){const localBounds=p.bounds.map((v,i)=>v-p.crop[i%2]),transform=(x,y)=>{const [x0,y0,x1,y1]=localBounds;return p.view==='W'?[(x1-1-x)*scale,(y1-1-y)*scale]:[(x-x0)*scale,(y1-1-y)*scale]};const all=[...scan(p,false),...scan(p,true)].sort((a,b)=>(b.pattern==='regular-dashes')-(a.pattern==='regular-dashes')||(b.to-b.from)-(a.to-a.from));
-   const unique=[];for(const l of all){if(unique.some(x=>x.vertical===l.vertical&&x.pattern===l.pattern&&Math.abs(x.row-l.row)<=Math.max(4,(p.sourceStroke||2)+2)&&Math.max(0,Math.min(x.to,l.to)-Math.max(x.from,l.from))>=Math.min(x.to-x.from,l.to-l.from)*.65))continue;unique.push(l);}for(const l of unique.slice(0,8)){const a=transform(l.vertical?l.row:l.from,l.vertical?l.from:l.row),b=transform(l.vertical?l.row:l.to,l.vertical?l.to:l.row);lines.push({id:p.view+'L'+(lines.filter(x=>x.view===p.view).length+1),view:p.view,axes:AXES[p.view].join(''),pattern:l.pattern,from:a.map(quant),to:b.map(quant)});}
+   // Anti-aliased sloping edges may leave regular gaps in one row while an adjacent row proves continuous ink.
+   const reliable=all.filter(l=>l.pattern!=='regular-dashes'||!all.some(c=>c.pattern==='continuous'&&c.vertical===l.vertical&&Math.abs(c.row-l.row)<=Math.max(1,(p.sourceStroke||1)/2+.5)&&c.from<=l.from+1&&c.to>=l.to-1));
+   const unique=[];for(const l of reliable){if(unique.some(x=>x.vertical===l.vertical&&x.pattern===l.pattern&&Math.abs(x.row-l.row)<=Math.max(4,(p.sourceStroke||2)+2)&&Math.max(0,Math.min(x.to,l.to)-Math.max(x.from,l.from))>=Math.min(x.to-x.from,l.to-l.from)*.65))continue;unique.push(l);}for(const l of unique.slice(0,8)){const a=transform(l.vertical?l.row:l.from,l.vertical?l.from:l.row),b=transform(l.vertical?l.row:l.to,l.vertical?l.to:l.row);lines.push({id:p.view+'L'+(lines.filter(x=>x.view===p.view).length+1),view:p.view,axes:AXES[p.view].join(''),pattern:l.pattern,from:a.map(quant),to:b.map(quant)});}
   }
   return {state:'observed',version:VERSION,layout:'first-angle-assumed',views:panels.map(p=>p.view),frame:'per-axis maximum observed ink envelopes; panel bounding minima; X right, Y rear, Z up; one shared scale; longest observed extent=100',extent:ratio,lines,scope:'relative raster observations only',dimensionValuesRead:false,materialInferred:false,annotationExcluded:!!panels.some(p=>p.ignore),automaticAcceptance:false};
  }
- function prompt(o){if(o?.state!=='observed')return '';const brief={layout:o.layout,views:o.views,frame:o.frame,extent:o.extent,lines:o.lines};return '\n\n【原题像素观测：本机提取，待原图核实，不是尺寸标注】\n'+JSON.stringify(brief)+'\n各视图共用比例，extent只是整件相对外包，最大项100，没有毫米含义；明确尺寸优先，不能把这些值写成source:drawing的尺寸读数。坐标轴按frame和每条axes，不是屏幕向下。只列出部分较长水平/竖直墨迹，continuous/regular-dashes是墨迹样式，不等于实线/隐藏线的可靠语义。未列出的弧线、短线、中心线及缺失视图不能当作没有结构。用原图核对相同特征的端点、跨度与跨视图对应：将横线解释为孔底前，须核实它的范围与该孔两侧壁对应，跨出孔壁的台阶线不能单独证明封底。保留应有的比例，不分别拉伸三张视图；不同特征遮挡后重合也不强行等宽。观测与原图/标注冲突时忽略该观测并注明，不据此自动加减料。';}
+ function utf8Bytes(s){let n=0;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);if(c<=0x7f)n+=1;else if(c<=0x7ff)n+=2;else if(c>=0xd800&&c<=0xdbff&&i+1<s.length&&s.charCodeAt(i+1)>=0xdc00&&s.charCodeAt(i+1)<=0xdfff){n+=4;i++}else n+=3}return n}
+ function prompt(o){
+  if(o?.state!=='observed')return '';
+  const MAX_CIRCLES_PER_VIEW=4,MAX_CIRCLES_TOTAL=12,MAX_CIRCLES_BYTES=2048,MAX_CORR_ITEMS=8,MAX_CORR_BYTES=1536,MAX_BRIEF_BYTES=8192;
+  const views=Array.isArray(o.views)?o.views.filter(v=>AXES[v]):[];
+  const brief={layout:o.layout,views,frame:o.frame,extent:o.extent,lines:Array.isArray(o.lines)?o.lines.slice(0,24):[]};
+  const hasCircleField=Array.isArray(o.circles)||!!o.circleObservation;
+  if(hasCircleField){
+   const co=o.circleObservation||{};
+   if(co.state==='unavailable'){
+    brief.circleStatus='unavailable';
+   }else{
+    const perView={},circles=[];
+    let truncated=!!co.truncated;
+    for(const c of (Array.isArray(o.circles)?o.circles:[])){
+     if(!c||!AXES[c.view]||!views.includes(c.view))continue;
+     const axes=AXES[c.view].join('');
+     if(c.axes!==axes||!Array.isArray(c.center)||c.center.length!==2||!c.center.every(Number.isFinite)||!Number.isFinite(c.radius)||c.radius<=0)continue;
+     const vc=perView[c.view]||0;
+     if(vc>=MAX_CIRCLES_PER_VIEW||circles.length>=MAX_CIRCLES_TOTAL){truncated=true;break;}
+     const item={id:typeof c.id==='string'&&c.id?c.id.slice(0,16):(c.view+'C'+(vc+1)),view:c.view,axes,center:[quant(c.center[0]),quant(c.center[1])],radius:quant(c.radius)};
+     circles.push(item);
+     if(utf8Bytes(JSON.stringify(circles))>MAX_CIRCLES_BYTES){circles.pop();truncated=true;break;}
+     perView[c.view]=vc+1;
+    }
+    brief.circles=circles;
+    brief.circleStatus=truncated?'partial':'observed';
+   }
+  }
+  let hasCorr=false;
+  const xObs=o.correspondenceObservation;
+  if(xObs?.state==='observed'&&views.includes('V')&&views.includes('W')&&views.includes('H')&&Array.isArray(o.correspondences)&&o.correspondences.length){
+   const validPat=p=>p==='continuous'||p==='regular-dashes';
+   const validPair=(a,lim)=>Array.isArray(a)&&a.length===2&&a.every(Number.isFinite)&&a[0]>=-1e-6&&a[0]<a[1]&&a[1]<=lim+1e-6;
+   const exX=Number(o.extent?.X)||100,exY=Number(o.extent?.Y)||100,exZ=Number(o.extent?.Z)||100;
+   const corrs=[];
+   let cTrunc=!!xObs.truncated||xObs.status==='partial';
+   for(const m of o.correspondences){
+    if(!m||typeof m.circleId!=='string'||!m.circleId)continue;
+    const circle=brief.circles?.find(c=>c.view==='H'&&c.id===m.circleId.slice(0,16));
+    if(!circle)continue;
+    if(!Array.isArray(m.hCenter)||m.hCenter.length!==2||!m.hCenter.every(Number.isFinite)||!Number.isFinite(m.hRadius)||m.hRadius<=0)continue;
+    if(!validPair(m.vX,exX)||!validPair(m.wY,exY)||!validPair(m.zRange,exZ))continue;
+    if(!m.patterns||!validPat(m.patterns.V)||!validPat(m.patterns.W))continue;
+    if(corrs.length>=MAX_CORR_ITEMS){cTrunc=true;break;}
+    corrs.push({circleId:circle.id,hCenter:circle.center,hRadius:circle.radius,vX:[quant(Math.max(0,m.vX[0])),quant(Math.min(exX,m.vX[1]))],wY:[quant(Math.max(0,m.wY[0])),quant(Math.min(exY,m.wY[1]))],zRange:[quant(Math.max(0,m.zRange[0])),quant(Math.min(exZ,m.zRange[1]))],patterns:{V:m.patterns.V,W:m.patterns.W}});
+    if(utf8Bytes(JSON.stringify(corrs))>MAX_CORR_BYTES){corrs.pop();cTrunc=true;break;}
+   }
+   if(corrs.length){
+    brief.correspondences=corrs;
+    brief.correspondenceStatus=cTrunc?'partial':'observed';
+    hasCorr=true;
+   }
+  }
+  while(brief.correspondences?.length&&utf8Bytes(JSON.stringify(brief))>MAX_BRIEF_BYTES){brief.correspondences.pop();brief.correspondenceStatus='partial';}
+  if(brief.correspondences&&!brief.correspondences.length){delete brief.correspondences;delete brief.correspondenceStatus;hasCorr=false;}
+  while(brief.circles?.length&&utf8Bytes(JSON.stringify(brief))>MAX_BRIEF_BYTES){brief.circles.pop();brief.circleStatus='partial';}
+  while(brief.lines.length&&utf8Bytes(JSON.stringify(brief))>MAX_BRIEF_BYTES){brief.lines.pop();}
+  return '\n\n【原题像素观测：本机提取，待原图核实，不是尺寸标注】\n'+JSON.stringify(brief)+'\n各视图共用比例，extent只是整件相对外包，最大项100，没有毫米含义；明确尺寸优先，不能把这些值写成source:drawing的尺寸读数。坐标轴按frame和每条axes，不是屏幕向下。只列出部分较长水平/竖直墨迹，continuous/regular-dashes是墨迹样式，不等于实线/隐藏线的可靠语义。circles只是封闭孤立近圆墨迹的相对中心与半径（每视图最多4个、整题最多12个），不是孔、凸台或直径/半径尺寸，也不能单独证明贯通还是盲孔。未列出的弧线、短线、中心线及缺失视图不能当作没有结构；未检测到圆、部分观测或因预算放弃圆形观测，均不能据此判定原图没有圆或圆弧。用原图核对相同特征的端点、跨度与跨视图对应：将横线解释为孔底前，须核实它的范围与该孔两侧壁对应，跨出孔壁的台阶线不能单独证明封底。保留应有的比例，不分别拉伸三张视图；不同特征遮挡后重合也不强行等宽。观测与原图/标注冲突时忽略该观测并注明，不据此自动加减料。'+(hasCorr?'correspondences仅表示俯视孤立圆在主/左视图两侧对称竖直壁、共X/Y及一致Z区间的局部像素对齐证据，未列出表示存在缺线、冲突、共壁/遮挡歧义或未核实；孔/凸台、贯通/盲孔及实际尺寸仍以原图和明确标注为准。':'');
+ }
  function compare(o,views){if(o?.state!=='observed'||!views)return {state:'unavailable',findings:[]};const b=views.V?.bounds,h=views.H?.bounds,w=views.W?.bounds;if(![b,h,w].every(a=>a?.length===4&&a.every(Number.isFinite)))return {state:'unavailable',findings:[]};const raw={X:Math.max(b[2]-b[0],h[2]-h[0]),Y:Math.max(w[2]-w[0],h[3]-h[1]),Z:Math.max(b[3]-b[1],w[3]-w[1])},max=Math.max(...Object.values(raw));if(!(max>0))return{state:'unavailable',findings:[]};const actual=Object.fromEntries(Object.entries(raw).map(([k,v])=>[k,quant(100*v/max)])),findings=[];for(const k of ['X','Y','Z'])if(Math.abs(actual[k]-o.extent[k])>Math.max(6,o.extent[k]*.12))findings.push({code:'source-ratio',axis:k,observed:o.extent[k],candidate:actual[k],scope:'relative-outline-only'});return{state:findings.length?'differences':'no-large-ratio-difference',findings,actual,automaticAcceptance:false};}
  return {VERSION,describe,prompt,compare,scan};
 }
 
 /* Shared source-only observations for generation and external instructions.
  * Cached in memory, candidate-owned on import, bounded worker, no networking. */
-const AI_SOURCE_EVIDENCE={cache:null,epoch:0,jobs:new Set()};
-function aiSourceEvidenceCancel(){AI_SOURCE_EVIDENCE.epoch++;AI_SOURCE_EVIDENCE.cache=null;for(const stop of [...AI_SOURCE_EVIDENCE.jobs])stop(true);}
+const AI_SOURCE_EVIDENCE={cache:null,epoch:0,jobs:new Set(),attachments:new Map()};
+function aiSourceEvidenceCancel(){AI_SOURCE_EVIDENCE.epoch++;AI_SOURCE_EVIDENCE.cache=null;let paint=false;for(const [r,t]of AI_SOURCE_EVIDENCE.attachments){if(r===aiResult&&r._sourceEvidence===t.binding&&r.ctx?.image===t.source){t.binding.observations={state:'unavailable',reason:'cancelled'};paint=true;}t.controller.abort();}AI_SOURCE_EVIDENCE.attachments.clear();for(const stop of [...AI_SOURCE_EVIDENCE.jobs])stop(true);if(paint)aiPreviewPaint();}
 function aiSourceEvidenceEligible(type,text=''){return ['auto','orthographic'].includes(type)&&!/(?:第三角|third[ -]?angle|剖视|section(?:al)?\s+view)/i.test(text);}
 async function aiSourceEvidenceRead(source,type,text='',signal=null){
  if(signal?.aborted)throw new DOMException('Cancelled','AbortError');
@@ -3988,19 +6663,32 @@ async function aiSourceEvidenceRead(source,type,text='',signal=null){
  const cached=AI_SOURCE_EVIDENCE.cache;if(cached?.source===source&&cached.type===type)return cached.observations;
  if(AI_SOURCE_EVIDENCE.jobs.size>=2)return {state:'unavailable',reason:'busy'};
  const epoch=AI_SOURCE_EVIDENCE.epoch;
- return new Promise((resolve,reject)=>{let settled=false,worker=null,url=null,timer=null;
+ return new Promise((resolve,reject)=>{let settled=false,worker=null,url=null,timer=null,baseEvidence=null;
   const abort=()=>finish(null,true),stop=cancelled=>finish(cancelled?null:{state:'unavailable',reason:'cancelled'},cancelled);
   const finish=(value,cancelled=false)=>{if(settled)return;settled=true;clearTimeout(timer);worker?.terminate();if(url)URL.revokeObjectURL(url);signal?.removeEventListener('abort',abort);AI_SOURCE_EVIDENCE.jobs.delete(stop);if(cancelled||signal?.aborted||epoch!==AI_SOURCE_EVIDENCE.epoch){reject(new DOMException('Cancelled','AbortError'));return;}if(value?.state==='observed')AI_SOURCE_EVIDENCE.cache={source,type,observations:value};resolve(value||{state:'unavailable',reason:'failed'});};
-  AI_SOURCE_EVIDENCE.jobs.add(stop);signal?.addEventListener('abort',abort,{once:true});timer=setTimeout(()=>finish({state:'unavailable',reason:'timeout'}),2500);
-  (async()=>{try{const im=new Image();im.src=source;await im.decode();if(settled)return;if(!im.naturalWidth||im.naturalWidth*im.naturalHeight>16000000){finish({state:'unavailable',reason:'image-size'});return;}const k=Math.min(1,1300/Math.max(im.naturalWidth,im.naturalHeight)),canvas=document.createElement('canvas');canvas.width=Math.round(im.naturalWidth*k);canvas.height=Math.round(im.naturalHeight*k);if(canvas.width<96||canvas.height<96){finish({state:'unavailable',reason:'image-size'});return;}const g=canvas.getContext('2d',{willReadFrequently:true});g.fillStyle='white';g.fillRect(0,0,canvas.width,canvas.height);g.drawImage(im,0,0,canvas.width,canvas.height);const rgba=g.getImageData(0,0,canvas.width,canvas.height).data,mask=new Uint8Array(canvas.width*canvas.height);for(let i=0;i<mask.length;i++)mask[i]=rgba[i*4]*.2126+rgba[i*4+1]*.7152+rgba[i*4+2]*.0722<145?1:0;
-   const body='const K=('+AIDrawingLocalBundle.toString()+')();const E=('+SourceEvidenceKit.toString()+')();self.onmessage=e=>{try{const image=e.data,a=K.annotations.prepare(image);if(a.unresolved){self.postMessage({state:"unavailable",reason:"annotations"});return;}const input={...image,mask:a.mask,ignore:a.uncertain,sourceStroke:a.sourceStroke};let s=K.regions.extract(input,{layout:"first-angle",views:"VWH"});if(s.code==="region-count"&&s.regions?.length===2)s=K.regions.extract(input,{layout:"first-angle",views:"VH"});self.postMessage(s.status==="prepared"?E.describe(s):{state:"unavailable",reason:s.code});}catch(e){self.postMessage({state:"unavailable",reason:"failed"});}};';
-   url=URL.createObjectURL(new Blob([body],{type:'text/javascript'}));worker=new Worker(url);worker.onmessage=e=>finish(e.data);worker.onerror=()=>finish({state:'unavailable',reason:'worker'});worker.postMessage({w:canvas.width,h:canvas.height,mask},[mask.buffer]);
+  const fallback=reason=>baseEvidence?{...baseEvidence,correspondences:[],correspondenceObservation:{state:'unavailable',status:'unavailable',reason,truncated:false}}:{state:'unavailable',reason};
+  AI_SOURCE_EVIDENCE.jobs.add(stop);signal?.addEventListener('abort',abort,{once:true});timer=setTimeout(()=>finish(fallback('timeout')),2500);
+  (async()=>{try{const im=new Image();im.src=source;await im.decode();if(settled)return;if(!im.naturalWidth||im.naturalWidth*im.naturalHeight>16000000){finish({state:'unavailable',reason:'image-size'});return;}const k=Math.min(1,1300/Math.max(im.naturalWidth,im.naturalHeight)),canvas=document.createElement('canvas');canvas.width=Math.round(im.naturalWidth*k);canvas.height=Math.round(im.naturalHeight*k);if(canvas.width<96||canvas.height<96){finish({state:'unavailable',reason:'image-size'});return;}const g=canvas.getContext('2d',{willReadFrequently:true});g.fillStyle='white';g.fillRect(0,0,canvas.width,canvas.height);g.drawImage(im,0,0,canvas.width,canvas.height);const rgba=g.getImageData(0,0,canvas.width,canvas.height).data,mask=new Uint8Array(canvas.width*canvas.height),luma=new Uint8Array(canvas.width*canvas.height);for(let i=0;i<mask.length;i++){const j=i*4,lum=rgba[j]*.2126+rgba[j+1]*.7152+rgba[j+2]*.0722;luma[i]=Math.round(lum);mask[i]=lum<145?1:0;}
+   const orientationKitCode=typeof SourceOrientationKit==='function'?SourceOrientationKit.toString():'null';
+   const circleKitCode=typeof SourceCircleKit==='function'?SourceCircleKit.toString():'function(){throw new Error("missing-circle-kit");}';
+   const corrKitCode=typeof SourceCorrespondenceKit==='function'?SourceCorrespondenceKit.toString():'null';
+   const body='const K=('+AIDrawingLocalBundle.toString()+')();const E=('+SourceEvidenceKit.toString()+')();let O=null;try{const fn=('+orientationKitCode+');O=typeof fn==="function"?fn():null;}catch(_){O=null;}let C=null;try{C=('+circleKitCode+')();}catch(_){C=null;}let X=null;try{const xfn=('+corrKitCode+');X=typeof xfn==="function"?xfn():null;}catch(_){X=null;}self.onmessage=e=>{try{let image=e.data,orient=null;if(O&&typeof O.prepare==="function"){orient=O.prepare(image);if(!orient||orient.state!=="ready"){self.postMessage({state:"unavailable",reason:(orient&&orient.reason)||"axes-uncertain"});return;}if(orient.action==="rectify")image={w:orient.w,h:orient.h,mask:orient.mask};}const a=K.annotations.prepare({w:image.w,h:image.h,mask:image.mask});if(a.unresolved){self.postMessage({state:"unavailable",reason:"annotations"});return;}const input={w:image.w,h:image.h,mask:a.mask,ignore:a.uncertain,sourceStroke:a.sourceStroke};let s=K.regions.extract(input,{layout:"first-angle",views:"VWH"});if(s.code==="region-count"&&s.regions?.length===2)s=K.regions.extract(input,{layout:"first-angle",views:"VH"});if(s.status!=="prepared"){self.postMessage({state:"unavailable",reason:s.code});return;}if(orient&&orient.action==="rectify"&&typeof O.hasClippedOriginalInk==="function"&&O.hasClippedOriginalInk(orient.transform,s.panels)){self.postMessage({state:"unavailable",reason:"image-clipped"});return;}const out=E.describe(s);if(out?.state!=="observed"){self.postMessage(out||{state:"unavailable",reason:"failed"});return;}if(orient&&orient.action==="rectify"){out.orientation={corrected:true,angleDeg:orient.angleDeg};}let co=null;try{co=C&&typeof C.observe==="function"?C.observe(s):{state:"unavailable",reason:"failed",circles:[]};}catch(_){co={state:"unavailable",reason:"failed",circles:[]};}if(co&&co.state==="observed"&&Array.isArray(co.circles)){out.circles=co.circles;out.circleObservation={state:co.truncated?"partial":"observed",reason:co.truncated?(co.truncateReason||"limit"):null,count:co.circles.length,truncated:!!co.truncated};}else{out.circles=[];out.circleObservation={state:"unavailable",reason:(co&&co.reason)||"failed",count:0,truncated:false};}if(X&&co?.circles?.some(c=>c.view==="H")&&out.views.includes("W"))self.postMessage({kind:"source-evidence-base",value:out});let cr=null;try{cr=X&&typeof X.observe==="function"?X.observe(s,co):{state:"unavailable",reason:"failed",items:[],unresolved:[]};}catch(_){cr={state:"unavailable",reason:"failed",items:[],unresolved:[]};}if(cr&&cr.state==="observed"){out.correspondences=Array.isArray(cr.items)?cr.items:[];out.correspondenceObservation={state:"observed",status:cr.status||(out.correspondences.length?"observed":"none"),reason:null,summary:cr.summary||null,truncated:!!cr.truncated};}else{out.correspondences=[];out.correspondenceObservation={state:"unavailable",status:"unavailable",reason:(cr&&cr.reason)||"failed",summary:null,truncated:false};}self.postMessage(out);}catch(e){self.postMessage({state:"unavailable",reason:"failed"});}};';
+   url=URL.createObjectURL(new Blob([body],{type:'text/javascript'}));worker=new Worker(url);worker.onmessage=e=>{if(settled)return;if(e.data?.kind==='source-evidence-base'){if(e.data.value?.state==='observed')baseEvidence=e.data.value;return;}finish(e.data);};worker.onerror=()=>finish(fallback('worker'));worker.postMessage({w:canvas.width,h:canvas.height,mask,luma},[mask.buffer,luma.buffer]);
   }catch(e){finish({state:'unavailable',reason:'failed'});}})();
  });
 }
 function aiSourceEvidenceBound(r){if(!r?.ctx)return null;const b=r._sourceEvidence;if(b&&b.source===r.ctx.image&&b.type===r.ctx.drawingType)return b.observations;const c=r.ctx.sourceEvidence;return c&&c.source===r.ctx.image&&c.type===r.ctx.drawingType?c.observations:null;}
-function aiSourceEvidenceHTML(r){const o=aiSourceEvidenceBound(r);if(!o||o.state==='pending'||!r.ctx?.image)return '';if(o.state!=='observed')return '<p class="ai-hint" data-i18n="off">'+bi('题图辅助：未能可靠提取比例和线段，沿用原图人工核对。','Drawing aid: reliable ratios and segments were unavailable. Review the original image.')+'</p>';const check=SourceEvidenceKit().compare(o,AI_PREVIEW.owner===r?AI_PREVIEW.views:r.previewViews),warning=check.findings.length?'<p class="ai-hint" data-i18n="off">'+bi('题图与候选的相对外包比例有偏差：','Relative source/candidate envelope differs: ')+check.findings.map(f=>aiEsc(f.axis)).join('/')+bi('。仅像素估计，明确标注优先。','; pixel estimates only. Explicit dimensions take priority.')+'</p>':'';return warning+'<details class="ai-subfold" data-i18n="off"><summary>'+bi('题图辅助 · 像素观测','Drawing aid · pixel observations')+'</summary><p>'+bi('从原图独立提取 '+o.views.join('/')+' 的相对比例及 '+o.lines.length+' 条较长直线。按本软件第一角布局解释，最长外包归一为100；不是毫米、尺寸标注、线型语义或正确性证明。原图和模型未改变。','Independent '+o.views.join('/')+' relative ratios and '+o.lines.length+' longer straight segments, assuming workbench first-angle layout. Longest extent is normalized to 100; these are not millimetres, dimension readings, semantic line labels or proof of correctness. Source and model are unchanged.')+'</p><p>X/Y/Z: '+['X','Y','Z'].map(k=>aiEsc(o.extent[k])).join(' / ')+'</p></details>';}
-async function aiSourceEvidenceAttach(r){const source=r?.ctx?.image,type=r?.ctx?.drawingType,epoch=AI_SOURCE_EVIDENCE.epoch;if(!source)return;r._sourceEvidence={source,type,observations:{state:'pending'}};try{const observations=await aiSourceEvidenceRead(source,type,r.ctx.originalQuestion??r.ctx.question??'');if(epoch!==AI_SOURCE_EVIDENCE.epoch||r!==aiResult||r.ctx.image!==source||r.ctx.drawingType!==type)return;r._sourceEvidence={source,type,observations};aiPreviewPaint();}catch(e){/* Stale/cancelled source observations never replace a candidate. */}}
+function aiSourceEvidenceHTML(r){const o=aiSourceEvidenceBound(r);if(!o||o.state==='pending'||!r.ctx?.image)return '';if(o.state!=='observed')return '<p class="ai-hint" data-i18n="off">'+bi('题图辅助：未能可靠提取比例和线段，沿用原图人工核对。','Drawing aid: reliable ratios and segments were unavailable. Review the original image.')+'</p>';const check=SourceEvidenceKit().compare(o,AI_PREVIEW.owner===r?AI_PREVIEW.views:r.previewViews),warning=check.findings.length?'<p class="ai-hint" data-i18n="off">'+bi('题图与候选的相对外包比例有偏差：','Relative source/candidate envelope differs: ')+check.findings.map(f=>aiEsc(f.axis)).join('/')+bi('。仅像素估计，明确标注优先。','; pixel estimates only. Explicit dimensions take priority.')+'</p>':'',cObs=o.circleObservation||(Array.isArray(o.circles)?{state:'observed',count:o.circles.length,truncated:false}:{state:'unavailable',count:0,truncated:false}),cCount=Number.isInteger(cObs.count)?cObs.count:(Array.isArray(o.circles)?o.circles.length:0),cTextZh=cObs.state==='unavailable'?'；圆形观测不可用（未检查或预算受限，不能据此说原图无圆）':(cObs.state==='partial'||cObs.truncated)?'及 '+aiEsc(cCount)+' 个封闭孤立圆（部分观测：已达上限，未列出全部）':'及 '+aiEsc(cCount)+' 个封闭孤立圆（每视图上限4个、整题上限12个）',cTextEn=cObs.state==='unavailable'?'; circle observations unavailable (unchecked or budget-limited; does not mean no circles)':(cObs.state==='partial'||cObs.truncated)?' and '+aiEsc(cCount)+' closed isolated circle(s) (partial observation: limit reached, not all shown)':' and '+aiEsc(cCount)+' closed isolated circle(s) (capped at 4/view, 12 total)',xObs=o.correspondenceObservation,xCount=Array.isArray(o.correspondences)?o.correspondences.length:0,xTextZh=!xObs?'':(xObs.state==='observed'&&xCount>0)?(xObs.status==='partial'?'；跨视图圆-边界线确认 '+aiEsc(xCount)+' 组（部分确认，缺线或歧义特征未强行匹配）':'；跨视图圆-边界线确认 '+aiEsc(xCount)+' 组（仅共X/Y与Z区间对齐，孔/凸台与实际尺寸仍待原图核对）'):xObs.state==='observed'?'；未确认俯视圆跨视图边界线对应（无对应或存在缺线/冲突/遮挡歧义，沿用原流程）':'；跨视图边界线对应未启用（'+(xObs.reason==='missing-view-W'?'缺少左视图W':(xObs.reason==='circles-incomplete'||xObs.reason==='circles-unavailable')?'圆形观测受限':'未检查或受预算限制')+'）',xTextEn=!xObs?'':(xObs.state==='observed'&&xCount>0)?(xObs.status==='partial'?'; '+aiEsc(xCount)+' cross-view top-circle/wall correspondence(s) confirmed (partial: incomplete/ambiguous features omitted)':'; '+aiEsc(xCount)+' cross-view top-circle/wall correspondence(s) confirmed (aligned X/Y & Z only; verify hole/boss and dimensions on source)'):xObs.state==='observed'?'; no unambiguous cross-view top-circle/wall correspondence confirmed (abstained or none detected)':'; cross-view top-circle/wall correspondence unavailable ('+(xObs.reason==='missing-view-W'?'W view absent':(xObs.reason==='circles-incomplete'||xObs.reason==='circles-unavailable')?'circle observations limited':'unchecked or budget-limited')+')';return warning+'<details class="ai-subfold" data-i18n="off"><summary>'+bi('题图辅助 · 像素观测','Drawing aid · pixel observations')+'</summary><p>'+bi('从原图独立提取 '+aiEsc(o.views.join('/'))+' 的相对比例、'+aiEsc(o.lines.length)+' 条较长直线'+cTextZh+xTextZh+'。按本软件第一角布局解释，最长外包归一为100；不是毫米、尺寸标注、孔/凸台/贯通语义、线型语义或正确性证明。原图和模型未改变。','Independent '+aiEsc(o.views.join('/'))+' relative ratios, '+aiEsc(o.lines.length)+' longer straight segments'+cTextEn+xTextEn+', assuming workbench first-angle layout. Longest extent is normalized to 100; these are not millimetres, dimension readings, hole/boss/through semantics, semantic line labels or proof of correctness. Source and model are unchanged.')+'</p><p>X/Y/Z: '+['X','Y','Z'].map(k=>aiEsc(o.extent[k])).join(' / ')+'</p></details>';}
+async function aiSourceEvidenceAttach(r){
+ const source=r?.ctx?.image,type=r?.ctx?.drawingType,epoch=AI_SOURCE_EVIDENCE.epoch;if(!source)return;
+ const previous=AI_SOURCE_EVIDENCE.attachments.get(r);previous?.controller.abort();
+ const controller=new AbortController(),binding={source,type,observations:{state:'pending'}},ticket={source,type,controller,binding};
+ AI_SOURCE_EVIDENCE.attachments.set(r,ticket);r._sourceEvidence=binding;
+ const live=()=>AI_SOURCE_EVIDENCE.attachments.get(r)===ticket&&r===aiResult&&r._sourceEvidence===binding&&r.ctx?.image===source&&r.ctx.drawingType===type;
+ try{const observations=await aiSourceEvidenceRead(source,type,r.ctx.originalQuestion??r.ctx.question??'',controller.signal);if(!live()||epoch!==AI_SOURCE_EVIDENCE.epoch)return;binding.observations=observations;aiPreviewPaint();}
+ catch(e){if(live()){binding.observations={state:'unavailable',reason:e?.name==='AbortError'?'cancelled':'failed'};aiPreviewPaint();}}
+ finally{if(AI_SOURCE_EVIDENCE.attachments.get(r)===ticket)AI_SOURCE_EVIDENCE.attachments.delete(r);}
+}
 async function aiSourceEvidencePrepareBrief(){
  if(aiImageLoading){toast(bi('图片仍在读取，请稍后复制说明。','The image is still loading. Copy instructions when it is ready.'));return false;}
  const source=aiImage?.data||null,type=AIK.drawingType(aiCfg.drawingType),text=$('aitext').value.trim().slice(0,6000),epoch=AI_SOURCE_EVIDENCE.epoch;
@@ -7232,4 +9920,79 @@ function FullSectionKit(K, features){
  wb.section={open,compare,close:()=>dialog.close(),state:()=>({open:dialog.open,busy:S.busy,view:S.view,position:S.position,source:S.source,comparison:!!S.compare,mode:fullOn()?'full':'slice',reverse:S.reverse,fullReady:!!S.fullData,centers:S.centers,solid:solidState(),difference:S.difference??null,filled:S.filled,res:S.res})};
 })();
 
-</script></body></html>
+</script><style id="v070-ui-polish">
+/* v0.7.0 UI polish (CSS only; IDs, data attributes, events unchanged).
+   Drawing-paper desk: one slim header, the sheet fits the viewport, quieter drawer head. */
+:root{--hdr:48px}
+body>header{min-height:var(--hdr);height:var(--hdr);padding:0 16px;gap:12px;border-bottom:1px solid #0e2234}
+body>header>div:first-child{display:flex;align-items:baseline;gap:14px;min-width:0;overflow:hidden}
+body>header h1{font-size:17px;margin:0;white-space:nowrap;letter-spacing:.3px}
+body>header p{margin:0;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#9fbccb}
+body>header .hdr-right{flex:none;gap:8px}
+body>header .lang-btn,body>header .badge{padding:5px 9px;min-height:30px}
+@media(min-width:731px){body>header .lang-btn,body>header .badge{display:inline-flex;align-items:center}}
+.layout{min-height:calc(100vh - var(--hdr))}
+@media(min-width:1250px){aside{max-height:calc(100vh - var(--hdr))}}
+/* Toolbar + sheet chrome: thinner bars so paper gets the height. */
+body .toolbar{padding:7px 12px;gap:6px}
+body .sheetbar{padding:7px 14px;font-size:12px;align-items:center;gap:10px}
+body .status{padding:7px 14px;min-height:34px;border-top:1px solid #edf2f5}
+body .sheetbox{border-radius:6px;overflow:hidden}
+@media(min-width:1121px){
+ body .ai-drawer{height:calc(100vh - var(--hdr))}
+ body .workspace{padding:10px;gap:10px;grid-template-columns:minmax(0,1fr) clamp(272px,25vw,360px)}
+ body.ai-open .workspace{grid-template-columns:minmax(0,1fr) 240px}
+ body.ai-open:not(.build-folded) .workspace{grid-template-columns:minmax(0,1fr)}
+ body .side{top:10px}
+ /* Whole first-angle sheet (V/W above, H below) visible without page scrolling; never smaller than 460px. */
+ #sheet svg{max-height:max(460px,calc(100vh - var(--hdr) - 150px))}
+ #sheet{min-height:0}
+}
+@media(min-width:731px) and (max-width:1120px){body .workspace{padding:10px;gap:10px}#sheet svg{max-height:max(460px,calc(100vh - var(--hdr) - 150px))}}
+/* 3D side card: tidy title row, presets never truncate in English. */
+body .side .preview{container-type:inline-size}
+body .preview-title{padding:9px 12px;align-items:center}
+body .preview-title>span{font-weight:600}
+html[lang=en] body .orbit-presets{grid-template-columns:repeat(3,minmax(0,1fr))}
+@container (min-width:330px){html[lang=en] body .orbit-presets{grid-template-columns:repeat(6,minmax(0,1fr))}}
+body .orbit-presets button{white-space:nowrap;overflow:visible}
+body .settings{margin-top:10px}
+/* AI drawer: light head with accent rule instead of a second dark band. */
+body .ai-head{background:#fff;color:var(--ink);border-bottom:1px solid var(--line);box-shadow:inset 0 3px 0 var(--accent);padding:12px 14px 10px}
+body .ai-head .ai-sub{color:var(--muted)}
+body .ai-head .ai-x{color:var(--ink);border-color:var(--line);background:#fff;min-width:32px;min-height:32px;font-size:16px}
+body .ai-head .ai-x:hover{color:var(--accent);border-color:var(--accent)}
+/* Sticky review dock: no content bleeding under it (padding replaced by an end spacer). */
+#aidrawer .ai-body{padding-bottom:0}
+#aidrawer .ai-body::after{content:"";display:block;height:20px}
+#aidrawer #aireviewdock{bottom:0;margin-bottom:0;padding:9px 0 10px;box-shadow:0 -8px 12px #ffffffee}
+#aidrawer .ai-entry>summary{padding:10px 12px;line-height:1.4}
+#aidrawer .ai-err{font-weight:600}
+#aidrawer .ai-preview-card{border-radius:6px}
+/* Author credit stays readable but leaves the drawer's action area free. */
+@media(min-width:1121px){body.ai-open .credit{right:auto;left:12px}}
+/* Dialogs: keep square canvases inside the viewport so controls are reachable with less scrolling. */
+#sectioncanvas{width:min(100%,520px,max(260px,calc(94vh - 330px)))}
+.ai-preview-stage canvas{width:min(100%,max(260px,calc(92vh - 250px)));margin:0 auto}
+#aipreviewdialog,#aicomparedialog,#sectiondialog,#cutdialog{box-shadow:0 18px 60px #0f243640}
+/* Step cards: tighter action buttons in Chinese and English. */
+body #list .chead{gap:4px}
+body #list .chead button{padding:3px 6px}
+/* Narrow (browser emulation only). */
+@media(max-width:730px){
+ :root{--hdr:auto}
+ body>header{height:auto;min-height:46px;padding:7px 12px}
+ body>header>div:first-child{display:block}
+ body>header h1{font-size:16px;white-space:normal}
+ body>header p{display:none}
+ body>header .lang-btn{min-height:34px;min-width:44px;justify-content:center}
+ body .orbit-stage #gl{aspect-ratio:4/3}
+ body .workspace{padding:8px}
+ body .side{margin-top:10px}
+}
+@media(max-width:700px){
+ .ai-preview-layout{gap:12px}
+ #aipreviewnotice,#aiviewhint{margin:4px 0}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style></body></html>
