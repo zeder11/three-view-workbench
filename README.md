@@ -1,4 +1,8 @@
-# Three-View Workbench · v0.7.0
+# Three-View Workbench · v0.7.1
+
+Desktop drawings use the available width. Scroll down for the top view when needed. English localization now covers the local AI mock result, its dimension table and more UI messages. User input, imported data and external AI responses retain their original text. [Release notes](RELEASE_NOTES.md) · [Open the workbench](app/three-view-workbench.html) · [简体中文](README.zh-CN.md)
+
+## Drawing aids introduced in v0.7.0
 
 [简体中文](README.zh-CN.md) · [Open the workbench](app/three-view-workbench.html) · [Release notes](RELEASE_NOTES.md) · [Build verification](docs/stability.md)
 

@@ -1,4 +1,8 @@
-# 三视图工作台 · v0.7.0
+# 三视图工作台 · v0.7.1
+
+桌面图纸会利用可用宽度显示三视图，图纸较长时可向下滚动查看俯视图。英文界面补齐了 AI 本地模拟结果、尺寸表及多处操作提示。用户输入、导入数据和外部 AI 原文按原文显示。[更新说明](RELEASE_NOTES.zh-CN.md) · [打开工作台](app/three-view-workbench.html)
+
+## v0.7.0 的题图辅助
 
 打开[工作台](app/three-view-workbench.html)，或查看[完整更新说明](RELEASE_NOTES.zh-CN.md)和[版本校验信息](docs/stability.zh-CN.md)。
 

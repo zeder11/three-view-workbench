@@ -1,27 +1,28 @@
 {
-  "version": "v0.7.0",
+  "version": "v0.7.1",
   "status": "ready-to-publish",
-  "baseVersion": "v0.6.2",
+  "baseVersion": "v0.7.0",
   "entry": "app/three-view-workbench.html",
-  "appBytes": 1160825,
-  "appSha256": "39dc51460829969f5dd19390bee9504518fbe43df459f2f5417b9272ae790810",
+  "appBytes": 1196863,
+  "appSha256": "529c38870d7ad38d2c00a43c35da7ac65c443a504bcd2df3b874de271ee9054e",
   "verification": {
-    "featureChecks": {
-      "endToEndChecks": 9,
-      "fileUrlModellingAndTraceSmoke": "passed",
-      "crossViewUnitChecks": 7,
-      "crossViewBrowserChecks": 9,
-      "circleWorkerBrowserChecks": 9,
-      "orientationBrowserChecks": 4
+    "desktopViewAt1536x900": {
+      "beforePx": 226,
+      "afterPx": 301
     },
+    "narrowScreenWidthPx": 390,
+    "languageBrowserChecks": 13,
+    "traceBrowserChecks": 12,
+    "crossViewBrowserChecks": 9,
+    "svgSize": [
+      860,
+      930
+    ],
+    "pngSize": [
+      1720,
+      1860
+    ],
     "realProviderCallsDuringOfflineVerification": 0
-  },
-  "pilot": {
-    "syntheticDrawings": 1,
-    "model": "Orchestrator (Argon)",
-    "hintOffGeometryPassed": true,
-    "hintOnGeometryPassed": true,
-    "geometryIdentical": true
   },
   "generalRecognitionAccuracyValidated": false,
   "publishedByThisPass": false
