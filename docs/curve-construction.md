@@ -31,3 +31,20 @@ The shape relation `0 < rise <= width/2` also remains subject to the existing ke
 Construction first normalizes the complete cap profile's bounding extent to 80 units and checks its radius. The final assembly still passes the existing workspace validation. For width=60 and wallHeight=20, rise=0.0001 passes the construction check, while rise=0.00001 is rejected with a parameter-specific precision message. Successful construction does not guarantee that a very shallow curve is visible at the current projection sampling resolution.
 
 The program never silently flattens an arc or increases its rise. A straight-line approximation requires an explicit user decision. Actual self-intersecting profiles remain invalid.
+
+## Obrounds and filleted polygons in v0.8.0
+
+- `obround` uses two distinct end centres and a positive radius. It builds equal-radius semicircles and two common tangents. The extrusion range determines whether a cut creates a through or blind slot.
+- `rounded_poly` takes the original polygon vertices and a zero-based map of corner radii. Only specified convex corners are rounded, and adjacent fillets must fit on their shared side.
+
+Place either shape object in the AI JSON `shapes` array to try it.
+
+```json
+{"type":"sketch","op":"add","view":"V","lo":-6,"hi":6,"profile":"obround","centers":[[0,0],[24,0]],"radius":6}
+```
+
+```json
+{"type":"sketch","op":"add","view":"V","lo":-6,"hi":6,"profile":"rounded_poly","points":[[0,0],[40,0],[40,20],[0,20]],"fillets":{"2":5,"3":5}}
+```
+
+An eligible nearly tangent join can be adjusted in a local AI candidate preview. Arc endpoints and extrusion depth stay fixed, while the radius may change. Check the source drawing to confirm the intended transition.

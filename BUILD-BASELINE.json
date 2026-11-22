@@ -1,27 +1,23 @@
 {
-  "version": "v0.7.1",
+  "version": "v0.8.0",
   "status": "ready-to-publish",
-  "baseVersion": "v0.7.0",
+  "baseVersion": "v0.7.1",
   "entry": "app/three-view-workbench.html",
-  "appBytes": 1196863,
-  "appSha256": "529c38870d7ad38d2c00a43c35da7ac65c443a504bcd2df3b874de271ee9054e",
+  "appBytes": 1307198,
+  "appSha256": "b7f002932bc9841bc61491aa2e757999b601c7e24f3b0f8d35ca28786af6c569",
   "verification": {
-    "desktopViewAt1536x900": {
-      "beforePx": 226,
-      "afterPx": 301
-    },
+    "browser": "Microsoft Edge",
+    "offlineSmokePassed": true,
+    "featureSuitePassed": true,
     "narrowScreenWidthPx": 390,
-    "languageBrowserChecks": 13,
-    "traceBrowserChecks": 12,
     "crossViewBrowserChecks": 9,
-    "svgSize": [
-      860,
-      930
+    "publicModelExamples": 45,
+    "publicAiJsonExamples": 3,
+    "layeredDxfViews": [
+      "three-view",
+      "full-section"
     ],
-    "pngSize": [
-      1720,
-      1860
-    ],
+    "homepageDownloadMatchesApp": true,
     "realProviderCallsDuringOfflineVerification": 0
   },
   "generalRecognitionAccuracyValidated": false,

@@ -1,12 +1,18 @@
-# v0.7.1 release notes
+# v0.8.0 release notes
 
-- **Larger desktop views.** The drawing uses the available width while keeping the three views at the same scale. Scroll down for the full top view when needed.
-- **More complete English localization.** Local AI mock results, dimension tables, error messages and additional controls follow the interface language. User input, imported content and external AI replies retain their original text.
+This release adds mechanical recipes, drawing checks and DXF export. It also improves scoped AI revisions and the construction of tangent arcs.
 
-Open the HTML file directly to use the workbench offline.
+## Highlights
+
+- Build boss flanges with evenly spaced bolt holes or stepped shafts with an optional keyway from dimensional parameters.
+- Limit AI revisions to selected steps and retain confirmations for unchanged evidence. A reading returns to review when its value or linked geometry changes. Supported holes can be previewed locally as through or blind holes.
+- Give AI sketches obround centres and radii, or identify corners to round. The workbench calculates the tangent points and arcs. Eligible nearly tangent joins can be adjusted in a local preview for review.
+- Review outlines and hidden lines, dimensions and annotations, sections, and smooth transitions. Checks without sufficient evidence remain unverified. Export the three views or an A–A full section as a layered 2D DXF.
+
+DXF files contain 2D linework and text-based dimensions. Review AI candidates against the source drawing, especially where dimensions, hole depths or tangent transitions are unspecified.
 
 ## Downloads
 
-- **three-view-workbench.html** — standalone offline application.
-- **three-view-workbench-v0.7.1.zip** — application, documentation, licence and public examples.
-- **SHA256SUMS.txt** — SHA-256 checksums for the Release downloads.
+- **three-view-workbench.html** — open directly in a browser for offline use.
+- **three-view-workbench-v0.8.0.zip** — application, documentation, licence and public examples.
+- **SHA256SUMS.txt** — checksums for the two downloads.

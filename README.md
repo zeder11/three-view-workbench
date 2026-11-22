@@ -1,6 +1,15 @@
-# Three-View Workbench · v0.7.1
+# Three-View Workbench · v0.8.0
 
-Desktop drawings use the available width. Scroll down for the top view when needed. English localization now covers the local AI mock result, its dimension table and more UI messages. User input, imported data and external AI responses retain their original text. [Release notes](RELEASE_NOTES.md) · [Open the workbench](app/three-view-workbench.html) · [简体中文](README.zh-CN.md)
+[Release notes](RELEASE_NOTES.md) · [Open the workbench](app/three-view-workbench.html) · [简体中文](README.zh-CN.md)
+
+## What’s new in v0.8.0
+
+- Build boss flanges with evenly spaced bolt holes or stepped shafts with an optional keyway from dimensional parameters.
+- Limit AI revisions to selected steps and retain confirmations for unchanged evidence. A reading returns to review when its value or linked geometry changes. Supported holes can be previewed locally as through or blind holes.
+- Give AI sketches obround centres and radii, or identify corners to round. The workbench calculates the tangent points and arcs. Eligible nearly tangent joins can be adjusted in a local preview for review.
+- Review outlines and hidden lines, dimensions and annotations, sections, and smooth transitions. Checks without sufficient evidence remain unverified. Export the three views or an A–A full section as a layered 2D DXF.
+
+[Curve construction and parameter examples](docs/curve-construction.md)
 
 ## Drawing aids introduced in v0.7.0
 
