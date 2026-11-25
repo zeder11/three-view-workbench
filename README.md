@@ -1,3 +1,4 @@
+[三视图工作台 Skill](skill/three-view-workbench/) · 用于 AI 建模后的离线出图、全剖和几何核对。
 # Three-View Workbench · v0.8.0
 
 [Release notes](RELEASE_NOTES.md) · [Open the workbench](app/three-view-workbench.html) · [简体中文](README.zh-CN.md)
