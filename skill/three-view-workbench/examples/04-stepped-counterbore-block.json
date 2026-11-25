@@ -1,0 +1,51 @@
+{
+  "unit": "mm",
+  "drawing": {
+    "type": "orthographic"
+  },
+  "understanding": "60×40×30 mm 长方体顶面中心带台阶沉孔：上部 Ø24 mm 深 10 mm，下部 Ø12 mm 贯通到底。",
+  "shapes": [
+    {
+      "type": "box",
+      "op": "add",
+      "cx": 30,
+      "cy": 20,
+      "cz": 15,
+      "sx": 60,
+      "sy": 40,
+      "sz": 30
+    },
+    {
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "z",
+      "cx": 30,
+      "cy": 20,
+      "cz": 25,
+      "r": 12,
+      "h": 10.6
+    },
+    {
+      "type": "cylinder",
+      "op": "sub",
+      "axis": "z",
+      "cx": 30,
+      "cy": 20,
+      "cz": 15,
+      "r": 6,
+      "h": 30.6
+    }
+  ],
+  "readings": [
+    { "label": "总长", "value": 60, "unit": "mm", "source": "drawing", "basis": "俯视图标注" },
+    { "label": "总宽", "value": 40, "unit": "mm", "source": "drawing", "basis": "俯视图标注" },
+    { "label": "总高", "value": 30, "unit": "mm", "source": "drawing", "basis": "主视图标注" },
+    { "label": "上沉孔直径", "value": 24, "unit": "mm", "source": "drawing", "basis": "俯视图 Ø24 标注" },
+    { "label": "上沉孔深度", "value": 10, "unit": "mm", "source": "drawing", "basis": "主视图沉孔深度标注" },
+    { "label": "下通孔直径", "value": 12, "unit": "mm", "source": "drawing", "basis": "俯视图 Ø12 标注" }
+  ],
+  "assumptions": [],
+  "questions": [],
+  "unsupported": [],
+  "confidence": "high"
+}

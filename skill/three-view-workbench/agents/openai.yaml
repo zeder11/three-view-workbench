@@ -1,0 +1,7 @@
+interface:
+  display_name: "Three-View Workbench"
+  short_description: "Offline 3D CSG, three-view checks, sections, probes & DXF."
+  default_prompt: "Use $three-view-workbench to build and offline-verify a v0.8.0 model from the supplied drawing."
+
+policy:
+  allow_implicit_invocation: true

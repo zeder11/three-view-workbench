@@ -1,0 +1,41 @@
+{
+  "understanding": "60x40x20 底板右上角带 R10 圆角，但首轮手算弦高取近似值 -2.85 导致接点存在微小偏角。",
+  "unit": "mm",
+  "drawing": {
+    "type": "orthographic",
+    "orientation": "俯视图 H 截面沿 Z 拉伸 0..20"
+  },
+  "readings": [
+    { "label": "总长", "value": 60, "unit": "mm", "axis": "X", "scope": "overall", "source": "drawing", "from": "俯视图标注" },
+    { "label": "总宽", "value": 40, "unit": "mm", "axis": "Y", "scope": "overall", "source": "drawing", "from": "俯视图标注" },
+    { "label": "总高", "value": 20, "unit": "mm", "axis": "Z", "scope": "overall", "source": "drawing", "from": "主视图标注" }
+  ],
+  "features": [
+    {
+      "id": "f1",
+      "name": "圆角底板",
+      "kind": "base",
+      "steps": [1],
+      "spatial": { "axis": "Z", "range": [0, 20], "material": "solid", "relation": "右上角圆弧过渡", "source": "drawing" },
+      "evidence": [{ "view": "H", "text": "俯视图右上角为 R10 圆角" }],
+      "alternatives": [],
+      "uncertain": false
+    }
+  ],
+  "shapes": [
+    {
+      "type": "sketch",
+      "op": "add",
+      "view": "H",
+      "profile": "polygon",
+      "points": [[-30, -20], [20, -20], [30, -10], [30, 20], [-30, 20]],
+      "arcs": { "1": -2.85 },
+      "lo": 0,
+      "hi": 20
+    }
+  ],
+  "assumptions": ["首轮手算圆角弦高近似取 -2.85"],
+  "unsupported": [],
+  "questions": [],
+  "confidence": "medium"
+}

@@ -1,0 +1,44 @@
+{
+  "understanding": "60x40x30 矩形基体顶部中心带直径 12 竖直圆孔（首轮误建为贯通孔，待对照原图核对孔底）。",
+  "unit": "mm",
+  "drawing": {
+    "type": "orthographic",
+    "orientation": "X 为长 60，Y 为宽 40，Z 为高 30，孔轴沿 Z"
+  },
+  "readings": [
+    { "label": "总长", "value": 60, "unit": "mm", "axis": "X", "scope": "overall", "source": "drawing", "from": "主视图标注" },
+    { "label": "总宽", "value": 40, "unit": "mm", "axis": "Y", "scope": "overall", "source": "drawing", "from": "俯视图标注" },
+    { "label": "总高", "value": 30, "unit": "mm", "axis": "Z", "scope": "overall", "source": "drawing", "from": "主视图标注" },
+    { "label": "孔径", "value": 12, "unit": "mm", "scope": "feature", "steps": [2], "source": "drawing", "from": "俯视图标注" }
+  ],
+  "features": [
+    {
+      "id": "f1",
+      "name": "矩形基体",
+      "kind": "base",
+      "steps": [1],
+      "spatial": { "axis": "Z", "range": [0, 30], "material": "solid", "relation": "主基体", "source": "drawing" },
+      "evidence": [{ "view": "V", "text": "外轮廓 60x30" }],
+      "alternatives": [],
+      "uncertain": false
+    },
+    {
+      "id": "f2",
+      "name": "中央圆孔",
+      "kind": "through_hole",
+      "steps": [2],
+      "spatial": { "axis": "Z", "range": [0, 30], "material": "void", "relation": "首轮暂按贯通处理", "source": "estimate" },
+      "evidence": [{ "view": "H", "text": "俯视图见中心圆孔" }],
+      "alternatives": ["blind_hole"],
+      "uncertain": true
+    }
+  ],
+  "shapes": [
+    { "type": "box", "op": "add", "cx": 0, "cy": 0, "cz": 15, "sx": 60, "sy": 40, "sz": 30 },
+    { "type": "cylinder", "op": "sub", "axis": "z", "cx": 0, "cy": 0, "cz": 15, "r": 6, "h": 36 }
+  ],
+  "assumptions": ["首轮暂按竖直通孔建出，需对照主视图虚线确认是否有孔底"],
+  "unsupported": [],
+  "questions": [],
+  "confidence": "medium"
+}

@@ -1,0 +1,47 @@
+{
+  "understanding": "60x40x30 块体顶面见直径 14 圆孔，但仅提供了两张外形视图，孔深与通盲无法唯一判定，保留在待确认。",
+  "unit": "mm",
+  "drawing": {
+    "type": "orthographic",
+    "orientation": "已知长 60（X）、宽 40（Y）、高 30（Z）；缺少孔深剖视或虚线标注"
+  },
+  "readings": [
+    { "label": "总长", "value": 60, "unit": "mm", "axis": "X", "scope": "overall", "source": "drawing", "from": "主视图标注" },
+    { "label": "总宽", "value": 40, "unit": "mm", "axis": "Y", "scope": "overall", "source": "drawing", "from": "俯视图标注" },
+    { "label": "总高", "value": 30, "unit": "mm", "axis": "Z", "scope": "overall", "source": "drawing", "from": "主视图标注" },
+    { "label": "孔径", "value": 14, "unit": "mm", "scope": "feature", "steps": [2], "source": "drawing", "from": "俯视图标注" },
+    { "label": "暂定孔深", "value": 15, "unit": "mm", "axis": "Z", "scope": "feature", "steps": [2], "source": "estimate", "from": "两视图未给出深度，暂按一半厚度占位" }
+  ],
+  "features": [
+    {
+      "id": "f1",
+      "name": "主块体",
+      "kind": "base",
+      "steps": [1],
+      "spatial": { "axis": "Z", "range": [0, 30], "material": "solid", "relation": "主基体", "source": "drawing" },
+      "evidence": [{ "view": "V", "text": "主视图外轮廓 60x30" }],
+      "alternatives": [],
+      "uncertain": false
+    },
+    {
+      "id": "f2",
+      "name": "顶面圆孔（深度未定）",
+      "kind": "blind_hole",
+      "steps": [2],
+      "spatial": { "axis": "Z", "range": null, "material": "void", "relation": "孔口在顶面，但两视图不足以判定通盲与孔深", "source": "unknown" },
+      "evidence": [{ "view": "H", "text": "俯视图见中心直径 14 圆孔，未见深度信息" }],
+      "alternatives": ["through_hole"],
+      "uncertain": true
+    }
+  ],
+  "shapes": [
+    { "type": "box", "op": "add", "cx": 0, "cy": 0, "cz": 15, "sx": 60, "sy": 40, "sz": 30 },
+    { "type": "cylinder", "op": "sub", "axis": "z", "cx": 0, "cy": 0, "cz": 24, "r": 7, "h": 18 }
+  ],
+  "assumptions": ["两视图未标孔深，暂按 15 mm 盲孔占位，须用户确认是否为通孔或指定深度"],
+  "unsupported": [],
+  "questions": [
+    { "id": "q1", "text": "顶面直径 14 的圆孔是通孔还是盲孔？若是盲孔，实际深度是多少？" }
+  ],
+  "confidence": "low"
+}

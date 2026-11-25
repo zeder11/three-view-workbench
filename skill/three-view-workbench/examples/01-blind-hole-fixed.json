@@ -1,0 +1,45 @@
+{
+  "understanding": "60x40x30 矩形基体顶部中心带直径 12、深 18 mm 的盲孔（第 2 轮已按主视图虚线修正孔底至距底面 12 mm）。",
+  "unit": "mm",
+  "drawing": {
+    "type": "orthographic",
+    "orientation": "X 为长 60，Y 为宽 40，Z 为高 30，孔轴沿 Z"
+  },
+  "readings": [
+    { "label": "总长", "value": 60, "unit": "mm", "axis": "X", "scope": "overall", "source": "drawing", "from": "主视图标注" },
+    { "label": "总宽", "value": 40, "unit": "mm", "axis": "Y", "scope": "overall", "source": "drawing", "from": "俯视图标注" },
+    { "label": "总高", "value": 30, "unit": "mm", "axis": "Z", "scope": "overall", "source": "drawing", "from": "主视图标注" },
+    { "label": "孔径", "value": 12, "unit": "mm", "scope": "feature", "steps": [2], "source": "drawing", "from": "俯视图标注" },
+    { "label": "盲孔深度", "value": 18, "unit": "mm", "axis": "Z", "scope": "feature", "steps": [2], "source": "drawing", "from": "主视图标注" }
+  ],
+  "features": [
+    {
+      "id": "f1",
+      "name": "矩形基体",
+      "kind": "base",
+      "steps": [1],
+      "spatial": { "axis": "Z", "range": [0, 30], "material": "solid", "relation": "主基体", "source": "drawing" },
+      "evidence": [{ "view": "V", "text": "外轮廓 60x30" }],
+      "alternatives": [],
+      "uncertain": false
+    },
+    {
+      "id": "f2",
+      "name": "中央盲孔",
+      "kind": "blind_hole",
+      "steps": [2],
+      "spatial": { "axis": "Z", "range": [12, 30], "material": "void", "relation": "从顶面下挖 18 mm，底面保留 12 mm 实体", "source": "drawing" },
+      "evidence": [{ "view": "V", "text": "主视图虚线止于距底面 12 mm 处" }],
+      "alternatives": [],
+      "uncertain": false
+    }
+  ],
+  "shapes": [
+    { "type": "box", "op": "add", "cx": 0, "cy": 0, "cz": 15, "sx": 60, "sy": 40, "sz": 30 },
+    { "type": "cylinder", "op": "sub", "axis": "z", "cx": 0, "cy": 0, "cz": 22, "r": 6, "h": 20 }
+  ],
+  "assumptions": [],
+  "unsupported": [],
+  "questions": [],
+  "confidence": "high"
+}
