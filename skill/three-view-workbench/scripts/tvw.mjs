@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Three-View Workbench Skill CLI (v0.1 MVP, pinned to workbench v0.8.0)
+ * Three-View Workbench Skill CLI (v0.8.0 DOM adapter and v0.8.1/v0.8.2 Agent API v1)
  * Commands:
  *   node tvw.mjs check  <candidate.json> [--out <dir>] [--html <path>]
  *   node tvw.mjs render <candidate.json> --out <dir> [--html <path>]
@@ -19,7 +19,7 @@ const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SKILL_ROOT = path.resolve(__dirname, '..');
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
-const PINNED_V080_SHA256 = 'B7F002932BC9841BC61491AA2E757999B601C7E24F3B0F8D35CA28786AF6C569';
+import { workbenchPins } from './workbench-pins.mjs';
 
 function loadLocalConfig() {
   const cfgPath = path.join(SKILL_ROOT, 'config.local.json');
@@ -51,8 +51,12 @@ function resolveDefaultHtml() {
     process.env.TVW_WORKBENCH_HTML,
     LOCAL_CONFIG.workbenchHtml,
     path.join(REPO_ROOT, 'app', 'three-view-workbench.html'),
+    path.join(REPO_ROOT, '发布包', 'v0.8.2', 'app', 'three-view-workbench.html'),
+    path.join(REPO_ROOT, '发布包', 'v0.8.1', 'app', 'three-view-workbench.html'),
     path.join(REPO_ROOT, '发布包', 'v0.8.0', 'app', 'three-view-workbench.html'),
     path.join(process.cwd(), 'app', 'three-view-workbench.html'),
+    path.join(process.cwd(), '发布包', 'v0.8.2', 'app', 'three-view-workbench.html'),
+    path.join(process.cwd(), '发布包', 'v0.8.1', 'app', 'three-view-workbench.html'),
     path.join(process.cwd(), '发布包', 'v0.8.0', 'app', 'three-view-workbench.html')
   ].filter(Boolean).map(p => path.resolve(p));
   for (const p of candidates) {
@@ -67,7 +71,7 @@ function usage() {
   console.error([
     'Usage:',
     '  node tvw.mjs check  <candidate.json> [--out <dir>] [--section <V|H|W> [--section-pos <0..100> | --section-world <coord>] [--section-reverse]] [--probe "x,y,z;..."] [--centerlines] [--html <path>] [--allow-unpinned]',
-    '  node tvw.mjs render <candidate.json> --out <dir>   [--section <V|H|W> [--section-pos <0..100> | --section-world <coord>] [--section-reverse]] [--probe "x,y,z;..."] [--compare <source.png>] [--centerlines] [--dxf] [--html <path>] [--allow-unpinned]',
+    '  node tvw.mjs render <candidate.json> --out <dir>   [--section <V|H|W> [--section-pos <0..100> | --section-world <coord>] [--section-reverse]] [--probe "x,y,z;..."] [--compare <source.png>] [--centerlines] [--dxf] [--stl] [--html <path>] [--allow-unpinned]',
     '  node tvw.mjs diff   <before.workbench.json> <after.workbench.json> [--out <dir>]',
     '',
     'Verification & export options (optional):',
@@ -79,9 +83,10 @@ function usage() {
     '  --compare <source.png>   Compose side-by-side compare.png (source drawing vs rendered sheet.png) during render',
     '  --centerlines            Enable workbench centerlines before capturing sheet.png and OQA inspection',
     '  --dxf                    Export three-view DXF (and section DXF when --section is set) during render',
+    '  --stl                    Export binary STL 3D mesh during render (requires workbench v0.8.2+)',
     '',
     'Environment:',
-    '  TVW_WORKBENCH_HTML   Default path to three-view-workbench.html (v0.8.0)',
+    '  TVW_WORKBENCH_HTML   Default path to the supported workbench HTML',
     '  PLAYWRIGHT_PATH      Optional path to Playwright package',
     '  TVW_BROWSER_CHANNEL  Browser channel (default: msedge; use "chromium" for bundled Chromium)'
   ].join('\n'));
@@ -138,6 +143,7 @@ function parseArgs(argv) {
   let sectionWorld = null;
   let sectionReverse = false;
   let exportDxf = false;
+  let exportStl = false;
   let centerlines = false;
   let probes = [];
   let comparePath = null;
@@ -146,6 +152,7 @@ function parseArgs(argv) {
     else if (args[i] === '--html' && args[i + 1]) htmlPath = path.resolve(args[++i]);
     else if (args[i] === '--allow-unpinned') allowUnpinned = true;
     else if (args[i] === '--dxf') exportDxf = true;
+    else if (args[i] === '--stl') exportStl = true;
     else if (args[i] === '--centerlines') centerlines = true;
     else if (args[i] === '--probe' && args[i + 1]) probes.push(...parseProbes(args[++i]));
     else if (args[i] === '--compare' && args[i + 1]) comparePath = path.resolve(args[++i]);
@@ -185,6 +192,10 @@ function parseArgs(argv) {
     console.error('Error: --dxf is only supported with render');
     process.exit(2);
   }
+  if (exportStl && cmd !== 'render') {
+    console.error('Error: --stl is only supported with render');
+    process.exit(2);
+  }
   if (comparePath && cmd !== 'render') {
     console.error('Error: --compare is only supported with render');
     process.exit(2);
@@ -197,7 +208,7 @@ function parseArgs(argv) {
     console.error('Error: --section-pos, --section-world, and --section-reverse require --section <V|H|W>');
     process.exit(2);
   }
-  return { cmd, input: path.resolve(input), outDir, htmlPath, allowUnpinned, sectionView, sectionPos, sectionWorld, sectionReverse, exportDxf, centerlines, probes, comparePath };
+  return { cmd, input: path.resolve(input), outDir, htmlPath, allowUnpinned, sectionView, sectionPos, sectionWorld, sectionReverse, exportDxf, exportStl, centerlines, probes, comparePath };
 }
 
 function loadPlaywright() {
@@ -243,7 +254,10 @@ function buildMarkdownReport(res) {
     lines.push(`- **待核对／拦截原因**：${res.reviewReasons.join('；')}`);
   }
   lines.push(`- **输入候选**：\`${path.basename(res.input)}\``);
-  lines.push(`- **工作台基线**：v${res.compatibility.version || 'unknown'}（SHA-256 \`${res.compatibility.htmlSha256.slice(0, 12)}…\`${res.compatibility.matchesPinnedV080 ? '，匹配 v0.8.0 锁定基线' : '，--allow-unpinned 非锁定基线'}）`);
+  const compatNote = res.compatibility.mode === 'agent-api'
+    ? `Agent API v${res.compatibility.apiVersion}`
+    : (res.compatibility.matchesPinnedV080 ? '匹配 v0.8.0 锁定基线' : '--allow-unpinned 非锁定基线');
+  lines.push(`- **工作台基线**：v${res.compatibility.version || 'unknown'}（${compatNote} · SHA-256 \`${res.compatibility.htmlSha256.slice(0, 12)}…\`）`);
   lines.push(`- **离线与错误**：外部网络请求 \`${res.networkRequests.length}\`，页面异常 \`${res.pageErrors.length}\``);
   lines.push('');
 
@@ -457,6 +471,25 @@ function runDiff(opts) {
   console.log(JSON.stringify(diffRes, null, 2));
 }
 
+async function writeSvgPng(page, svg, file) {
+  const encoded = await page.evaluate(async text => {
+    const url = URL.createObjectURL(new Blob([text], { type: 'image/svg+xml' }));
+    try {
+      const image = new Image();
+      image.src = url;
+      await image.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth * 2;
+      canvas.height = image.naturalHeight * 2;
+      canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL('image/png').split(',')[1];
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }, svg);
+  fs.writeFileSync(file, Buffer.from(encoded, 'base64'));
+}
+
 async function run() {
   const opts = parseArgs(process.argv);
   if (opts.cmd === 'diff') {
@@ -466,24 +499,27 @@ async function run() {
   if (!fs.existsSync(opts.input)) throw new Error(`Input file not found: ${opts.input}`);
   if (!fs.existsSync(opts.htmlPath)) throw new Error(`Workbench HTML not found: ${opts.htmlPath}`);
 
-  // Enforce v0.8.0 SHA-256 version lock BEFORE launching any browser
-  const htmlSha256 = sha256File(opts.htmlPath);
-  const matchesPinnedV080 = htmlSha256 === PINNED_V080_SHA256;
-  if (!matchesPinnedV080 && !opts.allowUnpinned) {
+  const htmlSha256 = crypto.createHash('sha256').update(fs.readFileSync(opts.htmlPath)).digest('hex').toUpperCase();
+  const pinnedVersion = Object.keys(workbenchPins).find(v => workbenchPins[v] === htmlSha256);
+  const matchesPinnedV080 = pinnedVersion === '0.8.0';
+  const pinnedSha256 = workbenchPins[pinnedVersion] || null;
+  if (!pinnedVersion && !opts.allowUnpinned) {
     const errReport = {
       ok: false,
       pipelineOk: false,
       status: 'failed',
       needsReview: true,
-      reviewReasons: [`Workbench HTML SHA-256 mismatch: expected pinned v0.8.0 (${PINNED_V080_SHA256}), got ${htmlSha256}. Pass --allow-unpinned only for deliberate compatibility testing.`],
+      reviewReasons: [`Workbench HTML SHA-256 mismatch: expected a verified v0.8.0 or v0.8.1 build, got ${htmlSha256}. Pass --allow-unpinned only for deliberate compatibility testing.`],
       command: opts.cmd,
       input: opts.input,
-      compatibility: { ok: false, version: null, htmlSha256, pinnedSha256: PINNED_V080_SHA256, matchesPinnedV080: false }
+      compatibility: { ok: false, mode: null, apiVersion: null, version: null, htmlSha256, pinnedSha256, matchesPinnedV080: false }
     };
     console.log(JSON.stringify(errReport, null, 2));
     process.exit(1);
   }
 
+  const workbenchUrl = pathToFileURL(opts.htmlPath);
+  if (opts.cmd === 'check' && !matchesPinnedV080) workbenchUrl.searchParams.set('agent', 'check');
   const rawText = fs.readFileSync(opts.input, 'utf8');
   // Fail fast on invalid JSON syntax before launching browser
   JSON.parse(rawText);
@@ -495,15 +531,33 @@ async function run() {
 
   const allExternalRequests = [];
   const allPageErrors = [];
+  let stageDir = null;
 
   try {
     // ---------------- Phase 1: Candidate preview & local checks ----------------
     const p1 = await createOfflineContext(browser);
-    await p1.page.goto(pathToFileURL(opts.htmlPath).href, { waitUntil: 'load' });
+    await p1.page.goto(workbenchUrl.href, { waitUntil: 'load' });
     await p1.page.waitForFunction(() => window.__workbench && window.__workbench.getState().ready, { timeout: 30000 });
 
-    const compat = await p1.page.evaluate(() => {
+    const compat = await p1.page.evaluate((needStl) => {
       const w = window.__workbench;
+      const requiredCaps = ['compileCandidate', 'importModel', 'renderViews', 'renderSection', 'probe', 'inspectOqa', 'exportDxf'];
+      if (needStl) requiredCaps.push('exportStl');
+      const agent = w?.agent;
+      if (agent && agent.apiVersion !== 1) {
+        return { ok: false, mode: 'agent-api', missing: ['supported API version 1 (received ' + agent.apiVersion + ')'] };
+      }
+      if (agent) {
+        const caps = Array.isArray(agent.capabilities) ? agent.capabilities : [];
+        const missingCaps = requiredCaps.filter(c => !caps.includes(c) || typeof agent[c] !== 'function');
+        return {
+          ok: missingCaps.length === 0,
+          mode: 'agent-api',
+          apiVersion: Number(agent.apiVersion),
+          version: agent.workbenchVersion || w?.v080?.version || null,
+          missing: missingCaps
+        };
+      }
       const missing = [];
       if (!w) missing.push('__workbench');
       if (!w?.v080) missing.push('__workbench.v080');
@@ -513,31 +567,49 @@ async function run() {
       if (typeof AIK === 'undefined') missing.push('AIK');
       if (!document.getElementById('aipastejson')) missing.push('#aipastejson');
       if (!document.getElementById('file')) missing.push('#file');
-      return { ok: missing.length === 0, version: w?.v080?.version || null, missing };
-    });
+      if (needStl) missing.push('exportStl (requires workbench v0.8.2+)');
+      return { ok: missing.length === 0, mode: 'v080-dom-fallback', apiVersion: null, version: w?.v080?.version || null, missing };
+    }, opts.exportStl);
     if (!compat.ok) {
-      throw new Error(`Workbench v0.8.0 compatibility check failed. Missing: ${compat.missing.join(', ')}`);
+      throw new Error(`Workbench compatibility check failed (${compat.mode}). Missing: ${compat.missing.join(', ')}`);
     }
+    if ((pinnedVersion === '0.8.1' || pinnedVersion === '0.8.2') && compat.mode !== 'agent-api') {
+      throw new Error(`The pinned v${pinnedVersion} workbench must expose Agent API v1.`);
+    }
+    const useAgentApi = compat.mode === 'agent-api';
 
-    // Open AI drawer -> paste JSON -> run local candidate preview & health checks
-    await p1.page.evaluate(() => {
-      const tb = document.getElementById('tbtools'); if (tb) tb.open = true;
-      const aiBtn = document.getElementById('aiopen'); if (aiBtn && document.getElementById('aidrawer')?.hidden) aiBtn.click();
-      const ex = document.getElementById('aiexternal'); if (ex) ex.open = true;
-      const dp = document.getElementById('aipaste'); if (dp) dp.open = true;
-    });
-    await p1.page.fill('#aipastejson', rawText);
-    await p1.page.click('#aipastego');
+    let candidateInfo;
+    if (useAgentApi) {
+      // Agent API v1: pure compilation without touching UI widgets or active workbench shapes
+      candidateInfo = await p1.page.evaluate((raw) => {
+        const beforeSnap = JSON.stringify(window.__workbench.getShapes());
+        const res = window.__workbench.agent.compileCandidate(raw);
+        const afterSnap = JSON.stringify(window.__workbench.getShapes());
+        if (beforeSnap !== afterSnap) {
+          return { ok: false, error: 'Agent API violation: compileCandidate mutated active workbench shapes' };
+        }
+        return res;
+      }, rawText);
+    } else {
+      // Legacy v0.8.0 DOM adapter: Open AI drawer -> paste JSON -> run local candidate preview & health checks
+      await p1.page.evaluate(() => {
+        const tb = document.getElementById('tbtools'); if (tb) tb.open = true;
+        const aiBtn = document.getElementById('aiopen'); if (aiBtn && document.getElementById('aidrawer')?.hidden) aiBtn.click();
+        const ex = document.getElementById('aiexternal'); if (ex) ex.open = true;
+        const dp = document.getElementById('aipaste'); if (dp) dp.open = true;
+      });
+      await p1.page.fill('#aipastejson', rawText);
+      await p1.page.click('#aipastego');
 
-    // Wait for either candidate result + health completion OR explicit #aierr
-    await p1.page.waitForFunction(() => {
-      const err = document.getElementById('aierr');
-      if (err && !err.hidden && err.textContent.trim()) return true;
-      const st = window.__workbench.ai.state();
-      return st.hasResult && !st.busy && st.health && !st.health.pending;
-    }, { timeout: 45000 });
+      // Wait for either candidate result + health completion OR explicit #aierr
+      await p1.page.waitForFunction(() => {
+        const err = document.getElementById('aierr');
+        if (err && !err.hidden && err.textContent.trim()) return true;
+        const st = window.__workbench.ai.state();
+        return st.hasResult && !st.busy && st.health && !st.health.pending;
+      }, { timeout: 45000 });
 
-    const candidateInfo = await p1.page.evaluate(() => {
+      candidateInfo = await p1.page.evaluate(() => {
       const errEl = document.getElementById('aierr');
       const errText = errEl && !errEl.hidden ? errEl.textContent.trim() : '';
       if (errText || !aiResult) {
@@ -661,6 +733,7 @@ async function run() {
         formalModel
       };
     });
+    }
 
     allExternalRequests.push(...p1.externalRequests);
     allPageErrors.push(...p1.pageErrors);
@@ -674,7 +747,7 @@ async function run() {
         needsReview: true,
         reviewReasons: [candidateInfo.error || 'Candidate failed validation'],
         input: opts.input,
-        compatibility: { ...compat, htmlSha256, pinnedSha256: PINNED_V080_SHA256, matchesPinnedV080 },
+        compatibility: { ...compat, htmlSha256, pinnedSha256, matchesPinnedV080 },
         candidate: candidateInfo,
         roundTrip: { ok: false },
         networkRequests: allExternalRequests,
@@ -684,46 +757,96 @@ async function run() {
       process.exit(1);
     }
 
-    // Write formal workbench JSON to temp or --out dir for blank-workbench re-import
+    // Stage all artifacts in an isolated temporary directory; commit to --out only after every step succeeds
     const baseName = path.basename(opts.input, path.extname(opts.input));
-    const targetDir = opts.outDir || fs.mkdtempSync(path.join(osTmpDir(), 'tvw-'));
-    fs.mkdirSync(targetDir, { recursive: true });
-    const formalPath = path.join(targetDir, `${baseName}.workbench.json`);
+    stageDir = fs.mkdtempSync(path.join(osTmpDir(), 'tvw-stage-'));
+    const formalPath = path.join(stageDir, `${baseName}.workbench.json`);
     fs.writeFileSync(formalPath, JSON.stringify(candidateInfo.formalModel, null, 2), 'utf8');
 
     // ---------------- Phase 2: Fresh blank workbench round-trip import ----------------
     const p2 = await createOfflineContext(browser);
-    await p2.page.goto(pathToFileURL(opts.htmlPath).href, { waitUntil: 'load' });
+    await p2.page.goto(workbenchUrl.href, { waitUntil: 'load' });
     await p2.page.waitForFunction(() => window.__workbench && window.__workbench.getState().ready, { timeout: 30000 });
 
-    // Record pre-import model state (revision / snapshot) so we wait for a real post-import rebuild
-    const beforeImport = await p2.page.evaluate(() => ({
-      snap: JSON.stringify(window.__workbench.getShapes()),
-      hasMeta: !!window.__workbench.ai.state().meta
-    }));
+    let roundTrip;
+    if (useAgentApi) {
+      const formalText = fs.readFileSync(formalPath, 'utf8');
+      const imp = await p2.page.evaluate(async ({ text, centerlines, skipMesh }) => {
+        return await window.__workbench.agent.importModel(text, { centerlines, skipMesh });
+      }, { text: formalText, centerlines: opts.centerlines, skipMesh: opts.cmd === 'check' });
 
-    // Import formal model file through real #file input
-    await p2.page.setInputFiles('#file', formalPath);
-    await p2.page.waitForFunction(({ beforeSnap, wantCount }) => {
-      const err = document.getElementById('errbar');
-      if (err && !err.hidden) return true;
-      const st = window.__workbench.getState();
-      const curShapes = window.__workbench.getShapes();
-      const curMeta = window.__workbench.ai.state().meta;
-      const changed = JSON.stringify(curShapes) !== beforeSnap || !!curMeta;
-      return changed && st.ready && !st.mesh?.busy && curShapes.length === wantCount && !!drawData;
-    }, { beforeSnap: beforeImport.snap, wantCount: candidateInfo.shapeCount }, { timeout: 45000 });
+      const normShape = (s) => {
+        const out = {};
+        for (const k of Object.keys(s || {}).sort()) {
+          if (k === 'id' || k === 'refKey') continue;
+          const v = s[k];
+          out[k] = typeof v === 'number' ? Number(v.toFixed(5)) : v;
+        }
+        return out;
+      };
+      const loadedShapes = imp.shapes || [];
+      const expectedShapes = candidateInfo.formalModel.shapes || [];
+      const geometryMatches = loadedShapes.length === expectedShapes.length
+        && loadedShapes.every((s, i) => JSON.stringify(normShape(s)) === JSON.stringify(normShape(expectedShapes[i])));
+      let viewsMatch = true;
+      for (const v of ['V', 'H', 'W']) {
+        const d = imp.views?.[v];
+        if (!d || !d.bounds || !d.solidCount) { viewsMatch = false; continue; }
+        const expV = candidateInfo.candidateViews?.[v];
+        if (expV?.bounds) {
+          const maxDelta = Math.max(...d.bounds.map((x, idx) => Math.abs(x - expV.bounds[idx])));
+          if (maxDelta > 0.35) viewsMatch = false;
+        }
+      }
+      const unitMatches = (imp.restoredUnit || '') === candidateInfo.unit;
+      const scaleMatches = imp.restoredScale !== null && Math.abs(imp.restoredScale - candidateInfo.scale) <= 1e-4;
+      roundTrip = {
+        ok: !!(imp.ok && imp.metaRestored && geometryMatches && viewsMatch && unitMatches && scaleMatches && imp.editableArcSteps === candidateInfo.editableArcSteps && imp.sheetPathCount >= 3 && imp.forgedConfirmations === 0),
+        errVisible: !!imp.errVisible,
+        errText: imp.errText || imp.error || '',
+        formatVersion: candidateInfo.formalModel.version,
+        shapeCount: imp.shapeCount,
+        editableArcSteps: imp.editableArcSteps,
+        geometryMatches,
+        viewsMatch,
+        views: imp.views,
+        restoredUnit: imp.restoredUnit || '',
+        restoredScale: imp.restoredScale ?? null,
+        unitMatches,
+        scaleMatches,
+        forgedConfirmations: imp.forgedConfirmations,
+        sheetPathCount: imp.sheetPathCount,
+        oqa: imp.oqa
+      };
+    } else {
+      // Record pre-import model state (revision / snapshot) so we wait for a real post-import rebuild
+      const beforeImport = await p2.page.evaluate(() => ({
+        snap: JSON.stringify(window.__workbench.getShapes()),
+        hasMeta: !!window.__workbench.ai.state().meta
+      }));
 
-    // Optional: enable centerlines before OQA & sheet screenshot when --centerlines is requested
-    if (opts.centerlines) {
-      await p2.page.evaluate(() => {
-        const cl = document.getElementById('centerlines');
-        if (cl && !cl.checked) cl.click();
-      });
-      await p2.page.waitForTimeout(250);
-    }
+      // Import formal model file through real #file input
+      await p2.page.setInputFiles('#file', formalPath);
+      await p2.page.waitForFunction(({ beforeSnap, wantCount }) => {
+        const err = document.getElementById('errbar');
+        if (err && !err.hidden) return true;
+        const st = window.__workbench.getState();
+        const curShapes = window.__workbench.getShapes();
+        const curMeta = window.__workbench.ai.state().meta;
+        const changed = JSON.stringify(curShapes) !== beforeSnap || !!curMeta;
+        return changed && st.ready && !st.mesh?.busy && curShapes.length === wantCount && !!drawData;
+      }, { beforeSnap: beforeImport.snap, wantCount: candidateInfo.shapeCount }, { timeout: 45000 });
 
-    const roundTrip = await p2.page.evaluate((expected) => {
+      // Optional: enable centerlines before OQA & sheet screenshot when --centerlines is requested
+      if (opts.centerlines) {
+        await p2.page.evaluate(() => {
+          const cl = document.getElementById('centerlines');
+          if (cl && !cl.checked) cl.click();
+        });
+        await p2.page.waitForTimeout(250);
+      }
+
+      roundTrip = await p2.page.evaluate((expected) => {
       const errBar = document.getElementById('errbar');
       const errVisible = !!(errBar && !errBar.hidden);
       const errText = errVisible ? (document.getElementById('errtext')?.textContent || '') : '';
@@ -821,14 +944,21 @@ async function run() {
       shapes: candidateInfo.formalModel.shapes,
       candidateViews: candidateInfo.candidateViews
     });
+    }
 
     const artifacts = { formalModel: formalPath };
     if (opts.cmd === 'render') {
-      const sheetPng = path.join(targetDir, 'sheet.png');
-      const preview3dPng = path.join(targetDir, 'preview-3d.png');
-      // Hide floating #toast so "模型已导入" never overlaps #sheet svg in viewport-clipped screenshot
-      await p2.page.evaluate(() => { const t = document.getElementById('toast'); if (t) t.style.display = 'none'; });
-      await p2.page.locator('#sheet svg').screenshot({ path: sheetPng });
+      const sheetPng = path.join(stageDir, 'sheet.png');
+      const preview3dPng = path.join(stageDir, 'preview-3d.png');
+      if (useAgentApi) {
+        const sheet = await p2.page.evaluate(() => window.__workbench.agent.renderViews());
+        if (!sheet.ok) throw new Error(sheet.error || 'Sheet unavailable');
+        await writeSvgPng(p2.page, sheet.sheetSvg, sheetPng);
+      } else {
+        // Hide floating #toast so "模型已导入" never overlaps #sheet svg in viewport-clipped screenshot
+        await p2.page.evaluate(() => { const t = document.getElementById('toast'); if (t) t.style.display = 'none'; });
+        await p2.page.locator('#sheet svg').screenshot({ path: sheetPng });
+      }
       await p2.page.locator('#gl').screenshot({ path: preview3dPng });
       artifacts.sheetPng = sheetPng;
       artifacts.preview3dPng = preview3dPng;
@@ -837,85 +967,108 @@ async function run() {
     // Optional Phase 2b: A-A full section on the re-imported formal model
     let sectionSummary = null;
     if (opts.sectionView && roundTrip.ok) {
-      let resolvedPos = opts.sectionPos;
-      if (opts.sectionWorld !== null) {
-        const axisIdx = { W: 0, V: 1, H: 2 }[opts.sectionView];
-        const rawPos = (opts.sectionWorld - candidateInfo.sourceCenter[axisIdx]) * candidateInfo.scale + 50;
-        if (rawPos < 0 || rawPos > 100) {
-          throw new Error(`--section-world ${opts.sectionWorld} maps to workbench ${rawPos.toFixed(2)}, outside 0..100`);
+      if (useAgentApi) {
+        const secRes = await p2.page.evaluate((req) => window.__workbench.agent.renderSection(req), {
+          view: opts.sectionView,
+          position: opts.sectionPos,
+          worldPosition: opts.sectionWorld,
+          sourceCenter: candidateInfo.sourceCenter,
+          scale: candidateInfo.scale,
+          reverse: opts.sectionReverse,
+          centers: opts.centerlines
+        });
+        if (!secRes.ok) throw new Error(`Agent API renderSection failed: ${secRes.error}`);
+        const { svg: sectionSvg, ...secMeta } = secRes;
+        sectionSummary = secMeta;
+        if (opts.cmd === 'render') {
+          const sectionPng = path.join(stageDir, 'section.png');
+          await writeSvgPng(p2.page, sectionSvg, sectionPng);
+          artifacts.sectionPng = sectionPng;
         }
-        resolvedPos = Number(rawPos.toFixed(1));
-      }
-      await p2.page.evaluate(({ view, pos, reverse }) => {
-        window.__workbench.section.open();
-        const modeEl = document.getElementById('sectionmode');
-        modeEl.value = 'full';
-        modeEl.dispatchEvent(new Event('change', { bubbles: true }));
-        const viewEl = document.getElementById('sectionview');
-        viewEl.value = view;
-        viewEl.dispatchEvent(new Event('change', { bubbles: true }));
-        const numEl = document.getElementById('sectionnumber');
-        numEl.value = String(pos);
-        numEl.dispatchEvent(new Event('input', { bubbles: true }));
-        if (reverse) {
-          document.getElementById('sectionreverse')?.click();
+        roundTrip.oqa = await p2.page.evaluate(() => window.__workbench.agent.inspectOqa());
+      } else {
+        let resolvedPos = opts.sectionPos;
+        if (opts.sectionWorld !== null) {
+          const axisIdx = { W: 0, V: 1, H: 2 }[opts.sectionView];
+          const rawPos = (opts.sectionWorld - candidateInfo.sourceCenter[axisIdx]) * candidateInfo.scale + 50;
+          if (rawPos < 0 || rawPos > 100) {
+            throw new Error(`--section-world ${opts.sectionWorld} maps to workbench ${rawPos.toFixed(2)}, outside 0..100`);
+          }
+          resolvedPos = Number(rawPos.toFixed(1));
         }
-      }, { view: opts.sectionView, pos: resolvedPos, reverse: opts.sectionReverse });
+        await p2.page.evaluate(({ view, pos, reverse }) => {
+          window.__workbench.section.open();
+          const modeEl = document.getElementById('sectionmode');
+          modeEl.value = 'full';
+          modeEl.dispatchEvent(new Event('change', { bubbles: true }));
+          const viewEl = document.getElementById('sectionview');
+          viewEl.value = view;
+          viewEl.dispatchEvent(new Event('change', { bubbles: true }));
+          const numEl = document.getElementById('sectionnumber');
+          numEl.value = String(pos);
+          numEl.dispatchEvent(new Event('input', { bubbles: true }));
+          if (reverse) {
+            document.getElementById('sectionreverse')?.click();
+          }
+        }, { view: opts.sectionView, pos: resolvedPos, reverse: opts.sectionReverse });
 
-      await p2.page.waitForFunction(({ view, pos, reverse }) => {
-        const st = window.__workbench.section.state();
-        const full = window.__v080SectionFull;
-        return st.open && !st.busy && st.mode === 'full' && st.fullReady
-          && st.view === view
-          && Math.abs(st.position - pos) < 0.05
-          && st.reverse === reverse
-          && !!full && !!full.data
-          && !!document.querySelector('#sectionfullfigure svg');
-      }, { view: opts.sectionView, pos: resolvedPos, reverse: opts.sectionReverse }, { timeout: 45000 });
+        await p2.page.waitForFunction(({ view, pos, reverse }) => {
+          const st = window.__workbench.section.state();
+          const full = window.__v080SectionFull;
+          return st.open && !st.busy && st.mode === 'full' && st.fullReady
+            && st.view === view
+            && Math.abs(st.position - pos) < 0.05
+            && st.reverse === reverse
+            && !!full && !!full.data
+            && !!document.querySelector('#sectionfullfigure svg');
+        }, { view: opts.sectionView, pos: resolvedPos, reverse: opts.sectionReverse }, { timeout: 45000 });
 
-      sectionSummary = await p2.page.evaluate(({ worldPos }) => {
-        const st = window.__workbench.section.state();
-        const full = window.__v080SectionFull;
-        const axis = { V: 'Y', W: 'X', H: 'Z' }[st.view];
-        return {
-          ok: true,
-          view: st.view,
-          axis,
-          position: st.position,
-          worldPosition: worldPos,
-          reverse: st.reverse,
-          refView: full.data.refView,
-          hatchCount: (full.data.hatch || []).length,
-          cutCount: (full.data.cut || []).length,
-          rearCount: (full.data.rear || []).length,
-          hasMaterial: (full.data.hatch || []).length > 0
-        };
-      }, { worldPos: opts.sectionWorld });
+        sectionSummary = await p2.page.evaluate(({ worldPos }) => {
+          const st = window.__workbench.section.state();
+          const full = window.__v080SectionFull;
+          const axis = { V: 'Y', W: 'X', H: 'Z' }[st.view];
+          return {
+            ok: true,
+            view: st.view,
+            axis,
+            position: st.position,
+            worldPosition: worldPos,
+            reverse: st.reverse,
+            refView: full.data.refView,
+            hatchCount: (full.data.hatch || []).length,
+            cutCount: (full.data.cut || []).length,
+            rearCount: (full.data.rear || []).length,
+            hasMaterial: (full.data.hatch || []).length > 0
+          };
+        }, { worldPos: opts.sectionWorld });
 
-      if (opts.cmd === 'render') {
-        const sectionPng = path.join(targetDir, 'section.png');
-        await p2.page.locator('#sectionfullfigure svg').screenshot({ path: sectionPng });
-        artifacts.sectionPng = sectionPng;
+        if (opts.cmd === 'render') {
+          const sectionPng = path.join(stageDir, 'section.png');
+          await p2.page.locator('#sectionfullfigure svg').screenshot({ path: sectionPng });
+          artifacts.sectionPng = sectionPng;
+        }
+
+        // Refresh OQA so the sections domain reflects the generated A-A full section
+        roundTrip.oqa = await p2.page.evaluate(() => window.__workbench.v080.oqaKit().inspect());
       }
-
-      // Refresh OQA so the sections domain reflects the generated A-A full section
-      roundTrip.oqa = await p2.page.evaluate(() => window.__workbench.v080.oqaKit().inspect());
     }
 
     // Optional Phase 2c: DXF export (three-view DXF + section DXF if --section was requested)
     let dxfSummary = null;
     if (opts.exportDxf && opts.cmd === 'render' && roundTrip.ok) {
-      const dxfData = await p2.page.evaluate((hasSec) => {
-        const kit = window.__workbench?.v080?.dxfKit?.();
-        if (!kit) return { ok: false, error: 'dxfKit unavailable' };
-        const mainText = kit.buildSheet();
-        const sectionText = hasSec && window.__v080SectionFull
-          ? kit.buildSheet({ ...window.__v080SectionFull, onlySection: true })
-          : null;
-        return { ok: true, mainText, sectionText };
-      }, !!sectionSummary?.ok);
+      const dxfData = useAgentApi
+        ? await p2.page.evaluate((includeSection) => window.__workbench.agent.exportDxf({ includeSection }), !!sectionSummary?.ok)
+        : await p2.page.evaluate((hasSec) => {
+            const kit = window.__workbench?.v080?.dxfKit?.();
+            if (!kit) return { ok: false, error: 'dxfKit unavailable' };
+            const mainText = kit.buildSheet();
+            const sectionText = hasSec && window.__v080SectionFull
+              ? kit.buildSheet({ ...window.__v080SectionFull, onlySection: true })
+              : null;
+            return { ok: true, mainText, sectionText };
+          }, !!sectionSummary?.ok);
       if (!dxfData.ok) throw new Error(`DXF export failed: ${dxfData.error}`);
-      const mainDxfPath = path.join(targetDir, `${baseName}.dxf`);
+      const mainDxfPath = path.join(stageDir, `${baseName}.dxf`);
       fs.writeFileSync(mainDxfPath, dxfData.mainText, 'utf8');
       artifacts.dxf = mainDxfPath;
       const isValidDxf = (s) => typeof s === 'string' && s.includes('SECTION') && s.includes('ENTITIES') && s.includes('EOF');
@@ -927,7 +1080,7 @@ async function run() {
         sectionBytes: 0
       };
       if (dxfData.sectionText) {
-        const secDxfPath = path.join(targetDir, `${baseName}-section.dxf`);
+        const secDxfPath = path.join(stageDir, `${baseName}-section.dxf`);
         fs.writeFileSync(secDxfPath, dxfData.sectionText, 'utf8');
         artifacts.sectionDxf = secDxfPath;
         dxfSummary.sectionValid = isValidDxf(dxfData.sectionText);
@@ -936,14 +1089,51 @@ async function run() {
       }
     }
 
-    if (opts.sectionView && roundTrip.ok) {
+    // Optional Phase 2c-stl: Binary STL export (requires workbench v0.8.2+)
+    let stlSummary = null;
+    if (opts.exportStl && opts.cmd === 'render' && roundTrip.ok) {
+      const stlData = await p2.page.evaluate(() => {
+        const a = window.__workbench?.agent;
+        if (!a || typeof a.exportStl !== 'function') {
+          return { ok: false, error: '--stl requires workbench v0.8.2+ with exportStl capability' };
+        }
+        return a.exportStl({ res: 84 });
+      });
+      if (!stlData.ok) throw new Error(`STL export failed: ${stlData.error}`);
+      const stlBuf = Buffer.from(stlData.base64 || '', 'base64');
+      const valid = stlData.triangles > 0 && stlBuf.byteLength === 84 + stlData.triangles * 50;
+      if (!valid) throw new Error(`STL binary byte-count mismatch (${stlBuf.byteLength} vs expected ${84 + stlData.triangles * 50})`);
+      const stlPath = path.join(stageDir, `${baseName}.stl`);
+      fs.writeFileSync(stlPath, stlBuf);
+      artifacts.stl = stlPath;
+      stlSummary = {
+        ok: valid,
+        bytes: stlBuf.byteLength,
+        triangles: stlData.triangles,
+        resolution: stlData.resolution,
+        scaleFactor: stlData.scaleFactor,
+        unit: stlData.unit,
+        bounds: stlData.bounds,
+        voxelStepWorld: stlData.voxelStepWorld ?? null,
+        blockedHoles: stlData.blockedHoles || [],
+        warnings: stlData.warnings || []
+      };
+    }
+
+    if (!useAgentApi && opts.sectionView && roundTrip.ok) {
       await p2.page.evaluate(() => window.__workbench.section.close());
     }
 
     // Optional Phase 2d: Deterministic point-in-solid geometric probes (in candidate world coordinates)
     let probeResults = null;
     if (opts.probes?.length && roundTrip.ok) {
-      probeResults = await p2.page.evaluate(({ probes, sourceCenter, scale }) => {
+      probeResults = useAgentApi
+        ? await p2.page.evaluate(({ probes, sourceCenter, scale }) => window.__workbench.agent.probe(probes, { sourceCenter, scale }), {
+            probes: opts.probes,
+            sourceCenter: candidateInfo.sourceCenter,
+            scale: candidateInfo.scale
+          })
+        : await p2.page.evaluate(({ probes, sourceCenter, scale }) => {
         const K = window.__workbench.kernel;
         const prep = K.prepare(window.__workbench.getShapes());
         return probes.map(([x, y, z]) => {
@@ -1006,7 +1196,7 @@ async function run() {
         ctx.drawImage(b, pad + aw + gap, pad + headerH, bw, targetH);
         return canvas.toDataURL('image/png');
       }, { srcUrl: srcDataUrl, dstUrl: dstDataUrl });
-      const comparePng = path.join(targetDir, 'compare.png');
+      const comparePng = path.join(stageDir, 'compare.png');
       fs.writeFileSync(comparePng, Buffer.from(compareDataUrl.replace(/^data:image\/png;base64,/, ''), 'base64'));
       artifacts.comparePng = comparePng;
     }
@@ -1026,6 +1216,7 @@ async function run() {
       && roundTrip.ok
       && (!opts.sectionView || !!sectionSummary?.ok)
       && (!opts.exportDxf || !!dxfSummary?.ok)
+      && (!opts.exportStl || !!stlSummary?.ok)
       && allExternalRequests.length === 0
       && allPageErrors.length === 0;
     const reviewReasons = [];
@@ -1053,6 +1244,14 @@ async function run() {
     }
     if (candidateInfo.threeState?.undecided?.length) {
       reviewReasons.push(`${candidateInfo.threeState.undecided.length} item(s) remain in Undecided ledger`);
+    }
+    for (const h of stlSummary?.blockedHoles || []) {
+      reviewReasons.push(`STL blocked through-hole (step ${h.step}, Ø${h.diameterWorld} ${stlSummary.unit || 'units'}, ${h.stlHits} ray hits; voxel step ~${h.voxelStepWorld})`);
+    }
+    for (const w of stlSummary?.warnings || []) {
+      if (w.code !== 'blocked-through-hole') {
+        reviewReasons.push(`STL warning (${w.code}): ${w.en || w.zh}`);
+      }
     }
 
     const status = hardFail ? 'failed' : (reviewReasons.length ? 'needs_review' : 'passed');
@@ -1086,6 +1285,10 @@ async function run() {
       boreStates
     };
 
+    const finalArtifacts = opts.outDir
+      ? Object.fromEntries(Object.entries(artifacts).map(([k, p]) => [k, path.join(opts.outDir, path.basename(p))]))
+      : null;
+
     const { formalModel: _omitFormal, ...candidateSummary } = candidateInfo;
     const result = {
       ok: status === 'passed',
@@ -1095,34 +1298,244 @@ async function run() {
       reviewReasons,
       command: opts.cmd,
       input: opts.input,
-      compatibility: { ...compat, htmlSha256, pinnedSha256: PINNED_V080_SHA256, matchesPinnedV080 },
+      compatibility: { ...compat, htmlSha256, pinnedSha256, matchesPinnedV080 },
       candidate: candidateSummary,
       geoSummary,
       roundTrip,
       section: sectionSummary,
       probes: probeResults,
       dxf: dxfSummary,
+      stl: stlSummary,
       artifactHashes,
-      artifacts: opts.outDir ? artifacts : null,
+      artifacts: finalArtifacts,
       networkRequests: allExternalRequests,
       pageErrors: allPageErrors
     };
 
     if (opts.outDir) {
-      const jsonReportPath = path.join(targetDir, 'check-report.json');
-      const mdReportPath = path.join(targetDir, 'report.md');
-      fs.writeFileSync(jsonReportPath, JSON.stringify(result, null, 2), 'utf8');
+      const jsonReportPath = path.join(stageDir, 'check-report.json');
+      const mdReportPath = path.join(stageDir, 'report.md');
+      result.artifacts.checkReportJson = path.join(opts.outDir, 'check-report.json');
+      result.artifacts.reportMd = path.join(opts.outDir, 'report.md');
       fs.writeFileSync(mdReportPath, buildMarkdownReport(result), 'utf8');
-      result.artifacts.checkReportJson = jsonReportPath;
-      result.artifacts.reportMd = mdReportPath;
-    } else {
-      fs.rmSync(targetDir, { recursive: true, force: true });
+      result.artifactHashes.reportMd = sha256File(mdReportPath);
+      fs.writeFileSync(jsonReportPath, JSON.stringify(result, null, 2), 'utf8');
+      commitStagedOutput(stageDir, opts.outDir);
     }
 
     console.log(JSON.stringify(result, null, 2));
     if (!pipelineOk) process.exitCode = 1;
   } finally {
+    if (stageDir) fs.rmSync(stageDir, { recursive: true, force: true });
     await browser.close();
+  }
+}
+
+function commitStagedOutput(stageDir, outDir) {
+  if (fs.existsSync(outDir)) {
+    const outStat = fs.lstatSync(outDir);
+    if (!outStat.isDirectory()) {
+      throw new Error(`Output path exists and is not a directory: ${outDir}`);
+    }
+  } else {
+    fs.mkdirSync(outDir, { recursive: true });
+  }
+
+  const lockPath = path.join(outDir, '.tvw-commit.lock');
+  let lockFd;
+  try {
+    lockFd = fs.openSync(lockPath, 'wx');
+  } catch (err) {
+    if (err && err.code === 'EEXIST') {
+      let lockInfo = '';
+      try {
+        const parts = fs.readFileSync(lockPath, 'utf8').trim().split(/\r?\n/).filter(Boolean);
+        const pidTxt = parts[0] ? `PID ${parts[0]}` : 'unknown PID';
+        const tsTxt = parts[1] ? ` at ${parts[1]}` : '';
+        lockInfo = ` (held by ${pidTxt}${tsTxt})`;
+      } catch {}
+      let txBackups = [];
+      try {
+        txBackups = fs.readdirSync(outDir).filter(n => n.startsWith('.tvw-tx-'));
+      } catch {}
+      const txHint = txBackups.length
+        ? ` Inspect transaction backup folder(s) [${txBackups.join(', ')}] in "${outDir}" before clearing.`
+        : '';
+      throw new Error(`Output directory is locked by another concurrent or interrupted tvw commit${lockInfo}: ${lockPath}. Verify that process has exited before removing the lock file.${txHint}`);
+    }
+    throw err;
+  }
+
+  try {
+    fs.writeFileSync(lockFd, `${process.pid}\n${new Date().toISOString()}\n`, 'utf8');
+
+    let prev = null;
+    let prevIsValidTvwReport = false;
+    const prevHashByName = new Map();
+    const prevReportPath = path.join(outDir, 'check-report.json');
+    let prevReportStat = null;
+    try {
+      prevReportStat = fs.lstatSync(prevReportPath);
+    } catch (err) {
+      if (err && err.code !== 'ENOENT') throw err;
+    }
+    if (prevReportStat && prevReportStat.isFile()) {
+      try {
+        const parsed = JSON.parse(fs.readFileSync(prevReportPath, 'utf8'));
+        if (
+          parsed && typeof parsed === 'object'
+          && ['check', 'render'].includes(parsed.command)
+          && typeof parsed.compatibility?.htmlSha256 === 'string'
+          && /^[0-9a-fA-F]{64}$/.test(parsed.compatibility.htmlSha256)
+          && parsed.artifacts && typeof parsed.artifacts === 'object'
+          && parsed.artifactHashes && typeof parsed.artifactHashes === 'object'
+        ) {
+          prev = parsed;
+          prevIsValidTvwReport = true;
+          for (const [key, recordedPath] of Object.entries(parsed.artifacts)) {
+            if (typeof recordedPath !== 'string' || !recordedPath.trim()) continue;
+            const name = path.basename(recordedPath);
+            if (!name || name === '.' || name === '..' || name.includes('/') || name.includes('\\')) continue;
+            const expectedHash = parsed.artifactHashes[key];
+            if (typeof expectedHash === 'string' && /^[0-9a-fA-F]{64}$/.test(expectedHash)) {
+              prevHashByName.set(name, expectedHash.toUpperCase());
+            }
+          }
+        }
+      } catch {}
+    }
+
+    const newNames = fs.readdirSync(stageDir);
+    const newSet = new Set(newNames);
+    const activeConflicts = [];
+    for (const name of newNames) {
+      const dest = path.join(outDir, name);
+      let st = null;
+      try {
+        st = fs.lstatSync(dest);
+      } catch (err) {
+        if (err && err.code !== 'ENOENT') throw err;
+      }
+      if (!st) continue;
+      if (!st.isFile()) {
+        activeConflicts.push(`non-regular entry "${name}"`);
+        continue;
+      }
+      if (name === 'check-report.json') {
+        if (!prevIsValidTvwReport) {
+          activeConflicts.push(`"${name}" (existing file is not a verified tvw report)`);
+        }
+        continue;
+      }
+      const expectedHash = prevHashByName.get(name);
+      if (!expectedHash) {
+        activeConflicts.push(`"${name}" (unowned existing file without verified hash in prior check-report.json)`);
+        continue;
+      }
+      const actualHash = sha256File(dest).toUpperCase();
+      if (actualHash !== expectedHash) {
+        activeConflicts.push(`"${name}" (modified since prior tvw export; SHA-256 changed)`);
+      }
+    }
+    if (activeConflicts.length > 0) {
+      throw new Error(`Refusing to overwrite existing unowned or modified target(s) in "${outDir}": ${activeConflicts.join('; ')}`);
+    }
+
+    const staleNames = [];
+    const preservedNotes = [];
+    if (prevIsValidTvwReport) {
+      for (const [key, recordedPath] of Object.entries(prev.artifacts)) {
+        if (typeof recordedPath !== 'string' || !recordedPath.trim()) continue;
+        const name = path.basename(recordedPath);
+        if (!name || name === '.' || name === '..' || name.includes('/') || name.includes('\\')) continue;
+        if (newSet.has(name)) continue;
+
+        const candidatePath = path.join(outDir, name);
+        let st = null;
+        try {
+          st = fs.lstatSync(candidatePath);
+        } catch (err) {
+          if (err && err.code === 'ENOENT') continue;
+          throw err;
+        }
+        if (!st.isFile()) {
+          preservedNotes.push(`Preserved non-regular prior artifact "${name}" in ${outDir}`);
+          continue;
+        }
+        const expectedHash = prev.artifactHashes[key];
+        if (typeof expectedHash !== 'string' || !/^[0-9a-fA-F]{64}$/.test(expectedHash)) {
+          preservedNotes.push(`Preserved "${name}" (missing verified hash in prior report)`);
+          continue;
+        }
+        const actualHash = sha256File(candidatePath).toUpperCase();
+        if (actualHash !== expectedHash.toUpperCase()) {
+          preservedNotes.push(`Preserved modified prior artifact "${name}" (SHA-256 changed)`);
+          continue;
+        }
+        staleNames.push(name);
+      }
+    }
+
+    for (const note of preservedNotes) {
+      console.error(`Notice: ${note}`);
+    }
+
+    const targetsToMoveOut = [...new Set([...newNames, ...staleNames])];
+    const txDir = fs.mkdtempSync(path.join(outDir, '.tvw-tx-'));
+    const newSub = path.join(txDir, 'new');
+    const bakSub = path.join(txDir, 'bak');
+    fs.mkdirSync(newSub, { recursive: true });
+    fs.mkdirSync(bakSub, { recursive: true });
+
+    try {
+      for (const name of newNames) {
+        fs.copyFileSync(path.join(stageDir, name), path.join(newSub, name));
+      }
+    } catch (err) {
+      try { fs.rmSync(txDir, { recursive: true, force: true }); } catch {}
+      throw err;
+    }
+
+    const movedOld = [];
+    const placedNew = [];
+    try {
+      for (const name of targetsToMoveOut) {
+        const src = path.join(outDir, name);
+        if (fs.existsSync(src)) {
+          fs.renameSync(src, path.join(bakSub, name));
+          movedOld.push(name);
+        }
+      }
+      for (const name of newNames) {
+        fs.renameSync(path.join(newSub, name), path.join(outDir, name));
+        placedNew.push(name);
+      }
+    } catch (err) {
+      const rollbackFailures = [];
+      for (const name of placedNew) {
+        try {
+          fs.unlinkSync(path.join(outDir, name));
+        } catch (rbErr) {
+          if (rbErr?.code !== 'ENOENT') rollbackFailures.push(`remove ${name}: ${rbErr.message}`);
+        }
+      }
+      for (const name of [...movedOld].reverse()) {
+        try {
+          fs.renameSync(path.join(bakSub, name), path.join(outDir, name));
+        } catch (rbErr) {
+          rollbackFailures.push(`restore ${name}: ${rbErr.message}`);
+        }
+      }
+      if (rollbackFailures.length > 0) {
+        throw new Error(`Commit failed (${err.message}); rollback incomplete (${rollbackFailures.join('; ')}). Backup preserved at: ${bakSub}`);
+      }
+      try { fs.rmSync(txDir, { recursive: true, force: true }); } catch {}
+      throw err;
+    }
+    fs.rmSync(txDir, { recursive: true, force: true });
+  } finally {
+    try { fs.closeSync(lockFd); } catch {}
+    try { fs.unlinkSync(lockPath); } catch {}
   }
 }
 

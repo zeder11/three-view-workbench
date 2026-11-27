@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Cross-Agent Installer for Three-View Workbench Skill (v0.8.0)
+ * Cross-Agent Installer for Three-View Workbench Skill (v0.8.0 / v0.8.1 / v0.8.2)
  * - Requires explicit --target
  * - Rejects source==target overlap
  * - Refuses to overwrite existing installs without --upgrade
@@ -8,7 +8,7 @@
  *   stages completely before swap, and retains a recoverable backup directory.
  *
  * Usage:
- *   node scripts/install.mjs --target codex|antigravity|agents|dsh[,...] [--upgrade] [--html <v0.8.0-html>] [--channel <msedge|chromium>]
+ *   node scripts/install.mjs --target codex|antigravity|agents|dsh[,...] [--upgrade] [--html <workbench-html>] [--channel <msedge|chromium>]
  */
 import fs from 'node:fs';
 import os from 'node:os';
@@ -20,7 +20,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SKILL_SRC = path.resolve(__dirname, '..');
 const REPO_ROOT = path.resolve(SKILL_SRC, '..', '..');
 const SKILL_NAME = 'three-view-workbench';
-const PINNED_V080_SHA256 = 'B7F002932BC9841BC61491AA2E757999B601C7E24F3B0F8D35CA28786AF6C569';
+import { workbenchPins } from './workbench-pins.mjs';
 
 const COPY_ITEMS = [
   'SKILL.md',
@@ -55,8 +55,12 @@ function resolveDefaultHtml() {
   const candidates = [
     process.env.TVW_WORKBENCH_HTML,
     path.join(REPO_ROOT, 'app', 'three-view-workbench.html'),
+    path.join(REPO_ROOT, '发布包', 'v0.8.2', 'app', 'three-view-workbench.html'),
+    path.join(REPO_ROOT, '发布包', 'v0.8.1', 'app', 'three-view-workbench.html'),
     path.join(REPO_ROOT, '发布包', 'v0.8.0', 'app', 'three-view-workbench.html'),
     path.join(process.cwd(), 'app', 'three-view-workbench.html'),
+    path.join(process.cwd(), '发布包', 'v0.8.2', 'app', 'three-view-workbench.html'),
+    path.join(process.cwd(), '发布包', 'v0.8.1', 'app', 'three-view-workbench.html'),
     path.join(process.cwd(), '发布包', 'v0.8.0', 'app', 'three-view-workbench.html')
   ].filter(Boolean).map(p => path.resolve(p));
   for (const p of candidates) {
@@ -68,7 +72,7 @@ function resolveDefaultHtml() {
 function usage() {
   console.error([
     'Usage:',
-    '  node scripts/install.mjs --target <codex|antigravity|agents|dsh[,...]> [--upgrade] [--html <v0.8.0-html>] [--channel <msedge|chromium>] [--allow-unpinned]',
+    '  node scripts/install.mjs --target <codex|antigravity|agents|dsh[,...]> [--upgrade] [--html <workbench-html>] [--channel <msedge|chromium>] [--allow-unpinned]',
     '',
     'Notes:',
     '  - --target is required explicitly (no silent multi-directory default).',
@@ -163,11 +167,11 @@ function resolveEffectiveConfig(destDir, baseConfig, opts) {
 
 function validateWorkbenchHtml(htmlPath, allowUnpinned, targetLabel) {
   if (!htmlPath || !fs.existsSync(htmlPath)) {
-    throw new Error(`Workbench HTML not found for target "${targetLabel}" at ${htmlPath}. Pass --html <path-to-v0.8.0-html>.`);
+    throw new Error(`Workbench HTML not found for target "${targetLabel}" at ${htmlPath}. Pass --html <path-to-workbench-html>.`);
   }
   const hash = sha256File(htmlPath);
-  if (hash !== PINNED_V080_SHA256 && !allowUnpinned) {
-    throw new Error(`HTML SHA-256 mismatch for target "${targetLabel}" (${htmlPath}: got ${hash}, expected pinned v0.8.0 ${PINNED_V080_SHA256}). Pass --html <path-to-v0.8.0-html> to update it, or --allow-unpinned to override.`);
+  if (!Object.values(workbenchPins).includes(hash) && !allowUnpinned) {
+    throw new Error(`HTML SHA-256 mismatch for target "${targetLabel}" (${htmlPath}: got ${hash}, expected a verified v0.8.0, v0.8.1, or v0.8.2 build). Pass --html <path-to-workbench-html> to update it, or --allow-unpinned to override.`);
   }
   return hash;
 }

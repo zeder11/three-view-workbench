@@ -10,22 +10,22 @@ import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SKILL_ROOT = path.resolve(__dirname, '..');
 const REPO_ROOT = path.resolve(SKILL_ROOT, '..', '..');
-const DEFAULT_HTML = path.join(REPO_ROOT, '发布包', 'v0.8.0', 'app', 'three-view-workbench.html');
+const version = process.argv[2] || 'v0.8.0';
+assert.ok(['v0.8.0','v0.8.1','v0.8.2'].includes(version), 'Expected v0.8.0, v0.8.1, or v0.8.2');
+const DEFAULT_HTML = path.join(REPO_ROOT, '发布包', version, 'app', 'three-view-workbench.html');
 const TVW = path.join(__dirname, 'tvw.mjs');
 const EX = path.join(SKILL_ROOT, 'examples');
-const OUT = path.join(SKILL_ROOT, '.selftest-out');
-
-fs.rmSync(OUT, { recursive: true, force: true });
-fs.mkdirSync(OUT, { recursive: true });
+const OUT = fs.mkdtempSync(path.join(os.tmpdir(), 'tvw-skill-test-'));
 
 // Pre-check: Version hash lock must reject modified HTML BEFORE launching browser
 {
-  const tamperedHtml = path.join(OUT, 'tampered-v080.html');
+  const tamperedHtml = path.join(OUT, 'modified-workbench.html');
   fs.writeFileSync(tamperedHtml, fs.readFileSync(DEFAULT_HTML, 'utf8') + '\n', 'utf8');
   const r = spawnSync(process.execPath, [TVW, 'check', path.join(EX, '01-blind-hole-fixed.json'), '--html', tamperedHtml], {
     encoding: 'utf8',
@@ -35,7 +35,7 @@ fs.mkdirSync(OUT, { recursive: true });
   const parsed = JSON.parse(r.stdout);
   assert.equal(parsed.status, 'failed');
   assert.equal(parsed.compatibility.matchesPinnedV080, false);
-  console.log('PASS Lock: modified v0.8.0 HTML rejected before browser launch');
+  console.log('PASS Lock: modified ' + version + ' HTML rejected before browser launch');
 }
 
 // Pre-check 2: Reject empty probe coordinate ("22,,4") and whitespace-only --section-world (" ")
@@ -66,13 +66,14 @@ console.log('PASS Input Guards: empty probe "22,,4" and blank --section-world re
 
 function runRender(exampleFile, subDir, extraArgs = []) {
   const outDir = path.join(OUT, subDir);
-  const stdout = execFileSync(process.execPath, [TVW, 'render', path.join(EX, exampleFile), '--out', outDir, ...extraArgs], {
+  const stdout = execFileSync(process.execPath, [TVW, 'render', path.join(EX, exampleFile), '--html', DEFAULT_HTML, '--out', outDir, ...extraArgs], {
     encoding: 'utf8',
     timeout: 120000
   });
   const res = JSON.parse(stdout);
   assert.equal(res.pipelineOk, true, `${exampleFile} pipeline should succeed`);
-  assert.equal(res.compatibility.matchesPinnedV080, true, 'Must match pinned v0.8.0 SHA-256');
+  assert.equal(res.compatibility.htmlSha256, res.compatibility.pinnedSha256);
+  assert.equal(res.compatibility.mode, version === 'v0.8.0' ? 'v080-dom-fallback' : 'agent-api');
   assert.equal(res.networkRequests.length, 0, 'Must make 0 external network requests');
   assert.equal(res.pageErrors.length, 0, 'Must have 0 page errors');
   assert.equal(res.roundTrip.ok, true, 'Blank-workbench round-trip import must pass');

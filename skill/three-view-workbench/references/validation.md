@@ -1,10 +1,10 @@
 # Validation Scope & Lessons Learned
 
-## Verified Offline Scope (v0.8.0 Baseline)
+## Verified Offline Scope (v0.8.0, v0.8.1, and v0.8.2)
 
 | Area | Verified Evidence | Boundary / Not Claimed |
 | --- | --- | --- |
-| **Version Lock** | `tvw.mjs` verifies the pinned v0.8.0 HTML SHA-256 before launching Playwright; modified HTML (even a trailing newline) exits non-zero unless `--allow-unpinned` is passed. | Compatibility with unreleased or older workbench HTML versions requires deliberate `--allow-unpinned` regression testing. |
+| **Version Lock** | `tvw.mjs` verifies the supported HTML hashes (v0.8.0, v0.8.1, and v0.8.2) before launching Playwright; modified HTML (even a trailing newline) exits non-zero unless `--allow-unpinned` is passed. | Use `--allow-unpinned` only for a trusted local test build. The CLI checks the Agent API version and required methods at runtime. |
 | **Round-Trip Import** | Every candidate is exported as a formal `orthographic-workbench` JSON (with `confirmedReadings: {}` and `consistency.accepted: false`) and re-imported through `#file` into a fresh blank workbench, checking physical geometry parameters, per-view (`V/H/W`) bounds, unit, scale, and editable arc steps. | Does not guarantee agreement with the user's source drawing; visual review against the source remains mandatory. |
 | **Tangency & Curves** | The tests catch a near-tangent sagitta error (`status: "failed"`) and verify the corrected `rounded_poly` joins with `0.00°` deviation and no fake seams. | Tangency OQA applies only to evaluated joins; non-tangent general polygons still need visual comparison. |
 | **A–A Full Section** | `--section <V|H|W> [--section-pos <0..100>] [--section-reverse]` exports `section.png` (and optional section DXF) on the re-imported formal model; tested for both central (`pos=50`) and off-center (`pos=20`, `pos=30`, `pos=34`) cut planes. | Uses material-based hatching; special drawing conventions for ribs/webs are not applied automatically. |
