@@ -202,11 +202,11 @@ body #sectionsolid{padding:11px;border-radius:7px}body #sectionsolid>summary{fon
 </style>
 </head><body>
 <header><div><h1>三视图工作台 <span style="font-weight:normal;font-size:12px;color:#aacbd6">/ 制图学习版</span></h1><p>对照三视图，画轮廓、搭立体。</p></div><div class="hdr-right"><button id="langbtn" class="lang-btn" type="button" title="Switch to English" aria-label="Switch interface language">EN</button><div class="badge">V / H / W　第一角投影</div></div></header>
-<div class="layout"><aside><div class="study-entry"><strong>搭建立体</strong><div class="study-actions"><button id="draftopen" class="primary" title="画截面，再沿深度加料">画截面 · 加料</button><button id="draftsubopen" title="画截面，在指定深度挖除">挖槽 / 挖孔</button><button id="draftcutopen" title="画直线，切掉一侧">直线切除</button><button id="planeopen" title="用三个空间点确定斜切平面">三点斜切</button></div><details id="studyhelp" class="ui-help"><summary>怎么开始？</summary><p>从主视图或俯视图描轮廓，再看左视图是否对得上。不用填半空间方程；题图可在草绘台本地参考。</p></details></div><details class="aside-fold" id="addfold" open><summary><span class="section-label">添加基本体</span></summary><div class="addrow"><button data-add="box">长方体</button><button data-add="prism">棱柱</button><button data-add="pyramid">棱锥</button><button data-add="cylinder">圆柱</button><button data-add="cone">圆锥</button><button data-add="frustum">圆台</button><button data-add="sphere">球</button></div><details class="advanced"><summary>高级形体</summary><div class="addrow2"><button data-add="poly">多面体</button><button data-add="plane">截平面参数</button></div></details></details><details class="aside-fold" id="mechrecipefold" data-i18n="off"><summary><span class="section-label" id="mechrecipesummary">机械配方 · 法兰 / 阶梯轴</span></summary><div id="mechrecipebody"></div></details><details id="replaypanel" class="learning-bar"><summary>步骤回放 · 不改模型</summary><div class="learning-row"><button id="replayprev">← 上一步</button><button id="replaynext">下一步 →</button><button id="replayplay">▶ 播放</button></div><div class="learning-row"><select id="replayselect" aria-label="查看建模步骤"></select><button id="replayfinal">返回最终</button></div><input id="replayrange" type="range" min="0" max="0" value="0" aria-label="回放步骤"><div class="replay-diff-row"><label class="replay-diff-toggle"><input type="checkbox" id="replaydiff" checked>与上一步的差异</label><span id="replaydiffcount" class="small"></span></div><p>按当前形体顺序查看；凹截面拆分块仍是一整步。修改会返回最终模型，保存始终保留完整模型。</p></details><details class="aside-fold" id="listfold" open><summary><span class="section-label">建模步骤</span></summary><div id="list"></div><details id="sequencehelp" class="ui-help"><summary>步骤顺序说明</summary><p class="small">加料：添加材料；挖除：去掉当时已有的材料。<br>上移 / 下移会改变布尔顺序。世界范围 0–100；超出部分被裁去。支持小数输入。</p></details></details></aside>
-<section><div class="toolbar"><button id="undo" title="Ctrl+Z">撤销</button><button id="redo" title="Ctrl+Y / Ctrl+Shift+Z">重做</button><details class="tb-fold workflow-menu" id="tbfile"><summary>模型文件</summary><div class="tb-row"><button id="load" title="从本机选择模型 JSON 文件">导入模型文件</button><button id="save" title="下载模型 JSON 到本机（备份、换电脑用）">导出模型文件</button><button id="savedopen" title="命名保存在这台电脑的浏览器里，之后可以回看（如 圆孔支座）">本机记录</button><details id="legacytools" class="legacy-tools" hidden><summary>旧文件兼容</summary><div id="legacyactions"></div></details></div></details><details class="tb-fold workflow-menu" id="tbsheet"><summary>导出图纸</summary><div class="tb-row"><button id="png" class="primary" disabled>导出 PNG · 2×</button><button id="svg" disabled>导出 SVG</button><button id="dxf" disabled>导出 DXF (CAD)</button></div></details><details class="tb-fold workflow-menu" id="tbtools"><summary>辅助工具</summary><div class="tb-row"><button id="aiopen" class="ai-open-btn" title="用文字或图片生成基本体和可编辑草绘模型">AI 建模</button><label for="quality">图纸精度</label><select id="quality" aria-label="三视图采样精度"><option value="320">标准精度 · 320</option><option value="640">精细精度 · 640</option><option value="960">超细精度 · 960（较慢）</option></select><label for="preset">示例与新建</label><select id="preset" aria-label="示例模型"><option value="">示例…</option><option value="prism">穿孔三棱柱</option><option value="hole">通孔长方体</option><option value="cone">横放圆锥</option><option value="tilt">倾斜圆柱</option><option value="cut">截交线 · 斜切圆柱</option><option value="conecut">截交线 · 圆锥斜切</option><option value="i336">截交线 · 横放圆柱斜切</option><option value="vgroove">截交线 · V 形槽</option><option value="flange">机械配方 · 均布孔凸台法兰</option><option value="shaft">机械配方 · 带键槽阶梯轴</option><option value="empty">清空模型</option></select></div></details><button id="markopen" title="在题图或三视图描线，比较候选后再采用">这条线是什么</button><input type="file" id="file" accept=".json,application/json" hidden><span id="autosave" class="autosave" hidden></span></div>
+<div class="layout"><aside><div class="study-entry"><strong>搭建立体</strong><div class="study-actions"><button id="draftopen" class="primary" title="画截面，再沿深度加料">画截面 · 加料</button><button id="draftsubopen" title="画截面，在指定深度挖除">挖槽 / 挖孔</button><button id="draftcutopen" title="画直线，切掉一侧">直线切除</button><button id="planeopen" title="用三个空间点确定斜切平面">三点斜切</button></div><details id="studyhelp" class="ui-help"><summary>怎么开始？</summary><p>从主视图或俯视图描轮廓，再看左视图是否对得上。不用填半空间方程；题图可在草绘台本地参考。</p></details></div><details class="aside-fold" id="addfold" open><summary><span class="section-label">添加基本体</span></summary><div class="addrow"><button data-add="box">长方体</button><button data-add="prism">棱柱</button><button data-add="pyramid">棱锥</button><button data-add="cylinder">圆柱</button><button data-add="cone">圆锥</button><button data-add="frustum">圆台</button><button data-add="sphere">球</button></div><details class="advanced"><summary>高级形体</summary><div class="addrow2"><button data-add="poly">多面体</button><button data-add="plane">截平面参数</button></div></details></details><details class="aside-fold" id="mechrecipefold" data-i18n="off"><summary><span class="section-label" id="mechrecipesummary">机械配方 · 法兰 / 阶梯轴 / L 支座</span></summary><div id="mechrecipebody"></div></details><details id="replaypanel" class="learning-bar"><summary>步骤回放 · 不改模型</summary><div class="learning-row"><button id="replayprev">← 上一步</button><button id="replaynext">下一步 →</button><button id="replayplay">▶ 播放</button></div><div class="learning-row"><select id="replayselect" aria-label="查看建模步骤"></select><button id="replayfinal">返回最终</button></div><input id="replayrange" type="range" min="0" max="0" value="0" aria-label="回放步骤"><div class="replay-diff-row"><label class="replay-diff-toggle"><input type="checkbox" id="replaydiff" checked>与上一步的差异</label><span id="replaydiffcount" class="small"></span></div><p>按当前形体顺序查看；凹截面拆分块仍是一整步。修改会返回最终模型，保存始终保留完整模型。</p></details><details class="aside-fold" id="listfold" open><summary><span class="section-label">建模步骤</span></summary><div id="list"></div><details id="sequencehelp" class="ui-help"><summary>步骤顺序说明</summary><p class="small">加料：添加材料；挖除：去掉当时已有的材料。<br>上移 / 下移会改变布尔顺序。世界范围 0–100；超出部分被裁去。支持小数输入。</p></details></details></aside>
+<section><div class="toolbar"><button id="undo" title="Ctrl+Z">撤销</button><button id="redo" title="Ctrl+Y / Ctrl+Shift+Z">重做</button><details class="tb-fold workflow-menu" id="tbfile"><summary>模型文件</summary><div class="tb-row"><button id="load" title="从本机选择模型 JSON 文件">导入模型文件</button><button id="save" title="下载模型 JSON 到本机（备份、换电脑用）">导出模型文件</button><button id="savedopen" title="命名保存在这台电脑的浏览器里，之后可以回看（如 圆孔支座）">本机记录</button><details id="legacytools" class="legacy-tools" hidden><summary>旧文件兼容</summary><div id="legacyactions"></div></details></div></details><details class="tb-fold workflow-menu" id="tbsheet"><summary>导出图纸</summary><div class="tb-row"><button id="png" class="primary" disabled>导出 PNG · 2×</button><button id="svg" disabled>导出 SVG</button><button id="dxf" disabled>导出 DXF (CAD)</button><button id="stl" data-i18n="off" disabled>导出 STL (3D)</button></div></details><details class="tb-fold workflow-menu" id="tbtools"><summary>辅助工具</summary><div class="tb-row"><button id="aiopen" class="ai-open-btn" title="用文字或图片生成基本体和可编辑草绘模型">AI 建模</button><label for="quality">图纸精度</label><select id="quality" aria-label="三视图采样精度"><option value="320">标准精度 · 320</option><option value="640">精细精度 · 640</option><option value="960">超细精度 · 960（较慢）</option></select><label for="preset">示例与新建</label><select id="preset" aria-label="示例模型"><option value="">示例…</option><option value="prism">穿孔三棱柱</option><option value="hole">通孔长方体</option><option value="cone">横放圆锥</option><option value="tilt">倾斜圆柱</option><option value="cut">截交线 · 斜切圆柱</option><option value="conecut">截交线 · 圆锥斜切</option><option value="i336">截交线 · 横放圆柱斜切</option><option value="vgroove">截交线 · V 形槽</option><option value="flange">机械配方 · 均布孔凸台法兰</option><option value="shaft">机械配方 · 带键槽阶梯轴</option><option value="bracket">机械配方 · L 形加强筋支座</option><option value="empty">清空模型</option></select></div></details><button id="markopen" title="在题图或三视图描线，比较候选后再采用">这条线是什么</button><input type="file" id="file" accept=".json,application/json" hidden><span id="autosave" class="autosave" hidden></span></div>
 <div id="errbar" class="errbar" role="alert" hidden><span id="errtext"></span><button id="errsave" class="errbar-act" type="button" hidden>导出备份</button><button id="errclose" type="button">关闭 ×</button></div>
 <div id="replaybanner" class="replay-banner" role="status" hidden></div><div class="workspace"><div class="sheetbox"><div class="sheetbar"><span>正投影图纸 / V 上、H 下、W 右</span><span id="resolution">等待计算</span></div><div id="sheet"><div class="empty">正在计算解析投影…</div></div><div id="sheetoqabar" class="sheet-oqa-bar" data-i18n="off" hidden></div><div id="status" class="status busy" role="status"><span class="lamp"></span><span id="statusText">正在准备几何内核</span><button id="cancelcalc" class="cancelcalc" type="button" hidden>取消</button></div></div>
-<div class="side"><div class="preview"><div class="preview-title"><span>立体预览 / 拖动旋转</span><div style="display:flex;gap:4px"><button id="expand3d">放大窗口</button><button id="reset3d">复位</button></div></div><div class="orbit-presets"><span class="orbit-presets-label">标准视角</span><button type="button" data-cam="front" title="从正前方看（主视图方向）">主视</button><button type="button" data-cam="top" title="从正上方看（俯视图方向）">俯视</button><button type="button" data-cam="left" title="从正左方看（左视图方向）">左视</button><button type="button" data-cam="right" title="从正右方看（右视图方向）">右视</button><button type="button" data-cam="bottom" title="从正下方看（仰视图方向）">仰视</button><button type="button" data-cam="back" title="从正后方看（后视图方向）">后视</button></div><div class="orbit-stage"><span id="point3d" hidden aria-hidden="true">P</span><canvas id="gl" width="530" height="530" aria-label="三维预览：左键旋转，右键或 Shift 拖动平移，滚轮缩放"></canvas></div><div class="orbit-controls"><button id="zoomout3d" aria-label="缩小立体">−</button><output id="zoomvalue3d">100%</output><button id="zoomin3d" aria-label="放大立体">＋</button><span>滚轮缩放 · Shift 拖动平移</span></div><div class="mesh-quality-controls"><label for="renderstyle">3D 显示</label><select id="renderstyle"><option value="solid">实体着色</option><option value="outline">仅可见轮廓</option><option value="xray">透视轮廓 · 遮挡线用虚线</option></select><label style="display:flex;gap:4px;align-items:center"><input id="renderaa" type="checkbox" checked>抗锯齿</label></div><div class="mesh-quality-controls"><label for="meshquality">3D 质量</label><select id="meshquality"><option value="auto">自动 · 快速→精细</option><option value="fast">快速预览 · 42³</option><option value="fine">精细预览 · 84³（较慢）</option><option value="ultra">超精细 · 128³（实体重建较慢）</option></select><button id="meshrefresh" title="按当前 3D 质量立即重建网格">重建 3D</button></div><details class="mesh-quality-detail"><summary>面数与精度说明</summary><p class="mesh-quality-note" id="renderhint">抗锯齿：开源 FXAA + 有界超采样；不改变模型精度。</p><p class="mesh-quality-note">只调整实体曲面细腻度，不改三视图和轮廓线。42³≈3 万面 / 84³≈12 万面 / 128³≈29 万面；实体网格仍可能漏掉极细特征。</p></details><div class="small" id="meshInfo" style="padding:7px 12px">网格只用于 3D，三视图不依赖体素。</div></div>
+<div class="side"><div class="preview"><div class="preview-title"><span>立体预览 / 拖动旋转</span><div style="display:flex;gap:4px"><button id="expand3d">放大窗口</button><button id="reset3d">复位</button></div></div><div class="orbit-stage"><span id="point3d" hidden aria-hidden="true">P</span><canvas id="gl" width="530" height="530" aria-label="三维预览：左键旋转，右键或 Shift 拖动平移，滚轮缩放"></canvas></div><div class="orbit-controls"><button id="zoomout3d" aria-label="缩小立体">−</button><output id="zoomvalue3d">100%</output><button id="zoomin3d" aria-label="放大立体">＋</button><span>滚轮缩放 · Shift 拖动平移</span></div><details class="view3d-fold" id="view3dfold"><summary id="view3dfoldsummary" data-i18n="off">视角与 3D 显示</summary><div class="view3d-fold-body"><div class="orbit-presets"><span class="orbit-presets-label">标准视角</span><button type="button" data-cam="front" title="从正前方看（主视图方向）">主视</button><button type="button" data-cam="top" title="从正上方看（俯视图方向）">俯视</button><button type="button" data-cam="left" title="从正左方看（左视图方向）">左视</button><button type="button" data-cam="right" title="从正右方看（右视图方向）">右视</button><button type="button" data-cam="bottom" title="从正下方看（仰视图方向）">仰视</button><button type="button" data-cam="back" title="从正后方看（后视图方向）">后视</button></div><div class="mesh-quality-controls"><label for="renderstyle">3D 显示</label><select id="renderstyle"><option value="solid">实体着色</option><option value="outline">仅可见轮廓</option><option value="xray">透视轮廓 · 遮挡线用虚线</option></select><label style="display:flex;gap:4px;align-items:center"><input id="renderaa" type="checkbox" checked>抗锯齿</label></div><div class="mesh-quality-controls"><label for="meshquality">3D 质量</label><select id="meshquality"><option value="auto">自动 · 快速→精细</option><option value="fast">快速预览 · 42³</option><option value="fine">精细预览 · 84³（较慢）</option><option value="ultra">超精细 · 128³（实体重建较慢）</option></select><button id="meshrefresh" title="按当前 3D 质量立即重建网格">重建 3D</button></div><details class="mesh-quality-detail"><summary>面数与精度说明</summary><p class="mesh-quality-note" id="renderhint">抗锯齿：开源 FXAA + 有界超采样；不改变模型精度。</p><p class="mesh-quality-note">只调整实体曲面细腻度，不改三视图和轮廓线。42³≈3 万面 / 84³≈12 万面 / 128³≈29 万面；实体网格仍可能漏掉极细特征。</p></details><div class="small" id="meshInfo" style="padding:7px 12px">网格只用于 3D，三视图不依赖体素。</div></div></details></div>
 <div class="settings"><details class="settings-fold" id="sheetfold"><summary>图纸辅助<span class="fold-state" id="sheetfoldstate"></span></summary><div class="section-label" hidden>图纸辅助</div><div class="sheethelpers"><label title="10 单位网格"><input type="checkbox" id="grid">10 单位网格</label><label title="长对正 / 高平齐 / 宽相等（第一角投影的三视图对应关系）"><input type="checkbox" id="guides">三视图对应</label><label title="点位对应辅助线（在图纸上点选一个表面点，三张视图同时标出对应位置）"><input type="checkbox" id="pointguides">点位对应</label></div><div id="pointguidepanel" hidden><p id="pointguideinfo" class="small">移动鼠标预览，点击锁定当前模型最近的可见表面点。</p><button id="pointguideclear">清除定位</button><p class="small">实心 P：该点可见；空心 P：该点被遮挡。只定位当前模型，不是自动识别题图的对应棱。定位线不导出。</p></div><div class="sheethelpers"><label title="投影外包尺寸（近似值，用虚线框标出三张视图的外包范围）"><input type="checkbox" id="dims">外包尺寸</label><label title="显示不可见轮廓（虚线）"><input type="checkbox" id="hidden" checked>不可见轮廓</label><label title="淡色填充实体投影"><input type="checkbox" id="fill">填充投影</label><label title="按当前投影显示圆孔轴线和视图对称线，导出时保留"><input type="checkbox" id="centerlines">中心线／对称线</label></div><p class="small note">可见轮廓画实线，被遮挡的轮廓画虚线。导出只包含图纸，不含 3D 和操作界面。<br>网格与尺寸采用模型单位，不代表实际毫米。</p><details><summary>精度、方向与使用限制</summary><div class="small">V：从 −Y 向 +Y 看，X 向右、Z 向上。H：从 +Z 向 −Z 看，X 向右、Y 向上（物体前面画在图纸下方）。W：从 −X 向 +X 看，Y 向左（物体前面画在图纸右侧）、Z 向上。<br>截平面默认减去局部 +Z 一侧，用位置和倾斜调整切口。锥体沿所选轴的负端为底、正端为顶，再施加倾斜。相贯轮廓由布尔表面的投影区域变化近似提取，复杂相切及光滑拼接并非 CAD 级保证。棱柱/棱锥的 rot 为截面正向旋转；长方体 rot 沿用原版绕 Z 顺时针约定。倾斜先绕世界 X，再绕世界 Y。<br>射线求交是解析的；轮廓拓扑仍按二维网格采样，再二分细化并转为折线。小于采样间距的特征可能漏掉，极近轮廓、相切、相贯处请核对。SVG 是真实路径，但不是精确 CAD 曲线。<br>3D 为独立表面网格：快速 42³（格距约 2.43）、精细 84³（约 1.21），自动模式先快后细。极细孔/薄片仍可能漏掉；以三视图为准。本工具辅助理解，不保证工程图规范完备。</div></details></details></div></div></div></section><aside class="ai-drawer" id="aidrawer" aria-label="AI 建模面板" hidden>
 <div class="ai-head"><strong>AI 建模</strong><span class="ai-sub">文字 / 图片 → 可编辑模型</span><button id="aiclose" class="ai-x" title="收起面板" aria-label="收起 AI 面板">×</button></div>
 <div class="ai-body">
@@ -381,9 +381,9 @@ body #sectionsolid{padding:11px;border-radius:7px}body #sectionsolid>summary{fon
   <div id="draftstepnarrow" class="draft-step-narrow" data-i18n="off"></div>
   <div class="draft-tools" style="margin-top:9px"><button id="draftback">退回一个点</button><button id="draftundo" title="撤销上一步草绘操作（Ctrl+Z）">撤销</button><button id="draftredo" title="重做刚才撤销的草绘操作（Ctrl+Shift+Z）">重做</button><button id="draftclear">清空草绘</button><button id="draftflip">切换去掉的一侧</button></div>
   <div class="draft-undo-note" id="draftundonote" hidden data-i18n="off"><span id="draftundotext"></span><button id="draftundobtn" type="button">撤销</button></div>
-  <details id="draftfootmore" class="draft-footmore" open><summary>画法说明</summary><p class="draft-footnote">灰线是当前模型投影，青色是新增截面，红色是将挖除的区域。仅当切线所定义的平面沿观察方向贯穿时，才能用一张视图确定切法；任意空间斜面仍需其他视图约束。</p></details>
+  <details id="draftfootmore" class="draft-footmore"><summary>画法说明</summary><p class="draft-footnote">灰线是当前模型投影，青色是新增截面，红色是将挖除的区域。仅当切线所定义的平面沿观察方向贯穿时，才能用一张视图确定切法；任意空间斜面仍需其他视图约束。</p></details>
  </div><div class="draft-right">
-  <h3 id="draftstep">沿边界依次点出截面</h3><details id="drafthelpfold" class="draft-helpfold" open><summary>画法说明（详细）</summary><div id="drafthelp" class="draft-help"></div></details>
+  <h3 id="draftstep">沿边界依次点出截面</h3><details id="drafthelpfold" class="draft-helpfold"><summary>画法说明（详细）</summary><div id="drafthelp" class="draft-help"></div></details>
   <div class="draft-presets" id="draftpresets"><button data-profile="circle">圆形</button><button data-profile="triangle">三角形</button><button data-profile="trapezoid">梯形</button><button data-profile="lshape">L 形</button><button data-profile="vslot">V 形槽</button></div>
   <div class="draft-fields" id="draftdepth"><label id="draftlolabel">起点<input id="draftlo" type="number" min="0" max="100" step="0.1" value="20"></label><label id="drafthilabel">终点<input id="drafthi" type="number" min="0" max="100" step="0.1" value="80"></label></div><button id="draftthrough">设为贯穿 · 0–100</button>
   <div id="draftcirclefields" class="draft-fields" hidden><label>半径 R<input id="draftradius" type="number" min="0.1" max="60" step="0.1" value="15"></label><label>直径 ⌀<input id="draftdiameter" type="number" min="0.2" max="120" step="0.1" value="30"></label></div>
@@ -918,8 +918,29 @@ function project(prep,view,res=320,outlineOnly=false){
  function occupied(u,v){return u>=0&&v>=0&&u<=100&&v<=100&&ray(prep,...viewRay(view,u,v)).length>0;}
  if(outlineOnly)patterns.push({front:1,ids:[]});
  function code(s){const k=s.front+':'+s.ids.map(id=>id+'x'+s.counts[id]).join(',');let n=intern.get(k);if(n===undefined){n=patterns.length;intern.set(k,n);patterns.push(s);}return n;}
+ // Conservative 2D AABB from additive shapes skips empty background rays (bit-identical output).
+ let x0=0,y0=0,x1=size-1,y1=size-1;
+ {
+  const adds=prep.filter(s=>s.op==='add'&&s.bounds&&s.bounds.every(Number.isFinite));
+  if(adds.length){
+   let u0=Infinity,v0=Infinity,u1=-Infinity,v1=-Infinity;
+   for(const s of adds){
+    const b=s.bounds;
+    const su0=view==='W'?100-b[4]:b[0], su1=view==='W'?100-b[1]:b[3];
+    const sv0=view==='H'?100-b[4]:100-b[5], sv1=view==='H'?100-b[1]:100-b[2];
+    if(su0<u0)u0=su0;if(su1>u1)u1=su1;if(sv0<v0)v0=sv0;if(sv1>v1)v1=sv1;
+   }
+   u0=Math.max(0,u0);v0=Math.max(0,v0);u1=Math.min(100,u1);v1=Math.min(100,v1);
+   if(u1>=u0&&v1>=v0){
+    x0=Math.max(0,Math.floor(u0/step)-1);
+    y0=Math.max(0,Math.floor(v0/step)-1);
+    x1=Math.min(size-1,Math.ceil(u1/step)+3);
+    y1=Math.min(size-1,Math.ceil(v1/step)+3);
+   }
+  }
+ }
  // Padding closes shapes even when they touch the world-domain boundary.
- for(let y=0;y<size;y++)for(let x=0;x<size;x++)grid[y*size+x]=outlineOnly?Number(occupied((x-1)*step,(y-1)*step)):code(sample(prep,view,(x-1)*step,(y-1)*step));
+ for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)grid[y*size+x]=outlineOnly?Number(occupied((x-1)*step,(y-1)*step)):code(sample(prep,view,(x-1)*step,(y-1)*step));
  const solid=new Map(),hidden=new Map(),outline=new Map(),crossings=new Map();
  const projectPoint=p=>view==='V'?[p[0],100-p[2]]:view==='H'?[p[0],100-p[1]]:[100-p[1],100-p[2]],viewDir=viewRay(view,50,50)[1],smoothBins=new Map(),smoothCache=new Map(),cell=step*2;
  const smooth=(outlineOnly?[]:profileSmoothJoins(prep)).filter(j=>Math.abs(dot(j.normal,viewDir))>1e-6).map(j=>({...j,pa:projectPoint(j.a),pb:projectPoint(j.b)}));
@@ -967,7 +988,8 @@ function project(prep,view,res=320,outlineOnly=false){
    for(const [a,b]of pairs)emit(crossing(a),crossing(b));
   }
  }
- for(let y=0;y<size-1;y++)for(let x=0;x<size-1;x++){
+ const cx1=Math.min(size-2,x1),cy1=Math.min(size-2,y1);
+ for(let y=y0;y<=cy1;y++)for(let x=x0;x<=cx1;x++){
   const indices=[grid[y*size+x],grid[y*size+x+1],grid[(y+1)*size+x+1],grid[(y+1)*size+x]];
   if(indices.every(n=>n===indices[0]))continue;
   const states=indices.map(i=>patterns[i]);
@@ -1025,9 +1047,28 @@ function modelField(prep,p){
  return Math.max(d,-p[0],p[0]-100,-p[1],p[1]-100,-p[2],p[2]-100);
 }
 function mesh(prep,res=42){
- const n=res+1,step=102/res,values=new Float32Array(n*n*n),positions=[],normals=[];
+ let hasAdd=false,validBounds=true,x0=Infinity,y0=Infinity,z0=Infinity,x1=-Infinity,y1=-Infinity,z1=-Infinity;
+ for(const sh of prep){
+  if(sh.op!=='add')continue;
+  hasAdd=true;
+  const b=sh.bounds;
+  if(!b||b.length!==6||!b.every(Number.isFinite)){validBounds=false;break;}
+  x0=Math.min(x0,b[0]);y0=Math.min(y0,b[1]);z0=Math.min(z0,b[2]);
+  x1=Math.max(x1,b[3]);y1=Math.max(y1,b[4]);z1=Math.max(z1,b[5]);
+ }
+ if(!hasAdd)return {positions:new Float32Array(0),normals:new Float32Array(0),resolution:res};
+ const n=res+1,step=102/res;
+ let gx0=0,gx1=res,gy0=0,gy1=res,gz0=0,gz1=res;
+ if(validBounds){
+  const cx0=Math.max(0,x0),cx1=Math.min(100,x1),cy0=Math.max(0,y0),cy1=Math.min(100,y1),cz0=Math.max(0,z0),cz1=Math.min(100,z1);
+  if(cx0>cx1||cy0>cy1||cz0>cz1)return {positions:new Float32Array(0),normals:new Float32Array(0),resolution:res};
+  gx0=Math.max(0,Math.floor((cx0+1)/step)-2);gx1=Math.min(res,Math.ceil((cx1+1)/step)+2);
+  gy0=Math.max(0,Math.floor((cy0+1)/step)-2);gy1=Math.min(res,Math.ceil((cy1+1)/step)+2);
+  gz0=Math.max(0,Math.floor((cz0+1)/step)-2);gz1=Math.min(res,Math.ceil((cz1+1)/step)+2);
+ }
+ const values=new Float32Array(n*n*n),positions=[],normals=[];
  const index=(x,y,z)=>(z*n+y)*n+x,point=(x,y,z)=>[-1+x*step,-1+y*step,-1+z*step];
- for(let z=0;z<n;z++)for(let y=0;y<n;y++)for(let x=0;x<n;x++)values[index(x,y,z)]=modelField(prep,point(x,y,z));
+ for(let z=gz0;z<=gz1;z++)for(let y=gy0;y<=gy1;y++)for(let x=gx0;x<=gx1;x++)values[index(x,y,z)]=modelField(prep,point(x,y,z));
  const offsets=[[0,0,0],[1,0,0],[1,1,0],[0,1,0],[0,0,1],[1,0,1],[1,1,1],[0,1,1]],tets=[[0,5,1,6],[0,1,2,6],[0,2,3,6],[0,3,7,6],[0,7,4,6],[0,4,5,6]],tetEdges=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
  // Interpolating min/max CSG fields crosses internal decomposition seams and
  // dents otherwise planar faces. Mesh edges use final material ray intervals;
@@ -1036,7 +1077,7 @@ function mesh(prep,res=42){
  function crossing(a,b,guess){const key=[a.join(','),b.join(',')].sort().join('|');if(edgeCache.has(key))return edgeCache.get(key);const d=b.map((v,k)=>v-a[k]),length=Math.hypot(...d),roots=ray(prep,a,d.map(v=>v/length)).flatMap(r=>[r[0],r[1]]).filter(t=>t>=-1e-9&&t<=length+1e-9).filter(t=>t>1e-8||!ray(prep,a,d.map(v=>-v/length)).some(r=>r[0]<1e-8&&r[1]>1e-7));let p=null;if(roots.length){const target=guess*length,t=roots.reduce((v,w)=>Math.abs(w-target)<Math.abs(v-target)?w:v);p=a.map((v,k)=>v+d[k]*t/length);}edgeCache.set(key,p);return p;}
  function normal(p){const key=p.join(',');if(normalCache.has(key))return normalCache.get(key);const e=.015;let g=[];for(let k=0;k<3;k++){const a=p.slice(),b=p.slice();a[k]+=e;b[k]-=e;g.push(modelField(prep,a)-modelField(prep,b));}const len=Math.hypot(...g)||1;const result=g.map(v=>v/len);normalCache.set(key,result);return result;}
  function tri(a,b,c){for(const p of [a,b,c]){positions.push(...p);normals.push(...normal(p));}}
- for(let z=0;z<res;z++)for(let y=0;y<res;y++)for(let x=0;x<res;x++){
+ for(let z=gz0;z<gz1;z++)for(let y=gy0;y<gy1;y++)for(let x=gx0;x<gx1;x++){
   const ps=offsets.map(([a,b,c])=>point(x+a,y+b,z+c)),vs=offsets.map(([a,b,c])=>values[index(x+a,y+b,z+c)]);
   if(vs.every(v=>v>=0)||vs.every(v=>v<0))continue;
   for(const t of tets){const hits=[];
@@ -1437,7 +1478,7 @@ function autosaveStamp(){const el=$('autosave');if(!el)return;if(!autosaveAt){el
 if($('errclose'))$('errclose').onclick=clearFail;
 if($('errsave'))$('errsave').onclick=()=>{if($('errsave'))$('errsave').hidden=true;exportModelNow();};
 function status(s,kind=''){$('statusText').textContent=s;$('status').className='status '+kind;}
-function controls(){ $('undo').disabled=!history.length;$('redo').disabled=!future.length;$('png').disabled=$('svg').disabled=!ready;if($('dxf'))$('dxf').disabled=!ready; }
+function controls(){ $('undo').disabled=!history.length;$('redo').disabled=!future.length;$('png').disabled=$('svg').disabled=!ready;const synced=typeof currentProjection==='function'?currentProjection():ready;if($('dxf'))$('dxf').disabled=!synced;if($('stl'))$('stl').disabled=!synced||(typeof stlExportBusy!=='undefined'&&stlExportBusy); }
 function autoSave(){
  try{
   const ann=typeof markAnnotations==='function'?markAnnotations():null,base={version:2,shapes,...(aiAppliedMeta&&aiAppliedModel===snapshot()?{meta:aiAppliedMeta}:{})};
@@ -1450,7 +1491,7 @@ function restoreDocumentState(state){shapes=JSON.parse(state.shapes);aiAppliedMe
 function commit(before=lastCommit,documentBefore=null){
  const now=snapshot();if(now!==before||(documentBefore&&JSON.stringify(documentBefore.annotations)!==JSON.stringify(markAnnotations({exact:true})))){if(aiAppliedMeta&&aiAppliedModel!==now){aiAppliedMeta=null;aiAppliedModel='';}if(before){history.push(documentBefore||before);if(history.length>60)history.shift();}future=[];lastCommit=now;clearFail();autoSave();}controls();
 }
-function edit(action,opt={}){replayExit(false);if(slideBase!==null){commit(slideBase);slideBase=null;}const before=snapshot(),beforeMeta=aiAppliedMeta,beforeMetaModel=aiAppliedModel;let paired=null;try{if(opt.annotations)paired=documentState();action();if(shapes.some(s=>s.draft?.constraints?.length))shapes=constraintSolved(shapes);}catch(e){shapes=JSON.parse(before);aiAppliedMeta=beforeMeta;aiAppliedModel=beforeMetaModel;if(paired)restoreDocumentState(paired);renderList();fail(constraintText(e,'zh'),constraintText(e,'en'));return false;}commit(before,paired);renderList();requestBuild();return true;}
+function edit(action,opt={}){replayExit(false);if(slideBase!==null){commit(slideBase);slideBase=null;}const before=snapshot(),beforeMeta=aiAppliedMeta,beforeMetaModel=aiAppliedModel;let paired=null;try{if(opt.annotations)paired=documentState();action();if(shapes.some(s=>s.draft?.constraints?.length))shapes=constraintSolved(shapes);}catch(e){shapes=JSON.parse(before);aiAppliedMeta=beforeMeta;aiAppliedModel=beforeMetaModel;if(paired)restoreDocumentState(paired);renderList();fail(constraintText(e,'zh'),constraintText(e,'en'));return false;}commit(before,paired);renderList();requestBuild(opt);return true;}
 function parameters(sh){return [['cx','X 位置（左右）',0,100],['cy','Y 位置（前后）',0,100],['cz','Z 位置（上下）',0,100],...DEFINITIONS[sh.type].params];}
 function paramHTML(sh,p){const [k,label,min,max,step=.1]=p,value=sh[k]||0;return `<div class="param"><div class="row"><label for="n-${sh.id}-${k}">${label}</label><input id="n-${sh.id}-${k}" type="number" min="${min}" max="${max}" step="${step}" value="${value}" data-id="${sh.id}" data-key="${k}" aria-label="${label}"></div><input type="range" min="${min}" max="${max}" step="${step}" value="${value}" data-id="${sh.id}" data-key="${k}" aria-label="${label}滑块"></div>`;}
 let stepEditId=null;
@@ -1551,6 +1592,7 @@ function preset(name){
  if(name==='conecut')return [newShape('cone',{r:30,h:60,cz:40}),newShape('plane',{op:'sub',cx:30,cz:30,ry:-40})];
  if(name==='flange'&&typeof MechRecipeKit==='function')return MechRecipeKit().compile('boss_flange',null,{withIds:true}).shapes;
  if(name==='shaft'&&typeof MechRecipeKit==='function')return MechRecipeKit().compile('stepped_shaft',null,{withIds:true}).shapes;
+ if(name==='bracket'&&typeof MechRecipeKit==='function')return MechRecipeKit().compile('l_bracket',null,{withIds:true}).shapes;
  return [newShape('prism',{n:3,r:40,h:60,rot:90,cx:50,cy:40,cz:50}),newShape('box',{sx:30,sy:80,sz:26,cx:50,cy:50,cz:50,op:'sub'})];
 }
 $('preset').onchange=e=>{const v=e.target.value;e.target.value='';if(!v)return;
@@ -1559,7 +1601,7 @@ $('preset').onchange=e=>{const v=e.target.value;e.target.value='';if(!v)return;
   if(!confirm(bi('清空会移除当前模型里的所有形体。继续吗？','Clear removes every shape in the current model. Continue?')))return;
   edit(()=>{shapes=[];});listSelId=null;toast(bi('已清空模型（Ctrl+Z 可撤回）','Model cleared (Ctrl+Z to undo)'));return;
  }
- if((v==='flange'||v==='shaft')&&typeof mechApplyPreset==='function'){mechApplyPreset(v);return;}
+ if((v==='flange'||v==='shaft'||v==='bracket')&&typeof mechApplyPreset==='function'){mechApplyPreset(v);return;}
  const had=shapes.length;
  edit(()=>{shapes=preset(v);});
  if(had)toastAction(bi('已替换当前模型','Replaced the current model'),bi('撤销','Undo'),()=>undoRedo(false));
@@ -1626,9 +1668,10 @@ const nativeUpgradeButton=document.createElement('button');nativeUpgradeButton.i
 $('save').onclick=()=>exportModelNow();
 // Optional annotations may be skipped only after valid geometry and explicit consent.
 // The import itself remains one paired undo transaction; source records are untouched.
-function modelOpenData(raw){
+function modelOpenData(raw,{interactive=true}={}){
  const next=validateModel(raw);let annotations,skipped=false;
  try{annotations=markParseAnnotations(raw?.annotations,{strict:true});}catch(e){
+  if(!interactive)throw e;
   if(!confirm(bi('模型有效，但标注或底图损坏。是否仅载入模型，跳过本份作业的标注和底图？当前作业将被替换，可撤销；原文件或记录不会改动。取消则保留当前作业。','The model is valid, but its annotations or reference images are invalid. Load only the model and skip this document’s annotations and references? This replaces the current work and can be undone. The source file or record is unchanged. Cancel keeps the current work.')))throw e;
   annotations=null;skipped=true;
  }
@@ -1811,27 +1854,146 @@ function CenterlineLayout(views,seeds=[]){
  }
  return out;
 }
+function packBinaryStlBuffer(pos,nrm,sc,unitTag,res){
+ const triCount=Math.floor((pos?.length||0)/9);
+ if(!triCount)throw Error('EMPTY_STL_MESH');
+ const buf=new ArrayBuffer(84+triCount*50),dv=new DataView(buf),u8=new Uint8Array(buf);
+ const hdr='Three-View Workbench v0.8.2 Binary STL'+(unitTag?' ('+unitTag+')':'');
+ for(let i=0;i<Math.min(80,hdr.length);i++)u8[i]=hdr.charCodeAt(i);
+ dv.setUint32(80,triCount,true);
+ let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+ for(let t=0;t<triCount;t++){
+  const base=t*9,off=84+t*50;
+  let ax=pos[base]*sc,ay=pos[base+1]*sc,az=pos[base+2]*sc;
+  let bx=pos[base+3]*sc,by=pos[base+4]*sc,bz=pos[base+5]*sc;
+  let cx=pos[base+6]*sc,cy=pos[base+7]*sc,cz=pos[base+8]*sc;
+  minX=Math.min(minX,ax,bx,cx);minY=Math.min(minY,ay,by,cy);minZ=Math.min(minZ,az,bz,cz);
+  maxX=Math.max(maxX,ax,bx,cx);maxY=Math.max(maxY,ay,by,cy);maxZ=Math.max(maxZ,az,bz,cz);
+  const nx=(nrm?.[base]||0)+(nrm?.[base+3]||0)+(nrm?.[base+6]||0);
+  const ny=(nrm?.[base+1]||0)+(nrm?.[base+4]||0)+(nrm?.[base+7]||0);
+  const nz=(nrm?.[base+2]||0)+(nrm?.[base+5]||0)+(nrm?.[base+8]||0);
+  const ux=bx-ax,uy=by-ay,uz=bz-az,vx=cx-ax,vy=cy-ay,vz=cz-az;
+  let fnx=uy*vz-uz*vy,fny=uz*vx-ux*vz,fnz=ux*vy-uy*vx;
+  if(fnx*nx+fny*ny+fnz*nz<0){
+   const tx=bx,ty=by,tz=bz;bx=cx;by=cy;bz=cz;cx=tx;cy=ty;cz=tz;
+   fnx=-fnx;fny=-fny;fnz=-fnz;
+  }
+  const flen=Math.hypot(fnx,fny,fnz);
+  if(flen<1e-12){
+   const nlen=Math.hypot(nx,ny,nz);
+   if(nlen>1e-12){fnx=nx/nlen;fny=ny/nlen;fnz=nz/nlen;}
+   else{fnx=0;fny=0;fnz=1;}
+  }else{fnx/=flen;fny/=flen;fnz/=flen;}
+  dv.setFloat32(off,fnx,true);dv.setFloat32(off+4,fny,true);dv.setFloat32(off+8,fnz,true);
+  dv.setFloat32(off+12,ax,true);dv.setFloat32(off+16,ay,true);dv.setFloat32(off+20,az,true);
+  dv.setFloat32(off+24,bx,true);dv.setFloat32(off+28,by,true);dv.setFloat32(off+32,bz,true);
+  dv.setFloat32(off+36,cx,true);dv.setFloat32(off+40,cy,true);dv.setFloat32(off+44,cz,true);
+  dv.setUint16(off+48,0,true);
+ }
+ return {buffer:buf,byteLength:buf.byteLength,triangles:triCount,resolution:res,scaleFactor:sc,unit:unitTag||'',bounds:[minX,minY,minZ,maxX,maxY,maxZ].map(n=>Number(n.toFixed(4)))};
+}
+function auditStlMesh(K,shapes,prep,pos,res,sc){
+ const voxelStepWb=102/res,voxelStepWorld=Number((voxelStepWb*sc).toFixed(4));
+ const warnings=[],blockedHoles=[];
+ const addBounds=prep.filter(s=>s&&s.op==='add'&&s.bounds).map(s=>s.bounds);
+ const overlap3=(a,b)=>a&&b&&a[0]<=b[3]+1e-4&&a[3]>=b[0]-1e-4&&a[1]<=b[4]+1e-4&&a[4]>=b[1]-1e-4&&a[2]<=b[5]+1e-4&&a[5]>=b[2]-1e-4;
+ const rayTriHit=(ox,oy,oz,dx,dy,dz,minT,maxT,ax,ay,az,bx,by,bz,cx,cy,cz)=>{
+  const e1x=bx-ax,e1y=by-ay,e1z=bz-az,e2x=cx-ax,e2y=cy-ay,e2z=cz-az;
+  const px=dy*e2z-dz*e2y,py=dz*e2x-dx*e2z,pz=dx*e2y-dy*e2x;
+  const det=e1x*px+e1y*py+e1z*pz;
+  if(Math.abs(det)<1e-12)return false;
+  const inv=1/det,tx=ox-ax,ty=oy-ay,tz=oz-az;
+  const u=(tx*px+ty*py+tz*pz)*inv;
+  if(u<-1e-6||u>1+1e-6)return false;
+  const qx=ty*e1z-tz*e1y,qy=tz*e1x-tx*e1z,qz=tx*e1y-ty*e1x;
+  const v=(dx*qx+dy*qy+dz*qz)*inv;
+  if(v<-1e-6||u+v>1+1e-6)return false;
+  const t=(e2x*qx+e2y*qy+e2z*qz)*inv;
+  return t>minT&&t<maxT;
+ };
+ const triCount=Math.floor((pos?.length||0)/9);
+ for(let i=0;i<prep.length;i++){
+  const sh=prep[i],raw=shapes[i];if(!sh||!raw||sh.type==='plane')continue;
+  const hitsAdd=sh.op==='add'||addBounds.some(b=>overlap3(sh.bounds,b));
+  if(!hitsAdd)continue;
+  let minDimWb=Infinity;
+  if(sh.type==='box')minDimWb=Math.min(raw.sx||0,raw.sy||0,raw.sz||0);
+  else if(sh.type==='sphere')minDimWb=2*(raw.r||0);
+  else if(sh.type==='frustum')minDimWb=Math.min(2*Math.min(raw.r||0,raw.r2>0?raw.r2:(raw.r||0)),raw.h>0?raw.h:Infinity);
+  else if(['cylinder','cone','prism','pyramid'].includes(sh.type))minDimWb=Math.min(2*(raw.r||0),raw.h>0?raw.h:Infinity);
+  else if(sh.type==='extrude'&&sh.h>0){
+   const pb=sh.profileData?.bounds,span2d=pb?Math.min(pb[2]-pb[0],pb[3]-pb[1]):Infinity;
+   minDimWb=Math.min(sh.h,span2d);
+  }
+  if(Number.isFinite(minDimWb)&&minDimWb>0&&minDimWb<2*voxelStepWb){
+   const sizeWorld=Number((minDimWb*sc).toFixed(4));
+   warnings.push({code:'sub-voxel-feature',step:i+1,sizeWorld,voxelStepWorld,
+    zh:`第 ${i+1} 步最小特征尺寸约 ${sizeWorld}，小于当前体素步距两倍（~${(2*voxelStepWorld).toFixed(3)}），导出 STL 可能丢失或封死。`,
+    en:`Step ${i+1} min feature (${sizeWorld}) is below 2x voxel step (~${(2*voxelStepWorld).toFixed(3)}) and may vanish or seal in STL.`});
+  }
+  if(sh.op==='sub'&&sh.type==='cylinder'&&sh.r>0&&sh.h>0&&sh.basis?.[2]){
+   const alen=Math.hypot(...sh.basis[2])||1,ax=sh.basis[2].map(v=>v/alen),half=sh.h/2;
+   const p0=sh.center.map((c,k)=>c-half*ax[k]);
+   let tBoxLo=-1e9,tBoxHi=1e9,okBox=true;
+   for(let k=0;k<3;k++){
+    if(Math.abs(ax[k])<1e-12){if(p0[k]<0||p0[k]>100){okBox=false;break;}}
+    else{const tA=(0-p0[k])/ax[k],tB=(100-p0[k])/ax[k];tBoxLo=Math.max(tBoxLo,Math.min(tA,tB));tBoxHi=Math.min(tBoxHi,Math.max(tA,tB));}
+   }
+   const loCut=Math.max(0,tBoxLo),hiCut=Math.min(sh.h,tBoxHi);
+   if(!okBox||hiCut-loCut<=1e-3)continue;
+   const addHit=prep.some(a=>a&&a.op==='add'&&K.intersections(a,p0,ax).some(([a0,a1])=>Math.min(a1,hiCut)-Math.max(a0,loCut)>1e-4));
+   if(!addHit)continue;
+   let list=[];
+   for(const s of prep)for(const q of K.intersections(s,p0,ax))list=s.op==='sub'?K.subtract(list,q):K.union(list,q);
+   const pad=Math.min(0.6,0.5*voxelStepWb);
+   const csgOccupied=list.some(([a0,a1])=>Math.min(a1,hiCut+pad)-Math.max(a0,loCut-pad)>1e-4);
+   if(csgOccupied)continue;
+   let stlHits=0;
+   const endTol=Math.min(0.15,0.25*voxelStepWb);
+   const minT=loCut-endTol,maxT=hiCut+endTol;
+   for(let t=0;t<triCount;t++){
+    const b=t*9;
+    if(rayTriHit(p0[0],p0[1],p0[2],ax[0],ax[1],ax[2],minT,maxT,pos[b],pos[b+1],pos[b+2],pos[b+3],pos[b+4],pos[b+5],pos[b+6],pos[b+7],pos[b+8]))stlHits++;
+   }
+   if(stlHits>0){
+    const diaWorld=Number((2*sh.r*sc).toFixed(4));
+    blockedHoles.push({step:i+1,diameterWorld:diaWorld,voxelStepWorld,stlHits});
+    warnings.push({code:'blocked-through-hole',step:i+1,diameterWorld:diaWorld,voxelStepWorld,stlHits,
+     zh:`第 ${i+1} 步通孔（直径 ${diaWorld}）在理论内核中贯通，但当前 ${res}³ STL 网格沿孔轴击中 ${stlHits} 个封堵三角面。`,
+     en:`Step ${i+1} through-hole (diameter ${diaWorld}) is open in the analytic kernel, but the ${res}³ STL mesh hit ${stlHits} blocking triangle(s) along the hole axis.`});
+   }
+  }
+ }
+ return {voxelStepWorld,blockedHoles,warnings};
+}
 const workerSource='('+function(){
- const K=GeometryKernel();self.onmessage=e=>{try{const {shapes,res,revision,kind,estimate}=e.data,start=performance.now(),prep=K.prepare(shapes);if(kind==='mesh'){const mesh=K.mesh(prep,res);self.postMessage({type:'mesh',revision,mesh,meshMs:performance.now()-start},[mesh.positions.buffer,mesh.normals.buffer]);return;}const views=estimate?Object.fromEntries(['V','H','W'].map(view=>[view,K.project(prep,view,res)])):OrthographicLines(K,shapes,prep,res);if(!estimate)views.V.centerSeeds=CenterlineSeeds(K,prep);self.postMessage({type:'views',revision,views,projectionMs:performance.now()-start});}catch(err){self.postMessage({type:'error',message:err.stack||err.message});}};
+ const K=GeometryKernel();self.onmessage=e=>{try{const {shapes,res,revision,kind,estimate,sc,unitTag,positions,normals}=e.data,start=performance.now(),prep=K.prepare(shapes);if(kind==='mesh'){const mesh=K.mesh(prep,res);self.postMessage({type:'mesh',revision,mesh,meshMs:performance.now()-start},[mesh.positions.buffer,mesh.normals.buffer]);return;}if(kind==='stl-build'){const mesh=K.mesh(prep,res),packed=packBinaryStlBuffer(mesh.positions,mesh.normals,sc,unitTag,res),audit=auditStlMesh(K,shapes,prep,mesh.positions,res,sc);self.postMessage({type:'stl',revision,packed,audit,mesh,meshMs:performance.now()-start},[packed.buffer,mesh.positions.buffer,mesh.normals.buffer]);return;}if(kind==='stl-pack'){const packed=packBinaryStlBuffer(positions,normals,sc,unitTag,res),audit=auditStlMesh(K,shapes,prep,positions,res,sc);self.postMessage({type:'stl',revision,packed,audit,meshMs:performance.now()-start},[packed.buffer]);return;}const views=estimate?Object.fromEntries(['V','H','W'].map(view=>[view,K.project(prep,view,res)])):OrthographicLines(K,shapes,prep,res);if(!estimate)views.V.centerSeeds=CenterlineSeeds(K,prep);self.postMessage({type:'views',revision,views,projectionMs:performance.now()-start});}catch(err){self.postMessage({type:'error',message:err.stack||err.message});}};
 }.toString()+')();';
-const workerURL=URL.createObjectURL(new Blob([GeometryKernel.toString(),'\n',FeatureLines.toString(),'\n',OrthographicLines.toString(),'\n',CenterlineSeeds.toString(),'\n',workerSource],{type:'text/javascript'}));
-let meshWorker=null,meshTimer=null,meshTicket=0,meshBuilds=0,projectionBuilds=0,lastMeshResolution=0,meshBusy=false,meshMode='auto';
+const workerURL=URL.createObjectURL(new Blob([GeometryKernel.toString(),'\n',FeatureLines.toString(),'\n',OrthographicLines.toString(),'\n',CenterlineSeeds.toString(),'\n',packBinaryStlBuffer.toString(),'\n',auditStlMesh.toString(),'\n',workerSource],{type:'text/javascript'}));
+let meshWorker=null,meshTimer=null,meshTicket=0,meshBuilds=0,projectionBuilds=0,lastMeshResolution=0,meshBusy=false,meshMode='auto',meshPool=null,projPool=null;
+window.__v082WorkerSpawns={projection:0,mesh:0};
+function cacheMeshResult(snap,res,mesh){if(!mesh||!mesh.positions||mesh.positions.length<9)return;const cur=window.__v082LastMesh;if(!cur||cur.snapshot!==snap||res>=cur.res)window.__v082LastMesh={snapshot:snap,res,mesh};}
+function acquireMeshWorker(){if(meshPool){const w=meshPool;meshPool=null;return w;}window.__v082WorkerSpawns.mesh++;return new Worker(workerURL);}
+function releaseMeshWorker(w){if(!w)return;w.onmessage=null;w.onerror=null;if(!meshPool)meshPool=w;else w.terminate();}
+function acquireProjWorker(){if(projPool){const w=projPool;projPool=null;return w;}window.__v082WorkerSpawns.projection++;return new Worker(workerURL);}
+function releaseProjWorker(w){if(!w)return;w.onmessage=null;w.onerror=null;if(!projPool)projPool=w;else w.terminate();}
 try{const saved=localStorage.getItem('orthographic-mesh-mode-v1');if(['fast','fine','auto','ultra'].includes(saved))meshMode=saved;}catch(e){}
 $('meshquality').value=meshMode;
 function resLabel(res,lang){const zh=res>=128?'超精细':res>=84?'精细':'快速',en=res>=128?'Ultra':res>=84?'Fine':'Fast';return lang==='en'?en:lang==='zh'?zh:bi(zh,en);}
 function refreshRes(){if(meshMode==='fast')return 42;if(meshMode==='fine')return 84;if(meshMode==='ultra')return 128;return 84;}
 function initialRes(){return meshMode==='fast'?42:meshMode==='fine'?84:meshMode==='ultra'?128:42;}
 function cancelMesh(){clearTimeout(meshTimer);meshTimer=null;meshTicket++;if(meshWorker){meshWorker.terminate();meshWorker=null;}meshBusy=false;}
+function disposeWorkerPools(){cancelMesh();if(meshPool){meshPool.terminate();meshPool=null;}if(projPool){projPool.terminate();projPool=null;}}
 let meshMsgRender=null;
 function meshMessage(text,render){meshMsgRender=typeof render==='function'?render:null;$('meshInfo').textContent=meshMsgRender?meshMsgRender():text;}
 function startMesh(res,current=revision){
  if(current!==revision)return;cancelMesh();const ticket=meshTicket,model=activeSnapshot();meshBusy=true;meshBuilds++;
  meshMessage('',()=>bi('立体更新中（当前仍是上一版，暂勿与新图纸对照） · ','Updating 3D (previous revision shown; wait before comparing) · ')+resLabel(res)+' '+res+'³');
- try{const w=new Worker(workerURL);meshWorker=w;
+ try{const w=acquireMeshWorker();meshWorker=w;
  const fail=text=>{if(ticket!==meshTicket||current!==revision)return;w.terminate();meshWorker=null;meshBusy=false;meshMessage('',()=>bi('3D 更新失败：'+text+'。可切换快速预览重试；三视图仍可用。','3D update failed: '+text+'. Switch to Fast preview to retry; three views stay available.'));};
  w.onerror=e=>fail(e.message);
  w.onmessage=e=>{if(ticket!==meshTicket||current!==revision||model!==activeSnapshot())return;const d=e.data;if(d.type==='error'){fail(d.message);return;}if(d.type!=='mesh')return;
-  renderer.setMesh(d.mesh,JSON.parse(model));lastMeshResolution=res;window.__meshMs=d.meshMs;meshBusy=false;meshWorker=null;w.terminate();
+  renderer.setMesh(d.mesh,JSON.parse(model));cacheMeshResult(model,res,d.mesh);meshRevision=current;lastMeshResolution=res;window.__meshMs=d.meshMs;meshBusy=false;meshWorker=null;releaseMeshWorker(w);
   const tris=Math.round(d.mesh.positions.length/9).toLocaleString(),ms=Math.round(d.meshMs);
   meshMessage('',()=>renderer.stats().available?bi(resLabel(res,'zh')+' · '+tris+' 三角面 · '+res+'³ 采样 · '+ms+' ms'+(meshMode==='auto'&&res<128?' · 空闲后自动提高精度':''),resLabel(res,'en')+' · '+tris+' triangles · '+res+'³ sampling · '+ms+' ms'+(meshMode==='auto'&&res<128?' · auto-refines when idle':'')):bi('WebGL 不可用；三视图与导出仍可使用。','WebGL unavailable; three views and export still work.'));
   if(meshMode==='auto'&&res===42){meshTimer=setTimeout(()=>{meshTimer=null;if(current===revision&&model===activeSnapshot()&&meshMode==='auto')startMesh(84,current);},1200);}
@@ -1841,14 +2003,23 @@ function startMesh(res,current=revision){
 }
 let draftTimer=null,draftAt=0,fullBuiltAt=0,draftWorker=null,draftBusy=false,burstCount=0;
 // 一次投影计算。draft=true 时用低采样快速出草稿，不碰 3D，也不打断界面。
-function projectionRun(res,current,draft){
- try{const w=new Worker(workerURL);worker=w;projectionBuilds++;
+let drawRevision=-1,drawModel='',meshRevision=-1;
+function currentProjection(){
+ return !!drawData && ready && drawRevision===revision && drawModel===activeSnapshot();
+}
+function currentSection(model){
+ const cached=window.__v080SectionFull;
+ return cached && cached.revision===revision && cached.model===model ? cached : null;
+}
+function projectionRun(res,current,draft,skipMesh=false){
+ const model=activeSnapshot();
+ try{const w=acquireProjWorker();worker=w;projectionBuilds++;
  w.onerror=e=>{if(current!==revision)return;w.terminate();worker=null;if($('cancelcalc'))$('cancelcalc').hidden=true;status(bi('计算线程失败：','Worker failed: ')+e.message,'error');ready=false;controls();};
  w.onmessage=e=>{if(current!==revision)return;const d=e.data;if(d.type==='error'){w.terminate();worker=null;if($('cancelcalc'))$('cancelcalc').hidden=true;status(bi('几何计算失败：','Geometry failed: ')+d.message,'error');ready=false;controls();return;}
  if(d.type==='views'){
-  drawData=d.views;ready=true;renderSheet();controls();if($('draftdialog').open){snapModelKey='';draftRefresh();}if($('planedialog').open)planeRefresh();
+  drawData=d.views;drawRevision=draft?-1:current;drawModel=model;ready=true;renderSheet();controls();if($('draftdialog').open){snapModelKey='';draftRefresh();}if($('planedialog').open)planeRefresh();
   $('resolution').textContent=`${draft?res:$('quality').value}`+bi('² 面域采样 · 同源轮廓','² area sampling · shared outlines')+(draft?bi('（草稿）',' (draft)'):'');
-  window.__lastProjectionMs=d.projectionMs;w.terminate();worker=null;
+  window.__lastProjectionMs=d.projectionMs;worker=null;releaseProjWorker(w);
   if(draft){
    status(bi('草稿 '+Math.round(d.projectionMs)+' ms · 松手后按 '+$('quality').value+'² 精算','Draft '+Math.round(d.projectionMs)+' ms · refines to '+$('quality').value+'² on release'),'busy');
    const mine=revision;clearTimeout(draftTimer);
@@ -1856,7 +2027,8 @@ function projectionRun(res,current,draft){
   }else{
    fullBuiltAt=performance.now();rememberQualityMs(res,d.projectionMs);if($('cancelcalc'))$('cancelcalc').hidden=true;
    status(bi('三视图 '+Math.round(d.projectionMs)+' ms · 3D 质量独立计算；旋转缩放不重算几何','Three views '+Math.round(d.projectionMs)+' ms · 3D quality computed separately; orbiting does not rebuild geometry'));
-    startMesh(initialRes(),current);
+   if(skipMesh)meshMessage('',()=>bi('此次检查已跳过立体更新。点击刷新立体可生成当前模型。','3D update skipped for this check. Refresh 3D to build the current model.'));
+   else startMesh(initialRes(),current);
   }
  }
  };w.postMessage({kind:'views',shapes:activeShapes(),res,revision:current});
@@ -1867,18 +2039,21 @@ const QMS_KEY='orthographic-quality-ms-v1';
 function qualityMs(){try{const v=JSON.parse(localStorage.getItem(QMS_KEY)||'{}');return v&&typeof v==='object'?v:{};}catch(e){return{};}}
 function rememberQualityMs(res,ms){try{const m=qualityMs(),k=String(res),prev=m[k];m[k]=prev?Math.round(prev*.6+ms*.4):Math.round(ms);localStorage.setItem(QMS_KEY,JSON.stringify(m));}catch(e){}}
 function qualityEstimate(res){const ms=qualityMs()[String(res)];if(!ms)return '';return ms>=1000?(ms/1000).toFixed(1)+' s':Math.round(ms)+' ms';}
-function cancelCalc(){if(!worker){$('cancelcalc').hidden=true;return;}worker.terminate();worker=null;if(renderer&&renderer.resumeOutlines)renderer.resumeOutlines();meshMessage('',()=>bi('已取消更新，立体和图纸保留上一版。','Update cancelled; 3D and drawing keep the previous revision.'));ready=!!document.querySelector('#sheet svg');$('cancelcalc').hidden=true;controls();status(bi('已取消这次计算，图纸保持上一版。','Calculation cancelled; drawing keeps the previous revision.'));}function requestBuild(){
+function cancelCalc(){if(!worker){$('cancelcalc').hidden=true;return;}worker.terminate();worker=null;if(renderer&&renderer.resumeOutlines)renderer.resumeOutlines();meshMessage('',()=>bi('已取消更新，立体和图纸保留上一版。','Update cancelled; 3D and drawing keep the previous revision.'));ready=!!document.querySelector('#sheet svg');$('cancelcalc').hidden=true;controls();status(bi('已取消这次计算，图纸保持上一版。','Calculation cancelled; drawing keeps the previous revision.'));}function requestBuild(options={}){
  if(typeof markSourceClear==='function'&&typeof MARK!=='undefined')markSourceClear();
  if(window.__workbench?.mark&&MARK.explainKey&&MARK.explainKey!==activeSnapshot()){sourceJobs.dispose();markInvalidate();}
  if(typeof projectionClear==='function')projectionClear();
  clearTimeout(timer);clearTimeout(draftTimer);draftTimer=null;
  // 草稿正在算：等它上屏（通常几十毫秒）再精算，避免刚出的草稿被立刻作废
- if(draftBusy){clearTimeout(timer);timer=setTimeout(requestBuild,80);return;}
- if(renderer&&renderer.suspendOutlines)renderer.suspendOutlines(activeSnapshot());cancelMesh();revision++;const current=revision;ready=false;controls();if(worker)worker.terminate();
+ if(draftBusy&&options.agentImport){
+  draftWorker?.terminate();draftWorker=null;draftBusy=false;
+ }
+ if(draftBusy){timer=setTimeout(()=>requestBuild(options),80);return;}
+ if(renderer&&renderer.suspendOutlines)renderer.suspendOutlines(activeSnapshot());cancelMesh();revision++;const current=revision;ready=false;controls();if(worker){worker.terminate();worker=null;}
  const res=+$('quality').value,est=qualityEstimate(res);
  status(bi('解析投影计算中…'+(res>=480?('（'+res+'²'+(est?'，上次约 '+est:'')+'）'):'')+'界面可继续操作。','Working out the projections…'+(res>=480?(' ('+res+'²'+(est?', last time about '+est:'')+')'):'')+' The interface stays usable while it runs.'),'busy');
  if($('cancelcalc'))$('cancelcalc').hidden=!(res>=480);
- projectionRun(res,current,false);
+ projectionRun(res,current,false,options.skipMesh===true);
 }
 // 拖动滑块时的低清预览：最多每 170 ms 起一次，不打断正在进行的精算。
 function requestDraft(){
@@ -1911,7 +2086,7 @@ $('quality').onchange=requestBuild;
 if($('cancelcalc'))$('cancelcalc').onclick=cancelCalc;
 $('meshquality').onchange=()=>{meshMode=$('meshquality').value;try{localStorage.setItem('orthographic-mesh-mode-v1',meshMode);}catch(e){}cancelMesh();if(ready)startMesh(initialRes());else meshMessage('',()=>bi('已切换 3D 质量，等待当前模型投影完成。','Switched 3D quality; waiting for the current projections to finish.'));};
 $('meshrefresh').onclick=()=>{if(ready)startMesh(refreshRes());else toast(bi('请等待当前模型三视图计算完成。','Wait for the current three views to finish computing.'));};
-window.addEventListener('beforeunload',cancelMesh);
+window.addEventListener('beforeunload',disposeWorkerPools);
 
 // ----- SVG sheet: one vector source for screen, SVG download, and PNG rasterization. -----
 const RECTS={V:{x:70,y:80},W:{x:490,y:80},H:{x:70,y:500}},SIZE=300,SCALE=3;
@@ -3468,13 +3643,21 @@ function AIConsistencyKit(){
     // Do not extract a component's 'total height' as the whole part's height.
     const lead=String(text).slice(0,m.index).split(/[，,;；。\n、]/).at(-1).slice(-60).trim();
     const whole=/(?:整件|整个零件|全件|整体|总成|组合体|零件|工件|模型|(?:whole|entire|complete)\s+(?:part|model|object|assembly))\s*(?:的|has|with)?\s*$/i.test(lead);
-    const local=/主体|基体|底座|基座|底板|部件|构件|凸台|凸部|凹腔|局部|台阶|肩|檐|板|肋|壁|孔|槽|圆柱|圆锥|球|\b(?:body|base|boss|rib|plate|hole|bore|slot|pocket|component|feature|local|shoulder|eave|step|wall)\b/i.test(lead);
+    const local=/主体|基体|底座|基座|底板|部件|构件|凸台|凸部|凹腔|局部|台阶|肩|檐|板|肋|壁|孔|槽|圆柱|圆锥|球|上段|下段|沉孔|盲孔|通孔|阶梯|段|Ø|Φ|∅|\b(?:body|base|boss|rib|plate|hole|bore|slot|pocket|component|feature|local|shoulder|eave|step|wall|counterbore|blind|through|upper|lower)\b/i.test(lead);
     const tail=String(text).slice(m.index+m[0].length).split(/[，,;；。\n、]|总长|总宽|总高|总深|overall/i)[0].slice(0,60),prefix=String(text).slice(Math.max(0,m.index-10),m.index);
     // Only an immediately attached component owns this number. A later clause
     // mentioning a hole/boss must not hide a genuine whole-part size conflict.
     const localAfter=/^(?:的\s*)?(?:[XYZ]\s*(?:方向|轴|向)\s*)?(?:主体|基体|底座|基座|底板|部件|构件|凸台|凸部|凹腔|局部|台阶|肩|檐|板|肋|壁|孔|槽|圆柱|圆锥|球)/i.test(tail.trim())||/^(?:(?:of|for)\s+(?:(?:the|a|an)\s+)?)?(?:body|base|boss|rib|plate|hole|bore|slot|pocket|component|feature|local|shoulder|eave|step|wall)\b/i.test(tail.trim());
-    if(localAfter||local&&!whole)continue;
-    if((a.readings||[]).some(r=>readingScope(r)!=='overall'&&axes[label(r.label)]===axes[label(m[1])]&&Math.abs(value(r.value,r.unit)-value(+m[2],m[3]))<1e-7))continue;
+    if(!whole&&(localAfter||local))continue;
+    const name=label(m[1]);
+    if(!whole&&!/^(?:整体|overall)/i.test(name)){
+     const localReading=(a.readings||[]).some(r=>{
+      if(readingScope(r)==='overall'||Math.abs(value(r.value,r.unit)-value(+m[2],m[3]))>=1e-7)return false;
+      const localName=label(r.label);
+      return localName.endsWith(name)||(/^总深度?$/.test(name)&&/深|depth/.test(localName));
+     });
+     if(localReading)continue;
+    }
     const axis=tail.match(/([XYZ])\s*(?:方向|轴|向)/i)?.[1]?.toUpperCase()||prefix.match(/([XYZ])\s*(?:方向|轴|向)\s*$/i)?.[1]?.toUpperCase();
     const row={label:label(m[1]),value:+m[2],unit:m[3],source:m[0].trim(),axis};texts.push(row);if(axis)hints.push({label:row.label,value:value(row.value,row.unit),axis});
    }
@@ -8562,7 +8745,7 @@ Object.assign(I18N_FRAG,{"单位 ":"Unit "," · 置信度 ":" · confidence "," 
 Object.assign(I18N_UI,{'已读取粘贴的 JSON · 请核对预览':'Pasted JSON loaded · Review the preview','已生成 · 请核对预览':'Generated · Review the preview','已按说明修正 · 请核对预览':'Revised · Review the preview','已生成 · 请核对预览（已自动重试一次）':'Generated · Review the preview (retried once)','已按说明修正 · 请核对预览（已自动重试一次）':'Revised · Review the preview (retried once)','已仅应用允许步骤的改动 · 其余步骤已锁回原值':'Merged allowed edits only · locked steps restored'});
 Object.assign(I18N_UI,{'中心线／对称线':'Centre / symmetry lines','中心线':'Centre lines','当前模型 · 4×':'Current model · 4×','题图 · 4×':'Reference · 4×','底面外接圆半径':'Base circumradius','底面旋转':'Base rotation','底面半径':'Base radius','底半径':'Base radius','顶半径':'Top radius','多面体':'Polyhedron','截平面':'Cutting plane','半空间数据（凸多面体 = 若干 n·p ≤ c 的交）':'Half-space data (convex polyhedron = intersection of n·p ≤ c)','每项 [nx,ny,nz,c]；p 是相对这个形体中心的坐标。改完点输入框外面生效；格式不对会被拒绝并恢复。':'Each entry is [nx, ny, nz, c], with p relative to this shape’s centre. Click outside the box to apply; invalid entries are rejected and restored.','还没有形体。先画一个截面拉伸，或添加基本体。':'No shapes yet. Sketch a section to extrude, or add a primitive.','视图画线切割':'Line cut in view','编辑切线':'Edit cut line','通过 A / B / C 三个空间点定位，切除一侧材料。':'Positioned by 3D points A / B / C; removes material on one side.','编辑三个点 / 切除侧':'Edit 3 points / cut side','已有圆心':'existing circle centre','已有草绘点':'existing sketch point','已有边中点':'existing edge midpoint','形体中心':'shape centre','45° 转向 · 宽相等':'45° mitre · widths equal','实线：可见轮廓　虚线：不可见轮廓　尺寸：投影外包范围近似值':'Solid: visible outline  Dashed: hidden outline  Dimensions: approximate projected extents','实线：可见轮廓　虚线：不可见轮廓':'Solid: visible outline  Dashed: hidden outline','收起窗口':'Collapse window','三视图 · 第一角投影':'Three Views · First-Angle Projection','已取消 · 当前模型没有被改动':'Cancelled · current model unchanged','失败 · 当前模型没有被改动':'Failed · current model unchanged'});
 Object.assign(I18N_FRAG,{' · 沿观察方向贯穿':' · cuts through along viewing direction','虚线：不可见轮廓　':'Dashed: hidden outline  ','实线：可见轮廓　':'Solid: visible outline  '});
-Object.assign(I18N_UI,{'导出 DXF (CAD)':'Export DXF (CAD)','机械配方 · 均布孔凸台法兰':'Mechanical recipe · boss flange','机械配方 · 带键槽阶梯轴':'Mechanical recipe · stepped shaft'});
+Object.assign(I18N_UI,{'导出 DXF (CAD)':'Export DXF (CAD)','导出 STL (3D)':'Export STL (3D)','机械配方 · 均布孔凸台法兰':'Mechanical recipe · boss flange','机械配方 · 带键槽阶梯轴':'Mechanical recipe · stepped shaft','机械配方 · L 形加强筋支座':'Mechanical recipe · L-bracket with ribs'});
 const I18N_UI_NORM=(()=>{const m=Object.create(null);for(const k in I18N_UI)m[i18nNorm(k)]=I18N_UI[k];return m;})();
 const I18N_FRAG_KEYS=Object.keys(I18N_FRAG).sort((a,b)=>b.length-a.length);
 let I18N_RE=null;
@@ -9747,7 +9930,7 @@ const uiSlimI18nSet=i18nSet;i18nSet=function(lang){const out=uiSlimI18nSet(lang)
 window.__workbench.i18n={get lang(){return LANG;},set:l=>i18nSet(l),apply:()=>i18nApply(document.body),tx:i18nTx,scan:i18nScan,size:()=>Object.keys(I18N_UI).length+Object.keys(I18N_FRAG).length};
 window.__workbench.mark=markAPI();
 try{const raw=localStorage.getItem('orthographic-workbench-v2'),stored=raw?JSON.parse(raw):null;shapes=stored?validateModel(stored):preset('prism');aiAppliedMeta=stored?aiRestoreMeta(stored.meta,shapes):null;aiAppliedModel=aiAppliedMeta?snapshot():'';if(stored&&stored.annotations)window.__markBootAnnotations=stored.annotations;}catch(e){shapes=preset('prism');toast(bi('未能恢复本地记录，已载入示例；可打开手动保存的 JSON。','Could not restore local records; loaded the example instead. You can open a saved JSON file.'));}
-lastCommit=snapshot();renderList();requestBuild();
+lastCommit=snapshot();renderList();requestBuild({skipMesh:new URLSearchParams(location.search).get('agent')==='check'});
 Object.assign(I18N_UI,{"搭建立体":"Build a solid","画截面 · 加料":"Sketch · add","挖槽 / 挖孔":"Cut a slot / hole","局部保留":"Keep a section","直线切除":"Line cut","三点斜切":"Three-point cut","怎么开始？":"How to start","建模步骤":"Model steps","步骤顺序说明":"About step order","对照三视图，画轮廓、搭立体。":"Read the views. Sketch and build.","画截面，再沿深度加料":"Sketch a profile and add material along the depth","画截面，在指定深度挖除":"Sketch a profile and remove material within the depth","画直线，切掉一侧":"Draw a line and remove one side","用三个空间点确定斜切平面":"Define an oblique cut with three spatial points"});
 // Menus open one at a time, stay within the viewport, and support Escape/outside clicks.
 const workflowMenus=[...document.querySelectorAll('.workflow-menu')];
@@ -10085,7 +10268,7 @@ function FullSectionKit(K, features){
   const dis=!data||!(data.cut.length||data.rear.length)||S.busy;
   $('sectionfullsvg').disabled=$('sectionfullpng').disabled=dis;
   if($('sectionfulldxf'))$('sectionfulldxf').disabled=dis;
-  if(data&&S.source==='model')window.__v080SectionFull={model:S.model,view:S.view,position:S.position,reverse:S.reverse,data};
+  if(data&&S.source==='model')window.__v080SectionFull={revision,model:S.model,view:S.view,position:S.position,reverse:S.reverse,data};
   else if(!data&&S.source!=='model'){}
   if(typeof oqaRefreshSheet==='function')oqaRefreshSheet();
  }
@@ -10940,7 +11123,8 @@ body #list .chead button{padding:3px 6px}
  window.MechRecipeKit=function MechRecipeKit(){
   const DEFAULTS={
    boss_flange:{diameter:160,thickness:18,bossDiameter:80,bossHeight:12,overallHeight:30,bore:50,boltCount:6,pcd:120,boltDiameter:12,phase:0},
-   stepped_shaft:{axis:'x',lands:[{diameter:28,length:30},{diameter:44,length:50},{diameter:32,length:30}],totalLength:110,bore:0,keywayEnabled:true,keywayLand:2,keywayLength:34,keywayWidth:10,keywayDepth:4.5}
+   stepped_shaft:{axis:'x',lands:[{diameter:28,length:30},{diameter:44,length:50},{diameter:32,length:30}],totalLength:110,bore:0,keywayEnabled:true,keywayLand:2,keywayLength:34,keywayWidth:10,keywayDepth:4.5},
+   l_bracket:{width:80,baseDepth:60,baseThickness:12,wallHeight:65,wallThickness:12,ribEnabled:true,ribThickness:8,baseHoleDia:10,baseHolePitch:40,wallHoleDia:20}
   };
   const finPos=(v,name)=>{if(typeof v!=='number'||!Number.isFinite(v)||v<=0)throw Error(bi(name+' 必须是大于 0 的有限数值。',name+' must be a finite number > 0.'));return v;};
 
@@ -11041,6 +11225,38 @@ body #list .chead button{padding:3px 6px}
    return {axis,lands,totalLength,bore,keyway};
   }
 
+  function validateBracket(raw){
+   const p={...DEFAULTS.l_bracket,...(raw||{})};
+   const W=finPos(Number(p.width),bi('支座总宽 W','Bracket width W'));
+   const D=finPos(Number(p.baseDepth),bi('底板总深 D','Base depth D'));
+   const t1=finPos(Number(p.baseThickness),bi('底板厚度 t1','Base thickness t1'));
+   const H=finPos(Number(p.wallHeight),bi('立板总高 H','Wall height H'));
+   const t2=finPos(Number(p.wallThickness),bi('立板厚度 t2','Wall thickness t2'));
+   if(H<=t1+4)throw Error(bi('立板总高 ('+H+') 必须大于底板厚 ('+t1+') + 4 mm。','Wall height ('+H+') must exceed base thickness ('+t1+') + 4 mm.'));
+   if(D<=t2+4)throw Error(bi('底板总深 ('+D+') 必须大于立板厚 ('+t2+') + 4 mm。','Base depth ('+D+') must exceed wall thickness ('+t2+') + 4 mm.'));
+   const ribEnabled=!!p.ribEnabled;
+   let tr=0;
+   if(ribEnabled){
+    tr=finPos(Number(p.ribThickness),bi('加强筋厚 tr','Rib thickness tr'));
+    if(2*tr>=W-4)throw Error(bi('双侧加强筋总厚 ('+(2*tr)+') 接近或超过总宽 ('+W+')，内侧无净空。','Combined rib thickness ('+(2*tr)+') leaves insufficient inner width ('+W+').'));
+   }
+   const innerW=ribEnabled?(W-2*tr):W;
+   const nonNeg=(v,name)=>{if(v===''||v===null||v===undefined||typeof v==='boolean')throw Error(bi(name+' 不能为空，请填写 0 或正数。',name+' cannot be empty; enter 0 or a positive number.'));const n=Number(v);if(!Number.isFinite(n)||n<0)throw Error(bi(name+' 须为大于等于 0 的有限数值。',name+' must be a finite number >= 0.'));return n;};
+   const baseHoleDia=nonNeg(p.baseHoleDia,bi('底板安装孔径','Base hole diameter'));
+   const baseHolePitch=nonNeg(p.baseHolePitch,bi('底板孔距','Base hole pitch'));
+   const wallHoleDia=nonNeg(p.wallHoleDia,bi('立板中心孔径','Wall hole diameter'));
+   if(baseHoleDia>0){
+    if(baseHolePitch<=baseHoleDia+2)throw Error(bi('底板双孔中心距 ('+baseHolePitch+') 过小，两孔会相交。','Base hole pitch ('+baseHolePitch+') is too small for hole diameter ('+baseHoleDia+').'));
+    if(baseHolePitch+baseHoleDia>innerW-2)throw Error(bi('底板安装孔超出内侧净宽 ('+innerW.toFixed(1)+')，会切入加强筋或破边。','Base mounting holes exceed inner clear width ('+innerW.toFixed(1)+').'));
+    if(baseHoleDia>(D-t2)-2)throw Error(bi('底板孔径 ('+baseHoleDia+') 过大，会切入立板或破前边。','Base hole diameter ('+baseHoleDia+') exceeds clear base span ('+(D-t2).toFixed(1)+').'));
+   }
+   if(wallHoleDia>0){
+    if(wallHoleDia>innerW-2)throw Error(bi('立板中心孔径 ('+wallHoleDia+') 超出内侧净宽 ('+innerW.toFixed(1)+')，会切入加强筋或破边。','Wall hole diameter ('+wallHoleDia+') exceeds inner clear width ('+innerW.toFixed(1)+').'));
+    if(wallHoleDia>(H-t1)-2)throw Error(bi('立板中心孔径 ('+wallHoleDia+') 超出立板净高 ('+(H-t1).toFixed(1)+')，会切入底板或破顶边。','Wall hole diameter ('+wallHoleDia+') exceeds clear wall height ('+(H-t1).toFixed(1)+').'));
+   }
+   return {width:W,baseDepth:D,baseThickness:t1,wallHeight:H,wallThickness:t2,ribEnabled,ribThickness:tr,baseHoleDia,baseHolePitch,wallHoleDia};
+  }
+
   function compile(kind,raw,opt={}){
    const srcShapes=[],readings=[],assumptions=[];
    let title='',p;
@@ -11090,6 +11306,31 @@ body #list .chead button{padding:3px 6px}
     p.lands.forEach((l,i)=>readings.push({label:'第'+(i+1)+'段 ⌀×L',value:l.diameter,unit:'mm',from:'L='+l.length+'mm'}));
     assumptions.push(bi('轴向尺寸链校验通过（'+p.lands.map(l=>l.length).join('+')+'='+p.totalLength+' mm）',
                         'Axial chain verified ('+p.lands.map(l=>l.length).join('+')+'='+p.totalLength+' mm)'));
+   }else if(kind==='l_bracket'){
+    p=validateBracket(raw);
+    title=bi('L 形加强筋支座','L-bracket with gusset ribs');
+    srcShapes.push({type:'box',op:'add',axis:'z',cx:0,cy:p.baseDepth/2,cz:p.baseThickness/2,sx:p.width,sy:p.baseDepth,sz:p.baseThickness,rot:0});
+    srcShapes.push({type:'box',op:'add',axis:'z',cx:0,cy:p.baseDepth-p.wallThickness/2,cz:p.baseThickness+(p.wallHeight-p.baseThickness)/2,sx:p.width,sy:p.wallThickness,sz:p.wallHeight-p.baseThickness,rot:0});
+    if(p.ribEnabled){
+     const triPts=[[0,p.baseThickness],[p.baseDepth-p.wallThickness,p.baseThickness],[p.baseDepth-p.wallThickness,p.wallHeight]];
+     srcShapes.push({type:'sketch',op:'add',view:'W',profile:'polygon',points:triPts,arcs:{},lo:-p.width/2,hi:-p.width/2+p.ribThickness});
+     srcShapes.push({type:'sketch',op:'add',view:'W',profile:'polygon',points:triPts,arcs:{},lo:p.width/2-p.ribThickness,hi:p.width/2});
+    }
+    if(p.baseHoleDia>0){
+     const hy=(p.baseDepth-p.wallThickness)/2;
+     srcShapes.push({type:'cylinder',op:'sub',axis:'z',cx:-p.baseHolePitch/2,cy:hy,cz:p.baseThickness/2,r:p.baseHoleDia/2,h:p.baseThickness+6});
+     srcShapes.push({type:'cylinder',op:'sub',axis:'z',cx:p.baseHolePitch/2,cy:hy,cz:p.baseThickness/2,r:p.baseHoleDia/2,h:p.baseThickness+6});
+    }
+    if(p.wallHoleDia>0){
+     srcShapes.push({type:'cylinder',op:'sub',axis:'y',cx:0,cy:p.baseDepth-p.wallThickness/2,cz:p.baseThickness+(p.wallHeight-p.baseThickness)/2,r:p.wallHoleDia/2,h:p.wallThickness+6});
+    }
+    readings.push(
+     {label:'总宽 W',value:p.width,unit:'mm',from:'参数配方'},
+     {label:'底板深 D',value:p.baseDepth,unit:'mm',from:'参数配方'},
+     {label:'总高 H',value:p.wallHeight,unit:'mm',from:'参数配方'}
+    );
+    assumptions.push(bi('支座参数校验通过（'+(p.ribEnabled?'双侧筋板厚 '+p.ribThickness+' mm':'无加强筋')+'）',
+                        'Bracket clearances verified ('+(p.ribEnabled?'twin gusset ribs '+p.ribThickness+' mm':'no ribs')+')'));
    }else{
     throw Error(bi('未知机械配方类型。','Unknown mechanical recipe kind.'));
    }
@@ -11105,7 +11346,7 @@ body #list .chead button{padding:3px 6px}
    };
    return {shapes:finalShapes,recipeMeta,aiMeta,fit:fitted};
   }
-  return {DEFAULTS,validateFlange,validateShaft,compile};
+  return {DEFAULTS,validateFlange,validateShaft,validateBracket,compile};
  };
 
  window.mechDetectBoltRings=function mechDetectBoltRings(shapeList){
@@ -11149,13 +11390,20 @@ body #list .chead button{padding:3px 6px}
   return out;
  };
 
- const RECIPE_UI={kind:'boss_flange',flange:{...MechRecipeKit().DEFAULTS.boss_flange},shaft:JSON.parse(JSON.stringify(MechRecipeKit().DEFAULTS.stepped_shaft)),error:'',lastStatus:''};
+ const RECIPE_UI={kind:'boss_flange',flange:{...MechRecipeKit().DEFAULTS.boss_flange},shaft:JSON.parse(JSON.stringify(MechRecipeKit().DEFAULTS.stepped_shaft)),bracket:{...MechRecipeKit().DEFAULTS.l_bracket},error:'',lastStatus:''};
  function readRecipeInputs(){
   if(RECIPE_UI.kind==='boss_flange'){
    for(const k of ['diameter','thickness','bossDiameter','bossHeight','overallHeight','bore','boltCount','pcd','boltDiameter','phase']){
     const el=$id('mr-f-'+k);if(el)RECIPE_UI.flange[k]=el.value===''?NaN:+el.value;
    }
    return RECIPE_UI.flange;
+  }
+  if(RECIPE_UI.kind==='l_bracket'){
+   for(const k of ['width','baseDepth','baseThickness','wallHeight','wallThickness','ribThickness','baseHoleDia','baseHolePitch','wallHoleDia']){
+    const el=$id('mr-b-'+k);if(el)RECIPE_UI.bracket[k]=el.value===''?NaN:+el.value;
+   }
+   const rb=$id('mr-b-rib-on');if(rb)RECIPE_UI.bracket.ribEnabled=rb.checked;
+   return RECIPE_UI.bracket;
   }
   const s=RECIPE_UI.shaft;
   const axEl=$id('mr-s-axis');if(axEl)s.axis=axEl.value;
@@ -11179,7 +11427,9 @@ body #list .chead button{padding:3px 6px}
    box.className='mech-status'+(RECIPE_UI.error?' err':'');
    box.textContent=RECIPE_UI.error||(RECIPE_UI.kind==='boss_flange'
     ?bi('✓ 法兰高度链与半径净距校验通过','✓ Flange height chain & radial clearances valid')
-    :bi('✓ 轴向尺寸链与键槽弦高校验通过','✓ Axial chain & keyway geometry valid'));
+    :RECIPE_UI.kind==='l_bracket'
+     ?bi('✓ 支座厚度、加强筋与安装孔净距校验通过','✓ Bracket clearances, ribs & mounting holes valid')
+     :bi('✓ 轴向尺寸链与键槽弦高校验通过','✓ Axial chain & keyway geometry valid'));
   }
   if(!preserveButtons){
    const b1=$id('mechrecipebuild'),b2=$id('mechrecipeadd');
@@ -11193,6 +11443,7 @@ body #list .chead button{padding:3px 6px}
   try{
    const params=readRecipeInputs();
    if(RECIPE_UI.kind==='boss_flange')kit.validateFlange(params);
+   else if(RECIPE_UI.kind==='l_bracket')kit.validateBracket(params);
    else kit.validateShaft(params);
   }catch(e){RECIPE_UI.error=String(e.message||e);}
   renderRecipeStatus(false);
@@ -11200,8 +11451,8 @@ body #list .chead button{padding:3px 6px}
 
  function renderRecipePanel(){
   const sum=$id('mechrecipesummary'),body=$id('mechrecipebody');if(!body)return;
-  if(sum)sum.textContent=bi('机械配方 · 法兰 / 阶梯轴','Mechanical recipes · flange / shaft');
-  const f=RECIPE_UI.flange,s=RECIPE_UI.shaft;
+  if(sum)sum.textContent=bi('机械配方 · 法兰 / 阶梯轴 / L 支座','Mechanical recipes · flange / shaft / bracket');
+  const f=RECIPE_UI.flange,s=RECIPE_UI.shaft,b=RECIPE_UI.bracket;
   const numField=(id,label,val,step=1,min=0)=>'<label><span>'+label+'</span><input id="'+id+'" type="number" step="'+step+'" min="'+min+'" value="'+val+'"></label>';
   const flangeHTML='<div class="mech-grid">'+
    numField('mr-f-diameter',bi('底盘外径 D','Flange D'),f.diameter,1,1)+
@@ -11228,14 +11479,26 @@ body #list .chead button{padding:3px 6px}
     numField('mr-s-kw-w',bi('键槽宽','Slot width'),s.keywayWidth,0.5,0.5)+
     numField('mr-s-kw-d',bi('键槽深','Slot depth'),s.keywayDepth,0.5,0.5)+
    '</div>':'');
+  const bracketHTML='<div class="mech-grid">'+
+   numField('mr-b-width',bi('总宽 W','Width W'),b.width,1,4)+
+   numField('mr-b-baseDepth',bi('底板深 D','Base D'),b.baseDepth,1,4)+
+   numField('mr-b-baseThickness',bi('底板厚 t1','Base t1'),b.baseThickness,1,1)+
+   numField('mr-b-wallHeight',bi('立板总高 H','Wall H'),b.wallHeight,1,4)+
+   numField('mr-b-wallThickness',bi('立板厚 t2','Wall t2'),b.wallThickness,1,1)+
+   numField('mr-b-wallHoleDia',bi('立板中心孔','Wall bore'),b.wallHoleDia,1,0)+
+   numField('mr-b-baseHoleDia',bi('底板双孔径','Base hole'),b.baseHoleDia,1,0)+
+   numField('mr-b-baseHolePitch',bi('底板孔距','Hole pitch'),b.baseHolePitch,1,0)+
+   '</div><label class="mech-check"><input type="checkbox" id="mr-b-rib-on"'+(b.ribEnabled?' checked':'')+'><span>'+bi('双侧三角形加强筋','Twin triangular gusset ribs')+'</span></label>'+
+   (b.ribEnabled?'<div class="mech-grid">'+numField('mr-b-ribThickness',bi('筋板厚 tr','Rib thick'),b.ribThickness,0.5,1)+'</div>':'');
 
-  body.innerHTML='<div class="mech-tabs"><button type="button" data-mr-kind="boss_flange" aria-pressed="'+(RECIPE_UI.kind==='boss_flange')+'">'+bi('凸台法兰','Boss flange')+'</button><button type="button" data-mr-kind="stepped_shaft" aria-pressed="'+(RECIPE_UI.kind==='stepped_shaft')+'">'+bi('阶梯轴','Stepped shaft')+'</button></div>'+
-   (RECIPE_UI.kind==='boss_flange'?flangeHTML:shaftHTML)+
+  body.innerHTML='<div class="mech-tabs"><button type="button" data-mr-kind="boss_flange" aria-pressed="'+(RECIPE_UI.kind==='boss_flange')+'">'+bi('凸台法兰','Boss flange')+'</button><button type="button" data-mr-kind="stepped_shaft" aria-pressed="'+(RECIPE_UI.kind==='stepped_shaft')+'">'+bi('阶梯轴','Stepped shaft')+'</button><button type="button" data-mr-kind="l_bracket" aria-pressed="'+(RECIPE_UI.kind==='l_bracket')+'">'+bi('L 形支座','L-bracket')+'</button></div>'+
+   (RECIPE_UI.kind==='boss_flange'?flangeHTML:RECIPE_UI.kind==='l_bracket'?bracketHTML:shaftHTML)+
    '<div id="mechrecipeerr" class="mech-status" role="status"></div>'+
    '<div class="mech-actions"><button type="button" class="primary" id="mechrecipebuild">'+bi('生成配方模型','Build recipe')+'</button><button type="button" id="mechrecipeadd">'+bi('追加到模型','Append')+'</button></div>';
 
   body.querySelectorAll('[data-mr-kind]').forEach(b=>b.onclick=()=>{RECIPE_UI.kind=b.dataset.mrKind;renderRecipePanel();});
   if($id('mr-s-kw-on'))$id('mr-s-kw-on').onchange=()=>{readRecipeInputs();renderRecipePanel();};
+  if($id('mr-b-rib-on'))$id('mr-b-rib-on').onchange=()=>{readRecipeInputs();renderRecipePanel();};
   body.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',validateRecipeLive));
   $id('mechrecipebuild').onclick=()=>applyRecipe(false);
   $id('mechrecipeadd').onclick=()=>applyRecipe(true);
@@ -11353,8 +11616,8 @@ body #list .chead button{padding:3px 6px}
  }
 
  window.mechApplyPreset=function mechApplyPreset(name){
-  const kind=name==='shaft'?'stepped_shaft':'boss_flange';
-  RECIPE_UI.kind=kind;RECIPE_UI.flange={...MechRecipeKit().DEFAULTS.boss_flange};RECIPE_UI.shaft=JSON.parse(JSON.stringify(MechRecipeKit().DEFAULTS.stepped_shaft));
+  const kind=name==='shaft'?'stepped_shaft':name==='bracket'?'l_bracket':'boss_flange';
+  RECIPE_UI.kind=kind;RECIPE_UI.flange={...MechRecipeKit().DEFAULTS.boss_flange};RECIPE_UI.shaft=JSON.parse(JSON.stringify(MechRecipeKit().DEFAULTS.stepped_shaft));RECIPE_UI.bracket={...MechRecipeKit().DEFAULTS.l_bracket};
   renderRecipePanel();
   if($id('mechrecipefold'))$id('mechrecipefold').open=true;
   applyRecipe(false);
@@ -11659,7 +11922,7 @@ body #list .chead button{padding:3px 6px}
 
    // Domain 4: Sections & internal voids
    const hasSub=shapeList.some(s=>s.op==='sub');
-   const fullSec=window.__v080SectionFull&&window.__v080SectionFull.model===snap?window.__v080SectionFull.data:null;
+   const fullSec=currentSection(snap)?.data;
    let secState='passed',secZh='无内部切除特征',secEn='No internal cuts';
    if(fullSec){
     const ok=(fullSec.cut?.length||0)+(fullSec.rear?.length||0)>0;
@@ -11896,10 +12159,10 @@ body #list .chead button{padding:3px 6px}
     const scaleNote=meta.unitTag
      ?'UNITS: '+meta.unitTag+(Math.abs(sc-1)<1e-6?' (1:1)':' (1:'+dxfNum(1/sc)+' FIT REMOVED -> 1:1 '+meta.unitTag+')')
      :(Math.abs(sc-1)<1e-6?'SCALE 1:1 MODEL UNITS':'SOURCE UNITS UNSPECIFIED (1:'+dxfNum(1/sc)+' FIT REMOVED)');
-    ents+=entityText('LABEL',0,-20*sc,txtH*0.85,'THREE-VIEW WORKBENCH v0.8.0 - FIRST-ANGLE PROJECTION - '+scaleNote);
+    ents+=entityText('LABEL',0,-20*sc,txtH*0.85,'THREE-VIEW WORKBENCH v0.8.2 - FIRST-ANGLE PROJECTION - '+scaleNote);
    }
 
-   const sec=sectionOverride?.data||(window.__v080SectionFull?.model===activeSnapshot()?window.__v080SectionFull.data:null);
+   const sec=sectionOverride?.data||currentSection(activeSnapshot())?.data;
    if(sec){
     const ox=sectionOverride?.onlySection?0:(box+gap),oy=0;
     addFrame(ox,oy,'SECTION A-A');
@@ -11940,7 +12203,7 @@ body #list .chead button{padding:3px 6px}
   }
 
   function downloadMain(){
-   if(!ready||!drawData)return;
+   if(!currentProjection())return;
    try{
     const content=buildSheet();
     download(new Blob([content],{type:'application/dxf'}),'三视图_工程图.dxf');
@@ -11963,23 +12226,125 @@ body #list .chead button{padding:3px 6px}
 
  if($id('dxf'))$id('dxf').onclick=()=>DXFExportKit().downloadMain();
 
+ let stlExportBusy=false;
+ const STLExportKit=function(){
+  function buildBinary(opts={}){
+   const dxf=DXFExportKit(),sc=dxf.scaleFactor(),meta=dxf.exportMeta();
+   const reqRes=Math.max(32,Math.min(128,Math.round(Number(opts.res)||84)));
+   const snap=activeSnapshot(),cached=window.__v082LastMesh,curShapes=activeShapes();
+   const reuse=!!(cached&&cached.snapshot===snap&&cached.res>=reqRes&&cached.mesh?.positions?.length>=9);
+   const usedRes=reuse?cached.res:reqRes;
+   let mesh=reuse?cached.mesh:null;
+   const K=window.__workbench.kernel,prep=K.prepare(curShapes);
+   if(!mesh){
+    mesh=K.mesh(prep,reqRes);
+    cacheMeshResult(snap,reqRes,mesh);
+   }
+   let packed;
+   try{packed=packBinaryStlBuffer(mesh.positions,mesh.normals,sc,meta.unitTag||'',usedRes);}
+   catch(err){if(err?.message==='EMPTY_STL_MESH')throw Error(bi('当前模型没有可导出的实体网格。','Current model has no 3D solid mesh to export.'));throw err;}
+   const audit=auditStlMesh(K,curShapes,prep,mesh.positions,usedRes,sc);
+   return {bytes:new Uint8Array(packed.buffer),byteLength:packed.byteLength,triangles:packed.triangles,resolution:packed.resolution,scaleFactor:packed.scaleFactor,unit:packed.unit,bounds:packed.bounds,voxelStepWorld:audit.voxelStepWorld,blockedHoles:audit.blockedHoles,warnings:audit.warnings};
+  }
+  function buildBinaryAsync(opts={}){
+   if(!currentProjection())return Promise.reject(new Error(bi('当前模型投影尚未完成，请等待计算完成后再导出 STL。','Current model projection is not ready; wait for calculation to finish before exporting STL.')));
+   const dxf=DXFExportKit(),sc=dxf.scaleFactor(),meta=dxf.exportMeta();
+   const reqRes=Math.max(32,Math.min(128,Math.round(Number(opts.res)||84)));
+   const expectedRev=revision,snap=activeSnapshot(),cached=window.__v082LastMesh,curShapes=activeShapes(),unitTag=meta.unitTag||'';
+   const hit=!!(cached&&cached.snapshot===snap&&cached.res>=reqRes&&cached.mesh?.positions?.length>=9);
+   return new Promise((resolve,reject)=>{
+    let w;
+    try{w=acquireMeshWorker();}
+    catch(e){reject(e);return;}
+    w.onerror=e=>{w.terminate();reject(new Error(e?.message||'3D mesh worker failed'));};
+    w.onmessage=e=>{
+     const d=e.data;if(!d)return;
+     if(d.type==='error'){w.terminate();reject(new Error(d.message==='EMPTY_STL_MESH'?bi('当前模型没有可导出的实体网格。','Current model has no 3D solid mesh to export.'):(d.message||'STL export failed')));return;}
+     if(d.type!=='stl')return;
+     releaseMeshWorker(w);
+     if(!currentProjection()||revision!==expectedRev||activeSnapshot()!==snap){
+      reject(new Error(bi('导出过程中模型已变更或计算已取消，已中止下载。','Model changed or calculation was cancelled during STL export; download aborted.')));
+      return;
+     }
+     if(d.mesh)cacheMeshResult(snap,reqRes,d.mesh);
+     resolve({bytes:new Uint8Array(d.packed.buffer),byteLength:d.packed.byteLength,triangles:d.packed.triangles,resolution:d.packed.resolution,scaleFactor:d.packed.scaleFactor,unit:d.packed.unit,bounds:d.packed.bounds,voxelStepWorld:d.audit.voxelStepWorld,blockedHoles:d.audit.blockedHoles,warnings:d.audit.warnings});
+    };
+    try{
+     if(hit){
+      const pCopy=cached.mesh.positions.slice(),nCopy=cached.mesh.normals.slice();
+      w.postMessage({kind:'stl-pack',shapes:curShapes,positions:pCopy,normals:nCopy,res:cached.res,sc,unitTag,revision:expectedRev},[pCopy.buffer,nCopy.buffer]);
+     }else{
+      w.postMessage({kind:'stl-build',shapes:curShapes,res:reqRes,sc,unitTag,revision:expectedRev});
+     }
+    }catch(e){w.terminate();reject(e);}
+   });
+  }
+  function toBase64(u8){
+   let bin='';
+   for(let i=0;i<u8.length;i+=0x8000)bin+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));
+   return btoa(bin);
+  }
+  async function downloadMain(opts={}){
+   if(!currentProjection()||stlExportBusy)return;
+   stlExportBusy=true;
+   const expectedRev=revision,expectedSnap=activeSnapshot(),stlBtn=$id('stl');
+   if(stlBtn){stlBtn.disabled=true;stlBtn.textContent=bi('正在生成 STL…','Building STL…');}
+   try{
+    const reqRes=opts.res||Math.max(84,typeof refreshRes==='function'?refreshRes():84);
+    const r=await buildBinaryAsync({...opts,res:reqRes});
+    if(!currentProjection()||revision!==expectedRev||activeSnapshot()!==expectedSnap){
+     throw Error(bi('导出过程中模型已变更或计算已取消，已中止下载。','Model changed or calculation was cancelled during STL export; download aborted.'));
+    }
+    download(new Blob([r.bytes],{type:'model/stl'}),'三视图_立体模型.stl');
+    const unitTxt=r.unit||'unit';
+    if(r.warnings?.length){
+     toast(bi(`已导出 STL，但检测到 ${r.warnings.length} 处体素/通孔精度告警（${r.blockedHoles?.length||0} 处通孔可能封堵），请勿直接用于精密加工。`,`Exported STL with ${r.warnings.length} resolution warning(s) (${r.blockedHoles?.length||0} blocked hole(s)); inspect before machining.`));
+    }else{
+     toast(bi(`已导出二进制 STL（${r.triangles.toLocaleString()} 个三角面，${r.resolution}³，比例 1:${Number((1/r.scaleFactor).toFixed(4))} ${unitTxt}）。`,`Exported Binary STL (${r.triangles.toLocaleString()} triangles, ${r.resolution}³, ${r.unit||'model units'}).`));
+    }
+   }catch(e){
+    fail(bi('STL 导出失败：'+e.message,'STL export failed: '+e.message));
+   }finally{
+    stlExportBusy=false;
+    syncV082Labels();
+    controls();
+   }
+  }
+  return {buildBinary,buildBinaryAsync,toBase64,downloadMain};
+ };
+
+ if($id('stl'))$id('stl').onclick=()=>STLExportKit().downloadMain();
+
+ function syncV082Labels(){
+  const stlBtn=$id('stl');
+  if(stlBtn&&!stlExportBusy){
+   stlBtn.textContent=bi('导出 STL (3D)','Export STL (3D)');
+   stlBtn.title=bi('导出二进制 STL 三维网格（支持切片打印和 CAD 打开）','Export binary STL 3D mesh for slicing or CAD');
+  }
+  const foldSum=$id('view3dfoldsummary');
+  if(foldSum)foldSum.textContent=bi('视角与 3D 显示','Camera & 3D Display');
+ }
+
  renderRecipePanel();
  oqaRefreshSheet();
+ syncV082Labels();
  const v080I18nSet=i18nSet;
  i18nSet=function(lang){
   if($id('mechrecipebody')?.querySelector('input'))readRecipeInputs();
   const res=v080I18nSet(lang);
   renderRecipePanel();
   oqaRefreshSheet();
+  syncV082Labels();
   return res;
  };
- if(LANG==='en'){renderRecipePanel();oqaRefreshSheet();}
+ if(LANG==='en'){renderRecipePanel();oqaRefreshSheet();syncV082Labels();}
 
  window.__workbench.v080={
-  version:'0.8.0',
+  version:'0.8.2',
   recipeKit:MechRecipeKit,
   oqaKit:MechOQAKit,
   dxfKit:DXFExportKit,
+  stlKit:STLExportKit,
   detectBoltRings:mechDetectBoltRings,
   intentAnalyze:aiIntentAnalyze,
   cutHostSpan:cutHostSpan,
@@ -11990,6 +12355,342 @@ body #list .chead button{padding:3px 6px}
   selectiveMerge:aiScopeSelectiveMerge,
   get activeRecipe(){return window.__v080Recipe||null;}
  };
+
+ /* v0.8.1 Versioned Offline Agent API (apiVersion: 1)
+    Decouples external CLIs / Skills from UI widgets (#aipastejson, #file, #sectiondialog, #toast).
+    Never forges user confirmations; compileCandidate never mutates the user's active workbench model. */
+ (function installAgentApiV1(){
+  const wb=window.__workbench;
+  const CAPABILITIES=['compileCandidate','importModel','renderViews','renderSection','probe','inspectOqa','exportDxf','exportStl'];
+  const summarizeViews=(viewsObj)=>{
+   if(!viewsObj)return null;
+   const out={};
+   for(const v of ['V','H','W']){
+    const d=viewsObj[v];
+    if(!d)continue;
+    let hBounds=null,hHorizMax=0;
+    for(const pl of d.hidden||[]){
+     for(let i=0;i<pl.length;i++){
+      const p=pl[i];
+      if(!hBounds)hBounds=[p[0],p[1],p[0],p[1]];
+      else{
+       hBounds[0]=Math.min(hBounds[0],p[0]);hBounds[1]=Math.min(hBounds[1],p[1]);
+       hBounds[2]=Math.max(hBounds[2],p[0]);hBounds[3]=Math.max(hBounds[3],p[1]);
+      }
+      if(i>0){
+       const dx=Math.abs(p[0]-pl[i-1][0]),dy=Math.abs(p[1]-pl[i-1][1]);
+       if(dy<0.25&&dx>hHorizMax)hHorizMax=dx;
+      }
+     }
+    }
+    out[v]={
+     bounds:d.bounds?d.bounds.slice():null,
+     solidCount:(d.solid||[]).length,
+     hiddenCount:(d.hidden||[]).length,
+     hiddenBounds:hBounds,
+     maxHorizontalHiddenSpan:Number(hHorizMax.toFixed(3))
+    };
+   }
+   return out;
+  };
+  const countEditableArcSteps=list=>(list||[]).filter(s=>(s.type==='extrude'&&s.profile?.arcs&&Object.keys(s.profile.arcs).length>0)||(s.draft?.arcs&&Object.keys(s.draft.arcs).length>0)).length;
+
+  function compileCandidate(rawInput){
+   try{
+    const raw=typeof rawInput==='string'?rawInput.trim():JSON.stringify(rawInput);
+    if(!raw)return {ok:false,error:'Empty candidate JSON'};
+    const parsed=typeof rawInput==='string'?AIK.extractJSON(raw):rawInput;
+    const answer=AIK.normalizeAnswer(parsed);
+    AIK.check(answer);
+    const fitted=AIK.fit(answer.shapes);
+    const model=validateModel(fitted.shapes);
+    const K=wb.kernel,prep=K.prepare(model);
+    const views=OrthographicLines(K,model,prep,320);
+    const healthRaw=AIConsistencyKit().check(answer,model,fitted,views);
+    const findingsWithText=(healthRaw?.findings||[]).map(f=>({...f,text:typeof aiHealthText==='function'?aiHealthText(f):f.code}));
+    const health={...healthRaw,pending:false,findings:findingsWithText};
+    const ts=wb.v080.threeStateClassify({answer,fit:fitted,model,health});
+    const nearTangent=[];
+    if(typeof DraftKit==='function'){
+     const DK=DraftKit(),seen=new Set();
+     model.forEach((sh,i)=>{
+      const d=sh.draft;if(!d||!d.arcs||!Object.keys(d.arcs).length)return;
+      const gk=d.group||('s:'+i);if(seen.has(gk))return;seen.add(gk);
+      try{
+       for(const row of DK.joinInfo(d)){
+        const deg=row.angle*180/Math.PI;
+        if(!row.tangent&&deg<5)nearTangent.push({step:i+1,vertex:row.vertex,arc:row.arc,angleDeg:deg,radius:row.radius});
+       }
+      }catch{}
+     });
+    }
+    const modelShapes=JSON.parse(JSON.stringify(model));
+    const formatVersion=modelShapes.some(s=>s.type==='retain')?6:modelShapes.some(s=>s.draft?.constraints?.length)?5:modelShapes.some(s=>s.type==='extrude')?4:3;
+    const formalMeta={
+     source:'AI 候选（Agent API v1 离线验证）',
+     appliedAt:new Date().toISOString(),
+     provider:'skill-offline',
+     model:'',
+     round:1,
+     drawingType:AIK.drawingType(answer.drawing?.type),
+     drawing:answer.drawing,
+     unit:answer.unit||'',
+     scale:Number(fitted.scale.toFixed(6)),
+     extent:Number(fitted.extent.toFixed(3)),
+     confirmedConditions:[],
+     confirmedReadings:{},
+     reviewAction:'unreviewed-skill-candidate',
+     readings:answer.readings,
+     ...(answer.checks?.length?{materialChecks:answer.checks}:{}),
+     structures:answer.features||[],
+     assumptions:answer.assumptions,
+     unsupported:answer.unsupported,
+     confidence:answer.confidence,
+     notices:fitted.notices,
+     understanding:answer.understanding,
+     originalShapes:answer.shapes,
+     consistency:{report:health,accepted:false},
+     note:'由 three-view-workbench Agent API v1 离线生成；未代替用户勾选任何确认项。'
+    };
+    const formalModel={format:'orthographic-workbench',version:formatVersion,shapes:modelShapes,meta:formalMeta};
+    return {
+     ok:true,
+     unit:answer.unit||'',
+     scale:Number(fitted.scale.toFixed(6)),
+     sourceCenter:fitted.source?fitted.source.map(n=>Number(n.toFixed(6))):[0,0,0],
+     extent:Number(fitted.extent.toFixed(3)),
+     shapeCount:modelShapes.length,
+     editableArcSteps:countEditableArcSteps(modelShapes),
+     warnings:answer.warnings||[],
+     questions:answer.questions||[],
+     assumptions:answer.assumptions||[],
+     unsupported:answer.unsupported||[],
+     confidence:answer.confidence,
+     health,
+     threeState:ts,
+     nearTangent,
+     candidateViews:summarizeViews(views),
+     formalModel
+    };
+   }catch(err){
+    return {ok:false,error:bi('这份 JSON 不能用：','This JSON cannot be used: ')+(err&&err.message||err)};
+   }
+  }
+
+  async function importModel(formalInput,options={}){
+   try{
+    const parsed=typeof formalInput==='string'?JSON.parse(formalInput):formalInput;
+    const {next,annotations}=modelOpenData(parsed,{interactive:false});
+    const meta=aiRestoreMeta(parsed?.meta,next);
+    clearFail();
+    if(typeof options.centerlines==='boolean'){
+     settings.centerlines=options.centerlines;
+     const clEl=document.getElementById('centerlines');
+     if(clEl)clEl.checked=options.centerlines;
+    }
+    const skipMesh=options.skipMesh===true;
+    const applied=edit(()=>{shapes=next;aiAppliedMeta=meta;aiAppliedModel=meta?snapshot():'';markRestore(annotations,{replace:true,save:false});},{annotations:true,agentImport:true,skipMesh});
+    if(!applied)return {ok:false,error:'Model edit rejected'};
+    const expectedRevision=revision,expectedModel=snapshot(),deadline=Date.now()+45000;
+    for(;;){
+     if(revision!==expectedRevision||activeSnapshot()!==expectedModel)return {ok:false,error:'Import superseded'};
+     if(currentProjection()){
+      if(skipMesh||meshRevision===revision)break;
+      if(!meshBusy)return {ok:false,error:'3D mesh unavailable'};
+     }else if(!worker)return {ok:false,error:'Projection unavailable'};
+     if(Date.now()>=deadline)return {ok:false,error:'Import timed out'};
+     await new Promise(resolve=>setTimeout(resolve,30));
+    }
+    const errBar=document.getElementById('errbar');
+    const errVisible=!!(errBar&&!errBar.hidden);
+    const errText=errVisible?(document.getElementById('errtext')?.textContent||''):'';
+    const loadedShapes=wb.getShapes();
+    const restoredMeta=wb.ai.state().meta;
+    const incoming=parsed?.meta;
+    const newReadings=Object.keys(restoredMeta?.confirmedReadings||{}).filter(k=>!incoming?.confirmedReadings?.[k]);
+    const forgedConfirmations=newReadings.length+Number(!!restoredMeta?.consistency?.accepted&&!incoming?.consistency?.accepted);
+    const oqa=wb.v080.oqaKit().inspect();
+    return {
+     ok:!errVisible,
+     metaRestored:!!restoredMeta,
+     errVisible,
+     errText,
+     formatVersion:parsed.version||null,
+     shapeCount:loadedShapes.length,
+     editableArcSteps:countEditableArcSteps(loadedShapes),
+     restoredUnit:restoredMeta?.unit||'',
+     restoredScale:restoredMeta?.scale??null,
+     forgedConfirmations,
+     shapes:loadedShapes,
+     views:summarizeViews(drawData),
+     sheetPathCount:countSheetPaths(svgMarkup()),
+     oqa
+    };
+   }catch(err){
+    return {ok:false,errVisible:true,errText:String(err&&err.message||err)};
+   }
+  }
+
+  function agentHasProjection(){return currentProjection()&&drawModel===snapshot();}
+  const pendingProjection=()=>({ok:false,error:'Current model projection unavailable'});
+  const countSheetPaths=svg=>(svg.match(/<path\b/g)||[]).length;
+  function renderViews(){
+   if(!agentHasProjection())return pendingProjection();
+   const sheetSvg=svgMarkup();
+   return {
+    ok:true,
+    views:summarizeViews(drawData),
+    sheetSvg,
+    sheetPathCount:countSheetPaths(sheetSvg)
+   };
+  }
+
+  function renderSection(opts={}){
+   if(!agentHasProjection())return pendingProjection();
+   const view=String(opts.view||'W').toUpperCase();
+   if(!['V','H','W'].includes(view))return {ok:false,error:`Invalid section view: ${view}`};
+   const reverse=!!opts.reverse;
+   const useCenters=typeof opts.centers==='boolean'?opts.centers:!!settings.centerlines;
+   if(opts.position!=null&&(!Number.isFinite(opts.position)||opts.position<0||opts.position>100))return {ok:false,error:'position must be within 0..100'};
+   if(opts.worldPosition!=null&&!Number.isFinite(opts.worldPosition))return {ok:false,error:'Invalid worldPosition'};
+   let pos=typeof opts.position==='number'&&Number.isFinite(opts.position)?Number(opts.position.toFixed(1)):50;
+   const worldPos=typeof opts.worldPosition==='number'&&Number.isFinite(opts.worldPosition)?opts.worldPosition:null;
+   if(worldPos!==null){
+    const sc=opts.scale||wb.ai.state().meta?.scale;
+    const center=opts.sourceCenter;
+    if(!Number.isFinite(sc)||sc<=0||!Array.isArray(center)||center.length!==3||!center.every(Number.isFinite))return {ok:false,error:'worldPosition requires scale and sourceCenter'};
+    const axisIdx={W:0,V:1,H:2}[view];
+    const rawPos=(worldPos-center[axisIdx])*sc+50;
+    if(rawPos<0||rawPos>100)return {ok:false,error:`worldPosition ${worldPos} maps to workbench ${rawPos.toFixed(2)}, outside 0..100`};
+    pos=Number(rawPos.toFixed(1));
+   }
+   const K=wb.kernel,curShapes=wb.getShapes(),prep=K.prepare(curShapes);
+   const fullKit=FullSectionKit(K,FeatureLines);
+   const data=fullKit.compute(curShapes,prep,view,pos,reverse,drawData,useCenters);
+   window.__v080SectionFull={revision,model:drawModel,view,position:pos,reverse,data};
+   if(typeof oqaRefreshSheet==='function')oqaRefreshSheet();
+   const num=n=>+n.toFixed(3);
+   const strokes=lines=>(lines||[]).map(p=>p.map(([x,y],i)=>(i?'L':'M')+num(x)+','+num(y)).join(' ')).join(' ');
+   const refPts=(data.ref?.rear||[]).flat();
+   const refB=refPts.length?refPts.reduce((b,[x,y])=>[Math.min(x,b[0]),Math.min(y,b[1]),Math.max(x,b[2]),Math.max(y,b[3])],[Infinity,Infinity,-Infinity,-Infinity]):null;
+   const marks=fullKit.markers(view,pos,reverse,refB),[ma,mb]=marks;
+   const line=(a,b)=>'M'+a.map(num).join(',')+' L'+b.map(num).join(',');
+   const cutSvg='<g data-section-aa="" fill="#182b39" stroke="#182b39"><path d="'+line(ma.tip,mb.tip)+'" stroke-width=".26" stroke-dasharray="4 1 .65 1" fill="none"/>'+marks.map(({tip,tail,d},i)=>{const v=[-d[1],d[0]],n=i?1:-1,ar=[tip,tip.map((x,j)=>x-2.6*d[j]+.85*v[j]),tip.map((x,j)=>x-2.6*d[j]-.85*v[j])],l=tip.map((x,j)=>x-6*d[j]+3.4*n*Math.abs(v[j]));return '<path data-section-arrow="'+i+'" d="'+line(tail,tip)+'" stroke-width=".6"/><polygon points="'+ar.map(p=>p.map(num).join(',')).join(' ')+'" stroke="none"/><text x="'+num(l[0])+'" y="'+num(l[1])+'" style="font:3.8px sans-serif;fill:#182b39" stroke="none" text-anchor="middle" dominant-baseline="central">A</text>';}).join('')+'</g>';
+   const centerSvg=(lines,part)=>!useCenters||!lines?.length?'':'<g data-section-centers="'+part+'" fill="none" stroke="#637c8e" stroke-width=".24" stroke-dasharray="5 1 .65 1">'+lines.map(c=>'<path data-center-kind="'+c.kind+'" stroke-dashoffset="'+num(2.5-c.anchor+c.lo)+'" d="'+(c.axis===0?'M'+num(c.lo)+','+num(c.at)+' L'+num(c.hi)+','+num(c.at):'M'+num(c.at)+','+num(c.lo)+' L'+num(c.at)+','+num(c.hi))+'"/>').join('')+'</g>';
+   const viewNames={V:bi('主视图','Front view'),H:bi('俯视图','Top view'),W:bi('左视图','Left view')};
+   const f=fullKit.frame(view,reverse),direction=(f.sign>0?'+':'−')+'XYZ'[f.depth];
+   const svg='<svg xmlns="http://www.w3.org/2000/svg" width="900" height="512" viewBox="0 0 900 512" role="img" aria-label="A–A"><title>A–A '+bi('全剖视图','Full section')+'</title><rect width="900" height="512" fill="#fff"/><g><text x="30" y="29" style="font:18px sans-serif;fill:#182b39">'+bi('剖切位置 · ','Cut location · ')+viewNames[data.refView]+'</text><text x="470" y="29" style="font:18px sans-serif;fill:#182b39">A–A · '+bi('全剖视图','Full section')+'</text></g><g fill="none" stroke="#d8e4eb"><rect x="30" y="43" width="400" height="408"/><rect x="470" y="43" width="400" height="408"/></g><g transform="translate(65 82) scale(3.3)" fill="none" stroke="#182b39"><path data-section-reference-hidden="" d="'+strokes(data.ref.hidden)+'" stroke-width=".27" stroke-dasharray="1.65 1"/><path data-section-reference="" d="'+strokes(data.ref.rear)+'" stroke-width=".48"/>'+centerSvg(data.refCenters,'reference')+cutSvg+'</g><g transform="translate(505 82) scale(3.3)" fill="none" stroke="#182b39" stroke-linecap="round" stroke-linejoin="round">'+centerSvg(data.centers,'section')+'<path data-section-hatch="" d="'+strokes(data.hatch)+'" stroke-width=".19"/><path data-section-rear="" d="'+strokes(data.rear)+'" stroke-width=".48"/><path data-section-cut="" d="'+strokes(data.cut)+'" stroke-width=".48"/></g><g><text x="30" y="479" style="font:13px sans-serif;fill:#405b6c">'+bi('沿 ','Look along ')+direction+' · '+'XYZ'[f.depth]+' = '+num(pos)+'</text><text x="470" y="479" style="font:13px sans-serif;fill:#405b6c">'+bi('斜线：剖到的材料 · 实线：可见轮廓','Hatch: cut material · Solid: visible edges')+'</text></g><text data-section-rule-note="" x="30" y="502" style="font:11px sans-serif;fill:#405b6c">'+bi('按实际材料画剖面线；筋板等特殊画法未自动处理，请按作业要求核对。','Material-based hatching; special rules for ribs are not applied. Check assignment requirements.')+'</text></svg>';
+   const axis={V:'Y',W:'X',H:'Z'}[view];
+   return {
+    ok:true,
+    view,
+    axis,
+    position:pos,
+    worldPosition:worldPos,
+    reverse,
+    refView:data.refView,
+    hatchCount:(data.hatch||[]).length,
+    cutCount:(data.cut||[]).length,
+    rearCount:(data.rear||[]).length,
+    hasMaterial:(data.hatch||[]).length>0,
+    svg
+   };
+  }
+
+  function probe(points,opts={}){
+   const sc=opts.scale||wb.ai.state().meta?.scale;
+   const center=opts.sourceCenter;
+   if(!Number.isFinite(sc)||sc<=0||!Array.isArray(center)||center.length!==3||!center.every(Number.isFinite))throw Error('probe requires positive finite scale and sourceCenter');
+   if(!Array.isArray(points)||!points.every(p=>Array.isArray(p)&&p.length===3&&p.every(Number.isFinite)))throw Error('probe requires finite XYZ coordinates');
+   const K=wb.kernel,prep=K.prepare(wb.getShapes());
+   return points.map(([x,y,z])=>{
+    const wbPt=[(x-center[0])*sc+50,(y-center[1])*sc+50,(z-center[2])*sc+50];
+    const inside=K.modelInside(prep,wbPt);
+    const fieldWorld=K.modelField(prep,wbPt)/sc;
+    const state=Math.abs(fieldWorld)<1e-3?'surface':(inside?'solid':'void');
+    return {world:[x,y,z],workbench:wbPt.map(n=>Number(n.toFixed(2))),state,inside,field:Number(fieldWorld.toFixed(4)),sdf:Number(fieldWorld.toFixed(4))};
+   });
+  }
+
+  function inspectOqa(){
+   if(!agentHasProjection())return pendingProjection();
+   return wb.v080.oqaKit().inspect();
+  }
+
+  function exportDxf(opts={}){
+   if(!agentHasProjection())return pendingProjection();
+   const section=currentSection(drawModel);
+   if(opts.includeSection&&!section)return {ok:false,error:'Render a full section for the current model first'};
+   const kit=wb.v080.dxfKit();
+   if(!kit)return {ok:false,error:'dxfKit unavailable'};
+   const mainText=kit.buildSheet();
+   const sectionText=opts.includeSection?kit.buildSheet({...section,onlySection:true}):null;
+   return {ok:true,mainText,sectionText};
+  }
+
+  function exportStl(opts={}){
+   if(!agentHasProjection())return pendingProjection();
+   try{
+    const kit=wb.v080.stlKit();
+    if(!kit)return {ok:false,error:'stlKit unavailable'};
+    const r=kit.buildBinary(opts);
+    return {
+     ok:true,
+     bytes:r.byteLength,
+     triangles:r.triangles,
+     resolution:r.resolution,
+     scaleFactor:r.scaleFactor,
+     unit:r.unit,
+     bounds:r.bounds,
+     voxelStepWorld:r.voxelStepWorld,
+     blockedHoles:r.blockedHoles,
+     warnings:r.warnings,
+     ...(opts.includeBase64===false?{}:{base64:kit.toBase64(r.bytes)})
+    };
+   }catch(err){
+    return {ok:false,error:String(err&&err.message||err)};
+   }
+  }
+
+  wb.agent={
+   apiVersion:1,
+   workbenchVersion:'0.8.2',
+   capabilities:CAPABILITIES.slice(),
+   info:()=>({apiVersion:1,workbenchVersion:'0.8.2',capabilities:CAPABILITIES.slice()}),
+   compileCandidate,
+   importModel,
+   renderViews,
+   renderSection,
+   probe,
+   inspectOqa,
+   exportDxf,
+   exportStl
+  };
+ })();
 })();
 </script>
+<style id="v082-clean-ui">
+body{background:#f3f6f9}
+.sheetbox,.preview,.settings{border-radius:8px;border-color:#dce6ed;box-shadow:0 2px 10px rgba(22,48,71,.045)}
+.card{border-radius:7px;border-color:#dce6ed}
+.toolbar{border-bottom-color:#dce6ed}
+.preview-title{padding:10px 12px;border-bottom-color:#e4edf2;font-weight:600}
+.orbit-controls{padding:8px 12px;border-top:1px solid #eef4f7}
+.view3d-fold{margin:0;border-top:1px solid #e4edf2;background:#fafcfe}
+.view3d-fold>summary{list-style:none;cursor:pointer;padding:9px 12px;font-size:11.5px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:5px;user-select:none}
+.view3d-fold>summary::-webkit-details-marker{display:none}
+.view3d-fold>summary::before{content:"▸";font-size:10px;color:#7a95a6}
+.view3d-fold[open]>summary::before{content:"▾"}
+.view3d-fold[open]>summary{border-bottom:1px solid #e8f0f5;color:var(--ink);background:#f5f9fc}
+.view3d-fold-body{padding-bottom:6px;background:#fff}
+.view3d-fold-body .orbit-presets{padding:7px 10px;border-bottom:1px solid #eef4f7}
+.view3d-fold-body #meshInfo{padding:6px 12px 4px!important}
+.workspace{padding-bottom:44px}
+.side{padding-bottom:28px}
+.credit{background:rgba(255,255,255,.94);backdrop-filter:blur(4px)}
+.study-entry{border:1px solid #dce6ed;border-radius:8px;background:#fff;box-shadow:0 1px 4px rgba(22,48,71,.03)}
+.mech-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.mech-tabs button{padding:5px 4px;font-size:11.5px;white-space:nowrap}
+@media(max-width:730px){.toolbar .workflow-menu>summary::before{content:none}.workspace{padding-bottom:10px}.side{padding-bottom:8px}.credit{position:static;display:flex;width:fit-content;margin:2px 10px 14px auto}}
+</style>
 </body></html>

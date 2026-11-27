@@ -1,7 +1,19 @@
-[Three-View Workbench Agent Skill](skill/three-view-workbench/) · Offline drawing, section views, and geometry checks for AI-generated models.
-# Three-View Workbench · v0.8.0
+# Three-View Workbench · v0.8.2
 
 [Release notes](RELEASE_NOTES.md) · [Open the workbench](app/three-view-workbench.html) · [简体中文](README.zh-CN.md)
+
+## What’s new in v0.8.2
+
+- **Binary STL export & resolution audit**: Adds offline Binary STL export (`导出 STL (3D)` / `STLExportKit` / `window.__workbench.agent.exportStl` / Skill CLI `--stl`) with background Worker binary encoding, automatic outward CCW winding correction, sub-voxel feature warnings (across diameter, axial height, and extrusion thickness), and CSG-verified through-hole ray clearance checks.
+- **3D meshing speedup & persistent Worker pools**: Clips `K.mesh` voxel sampling to the additive 3D AABB (23.5%–31.5% faster at `84³` on benchmarked samples while keeping vertices and normals byte-identical across 19 synthetic models / 38 comparisons) and reuses projection and 3D mesh Workers across edits.
+- **L-bracket mechanical recipe**: Adds `l_bracket` to `MechRecipeKit`, presets, and the 3-tab mechanical recipe panel (base plate, rear wall, optional twin triangular gusset ribs, and mounting holes with pre-flight clearance validation).
+- **Cleaner UI & safer CLI delivery**: Collapses secondary 3D display controls (`#view3dfold`) and sketch help folds by default, fixes mobile toolbar carets and footer clearance, guards active exports on `currentProjection()`, and adds atomic lock-protected output commits with SHA-256 ownership verification in `tvw.mjs` (if upgrading over an older delivery lacking `reportMd` hashes, export to a fresh directory; keep persistent notes outside `check-report.json`).
+
+## What’s new in v0.8.1
+
+- Adds a versioned offline Agent API (`window.__workbench.agent`, `apiVersion: 1`) so companion skills and scripts can compile candidates, re-import formal and plain models, render three-view sheets and A–A full sections, run probes, inspect OQA, and export DXF without driving UI controls, with concurrency and cross-model section/DXF guards.
+- Speeds up orthographic sampling via additive AABB clipping and skips 3D meshing in `check` mode (135 orthographic views across 45 public models match v0.8.0; local counterbore `check + section` median wall time dropped from 4.09 s to 2.75 s).
+- Fixes false whole-part Y-width conflicts on local bore-depth phrasing while keeping genuine whole-part size conflicts caught.
 
 ## What’s new in v0.8.0
 

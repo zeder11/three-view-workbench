@@ -1,18 +1,20 @@
 {
-  "version": "v0.8.0",
+  "version": "v0.8.2",
   "status": "ready-to-publish",
-  "baseVersion": "v0.7.1",
+  "baseVersion": "v0.8.1",
   "entry": "app/three-view-workbench.html",
-  "appBytes": 1307198,
-  "appSha256": "b7f002932bc9841bc61491aa2e757999b601c7e24f3b0f8d35ca28786af6c569",
+  "appBytes": 1351200,
+  "appSha256": "9ca73c41d4480d66c3f6d6bbcb764ac8c64eab874a42209b27629fd10ea7b4c1",
+  "agentApiVersion": 1,
   "verification": {
     "browser": "Microsoft Edge",
     "offlineSmokePassed": true,
     "featureSuitePassed": true,
-    "narrowScreenWidthPx": 390,
-    "crossViewBrowserChecks": 9,
-    "publicModelExamples": 45,
-    "publicAiJsonExamples": 3,
+    "agentApiRegressionPassed": true,
+    "meshParitySyntheticModels": 19,
+    "meshParityComparisons": 38,
+    "stlExportSupported": true,
+    "lBracketRecipeSupported": true,
     "layeredDxfViews": [
       "three-view",
       "full-section"
